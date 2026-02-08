@@ -1,63 +1,150 @@
 import DashboardHeader from '@/components/DashboardHeader';
-import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
+import { applyForJob, getAvailableJobs, Job } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const jobs = [
-    { id: '1', title: 'Brick Layer Needed', location: 'Okhla, Delhi', pay: '₹800/day', type: 'Residential' },
-    { id: '2', title: 'Plumbing Works', location: 'HSR Layout, Bangalore', pay: '₹1200/day', type: 'Renovation' },
-    { id: '3', title: 'Tile Fixer', location: 'Powai, Mumbai', pay: '₹1000/day', type: 'Apartment' },
-];
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function WorkerDashboard() {
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchJobs = async () => {
+        try {
+            const data = await getAvailableJobs();
+            setJobs(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchJobs();
+    }, []);
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchJobs();
+    };
+
+    const handleApply = async (id: string, title: string) => {
+        try {
+            await applyForJob(id);
+            Alert.alert('Applied!', `You have applied for: ${title}. The homeowner will contact you if interested.`);
+            fetchJobs(); // Update counts
+        } catch (error: any) {
+            Alert.alert('Error', error.message);
+        }
+    };
+
+    const heartScale = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(heartScale, {
+                    toValue: 1.3,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(heartScale, {
+                    toValue: 1,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="Hello, Worker" subtitle="3 New jobs in your area" />
+            <DashboardHeader title="Worker Dashboard" subtitle={`${jobs.length} New jobs nearby`} showSearch={false} />
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
                 <View style={styles.statsRow}>
-                    <View style={styles.statCard}>
+                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: '#10b981' }]}>
                         <Text style={styles.statValue}>₹12,400</Text>
                         <Text style={styles.statLabel}>Earnings</Text>
                     </View>
-                    <View style={styles.statCard}>
-                        <Text style={styles.statValue}>12</Text>
-                        <Text style={styles.statLabel}>Jobs Done</Text>
+                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: '#6366f1' }]}>
+                        <Text style={styles.statValue}>{jobs.length}</Text>
+                        <Text style={styles.statLabel}>New Jobs</Text>
                     </View>
                 </View>
 
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Jobs for You</Text>
-                    <TouchableOpacity><Text style={styles.seeAll}>See All</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={onRefresh}><Text style={styles.seeAll}>Refresh</Text></TouchableOpacity>
                 </View>
 
-                {jobs.map(job => (
-                    <TouchableOpacity key={job.id} style={styles.jobCard}>
-                        <View style={styles.jobInfo}>
-                            <Text style={styles.jobTitle}>{job.title}</Text>
-                            <Text style={styles.jobMeta}>{job.location} • {job.type}</Text>
-                        </View>
-                        <View style={styles.jobAction}>
-                            <Text style={styles.jobPay}>{job.pay}</Text>
-                            <TouchableOpacity style={styles.applyBtn}>
-                                <Text style={styles.applyText}>Apply</Text>
+                {loading ? (
+                    <ActivityIndicator color="black" style={{ marginTop: 20 }} />
+                ) : jobs.length === 0 ? (
+                    <View style={styles.emptyState}>
+                        <MaterialCommunityIcons name="briefcase-off-outline" size={48} color={Colors.light.border} />
+                        <Text style={styles.emptyText}>No new jobs available right now</Text>
+                    </View>
+                ) : (
+                    jobs.map(job => (
+                        <View key={job.id} style={styles.jobCard}>
+                            <View style={styles.jobHeader}>
+                                <View style={styles.categoryBadge}>
+                                    <Text style={styles.categoryText}>{job.category}</Text>
+                                </View>
+                                <Text style={styles.applicantCount}>{job.applicantCount} applied</Text>
+                            </View>
+
+                            <View style={styles.jobBody}>
+                                <View style={styles.jobInfo}>
+                                    <Text style={styles.jobTitle}>{job.title}</Text>
+                                    <Text style={styles.jobLocation}>
+                                        <MaterialCommunityIcons name="map-marker" size={12} color={Colors.light.muted} /> {job.location}
+                                    </Text>
+                                </View>
+                                <View style={styles.payInfo}>
+                                    <Text style={styles.jobPay}>₹{job.wage}</Text>
+                                    <Text style={styles.paySub}>per day</Text>
+                                </View>
+                            </View>
+
+                            <Text style={styles.description} numberOfLines={2}>{job.description}</Text>
+
+                            <TouchableOpacity
+                                style={styles.applyBtn}
+                                onPress={() => handleApply(job.id!, job.title)}
+                            >
+                                <Text style={styles.applyBtnText}>Apply Now</Text>
                             </TouchableOpacity>
                         </View>
-                    </TouchableOpacity>
-                ))}
+                    ))
+                )}
 
                 <View style={styles.profileSection}>
                     <Text style={styles.sectionTitle}>Your Profile</Text>
                     <View style={styles.skillsContainer}>
                         {['Masonry', 'Plumbing', 'Painting'].map(skill => (
                             <View key={skill} style={styles.skillBadge}>
-                                <Text style={styles.skillText}>{skill}</Text>
+                                <Text style={styles.skillBadgeText}>{skill}</Text>
                             </View>
                         ))}
                         <TouchableOpacity style={styles.addSkill}>
                             <MaterialCommunityIcons name="plus" size={16} color="black" />
                         </TouchableOpacity>
                     </View>
+                </View>
+
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
+                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                        <MaterialCommunityIcons name="heart" size={18} color="#ef4444" />
+                    </Animated.View>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -79,20 +166,23 @@ const styles = StyleSheet.create({
     },
     statCard: {
         flex: 1,
-        backgroundColor: Colors.light.background,
-        borderWidth: 1,
-        borderColor: Colors.light.border,
+        backgroundColor: 'white',
         padding: Spacing.md,
-        borderRadius: BorderRadius.md,
+        borderRadius: 16,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
     },
     statValue: {
-        fontSize: 20,
-        fontWeight: '800',
+        fontSize: 22,
+        fontWeight: '900',
     },
     statLabel: {
         fontSize: 12,
         color: Colors.light.muted,
-        textTransform: 'uppercase',
+        fontWeight: '600',
         marginTop: 2,
     },
     sectionHeader: {
@@ -106,64 +196,108 @@ const styles = StyleSheet.create({
         fontWeight: '800',
     },
     seeAll: {
-        color: Colors.light.muted,
-        fontWeight: '600',
+        color: '#6366f1',
+        fontWeight: '700',
     },
     jobCard: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+    },
+    jobHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: Spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.light.border,
-        marginBottom: Spacing.sm,
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    categoryBadge: {
+        backgroundColor: '#f3f4f6',
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+    },
+    categoryText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#4b5563',
+    },
+    applicantCount: {
+        fontSize: 11,
+        color: '#059669',
+        fontWeight: '600',
+    },
+    jobBody: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
     },
     jobInfo: {
         flex: 1,
     },
     jobTitle: {
-        fontSize: 16,
-        fontWeight: '700',
+        fontSize: 17,
+        fontWeight: '800',
+        color: 'black',
     },
-    jobMeta: {
+    jobLocation: {
         fontSize: 13,
         color: Colors.light.muted,
         marginTop: 4,
     },
-    jobAction: {
+    payInfo: {
         alignItems: 'flex-end',
     },
     jobPay: {
-        fontSize: 15,
-        fontWeight: '800',
-        marginBottom: 8,
+        fontSize: 18,
+        fontWeight: '900',
+        color: '#10b981',
+    },
+    paySub: {
+        fontSize: 10,
+        color: Colors.light.muted,
+    },
+    description: {
+        fontSize: 14,
+        color: '#4b5563',
+        lineHeight: 20,
+        marginVertical: 12,
     },
     applyBtn: {
-        backgroundColor: 'black',
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        borderRadius: 6,
+        backgroundColor: '#6366f1',
+        padding: 12,
+        borderRadius: 12,
+        alignItems: 'center',
     },
-    applyText: {
+    applyBtnText: {
         color: 'white',
         fontWeight: '700',
-        fontSize: 12,
+        fontSize: 14,
     },
     profileSection: {
         marginTop: Spacing.xl,
+        paddingBottom: 40,
     },
     skillsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: Spacing.sm,
-        marginTop: Spacing.md,
+        gap: 8,
+        marginTop: 12,
     },
     skillBadge: {
-        backgroundColor: Colors.light.surface,
+        backgroundColor: '#f5f5f5',
         paddingVertical: 8,
         paddingHorizontal: 16,
-        borderRadius: BorderRadius.round,
+        borderRadius: 20,
     },
-    skillText: {
+    skillBadgeText: {
         fontSize: 13,
         fontWeight: '600',
     },
@@ -171,9 +305,30 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        borderWidth: 1,
-        borderColor: Colors.light.border,
+        backgroundColor: '#eee',
         justifyContent: 'center',
         alignItems: 'center',
     },
+    emptyState: {
+        alignItems: 'center',
+        marginTop: 40,
+        gap: 12,
+    },
+    emptyText: {
+        color: Colors.light.muted,
+        fontSize: 15,
+        fontWeight: '500',
+    },
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+        opacity: 0.6,
+    },
+    footerText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: Colors.light.muted,
+    }
 });

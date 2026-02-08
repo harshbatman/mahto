@@ -1,31 +1,50 @@
 import { Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface DashboardHeaderProps {
     title: string;
     subtitle?: string;
     showSearch?: boolean;
+    onSearch?: (text: string) => void;
+    placeholder?: string;
 }
 
-export default function DashboardHeader({ title, subtitle, showSearch = true }: DashboardHeaderProps) {
+export default function DashboardHeader({ title, subtitle, showSearch = true, onSearch, placeholder }: DashboardHeaderProps) {
+    const { profile } = useAuth();
+    const router = useRouter();
+
     return (
         <View style={styles.container}>
             <View style={styles.topRow}>
-                <View>
+                <TouchableOpacity
+                    style={styles.profileBtn}
+                    onPress={() => router.push('/edit-profile')}
+                >
+                    {profile?.photoURL ? (
+                        <Image source={{ uri: profile.photoURL }} style={styles.profileImg} />
+                    ) : (
+                        <MaterialCommunityIcons name="account-circle" size={36} color="black" />
+                    )}
+                </TouchableOpacity>
+                <View style={styles.titleContainer}>
                     <Text style={styles.title}>{title}</Text>
                     {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
                 </View>
-                <TouchableOpacity style={styles.profileBtn}>
-                    <MaterialCommunityIcons name="account-circle-outline" size={32} color="black" />
-                </TouchableOpacity>
             </View>
 
             {showSearch && (
-                <TouchableOpacity style={styles.searchBar}>
+                <View style={styles.searchBar}>
                     <MaterialCommunityIcons name="magnify" size={20} color={Colors.light.muted} />
-                    <Text style={styles.searchText}>Search for jobs, materials, or people...</Text>
-                </TouchableOpacity>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder={placeholder || "Search for jobs, materials, or people..."}
+                        placeholderTextColor={Colors.light.muted}
+                        onChangeText={onSearch}
+                    />
+                </View>
             )}
         </View>
     );
@@ -40,13 +59,16 @@ const styles = StyleSheet.create({
     },
     topRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: Spacing.lg,
+        gap: Spacing.md,
+    },
+    titleContainer: {
+        flex: 1,
     },
     title: {
-        fontSize: 28,
-        fontWeight: '800',
+        fontSize: 22,
+        fontWeight: '900',
         color: Colors.light.text,
     },
     subtitle: {
@@ -59,6 +81,12 @@ const styles = StyleSheet.create({
         borderRadius: 22,
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
+        backgroundColor: '#f0f0f0',
+    },
+    profileImg: {
+        width: '100%',
+        height: '100%',
     },
     searchBar: {
         flexDirection: 'row',
@@ -68,8 +96,10 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         gap: Spacing.sm,
     },
-    searchText: {
-        color: Colors.light.muted,
+    searchInput: {
+        flex: 1,
+        color: Colors.light.text,
         fontSize: 15,
+        padding: 0,
     },
 });

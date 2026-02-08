@@ -11,6 +11,7 @@ export default function PhoneLoginScreen() {
 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
@@ -63,13 +64,25 @@ export default function PhoneLoginScreen() {
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter your password"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                        />
+                        <View style={styles.passwordContainer}>
+                            <TextInput
+                                style={styles.passwordInput}
+                                placeholder="Enter your password"
+                                secureTextEntry={!showPassword}
+                                value={password}
+                                onChangeText={setPassword}
+                            />
+                            <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}
+                                style={styles.eyeIcon}
+                            >
+                                <MaterialCommunityIcons
+                                    name={showPassword ? "eye-off" : "eye"}
+                                    size={24}
+                                    color={Colors.light.muted}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <TouchableOpacity
@@ -131,6 +144,22 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.md,
         fontSize: 16,
         backgroundColor: Colors.light.surface,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.light.border,
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.light.surface,
+    },
+    passwordInput: {
+        flex: 1,
+        padding: Spacing.md,
+        fontSize: 16,
+    },
+    eyeIcon: {
+        padding: Spacing.md,
     },
     submitBtn: {
         backgroundColor: 'black',

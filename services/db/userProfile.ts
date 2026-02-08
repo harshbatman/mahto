@@ -1,5 +1,5 @@
+import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 
 export interface UserProfile {
     uid: string;
@@ -8,6 +8,7 @@ export interface UserProfile {
     email: string;
     phoneNumber?: string;
     photoURL?: string;
+    address?: string;
     createdAt: number;
 }
 

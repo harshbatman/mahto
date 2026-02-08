@@ -30,6 +30,11 @@ export default function RootLayout() {
           <Stack.Screen name="contractor" />
           <Stack.Screen name="homeowner" />
           <Stack.Screen name="shop" />
+          <Stack.Screen name="user-profile" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="edit-profile" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="post-contract" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="post-job" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="search-results" options={{ animation: 'slide_from_right', headerTitle: 'Search Results' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

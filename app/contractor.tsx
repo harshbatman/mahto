@@ -1,14 +1,75 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ContractorDashboard() {
+    const [contracts, setContracts] = useState<Contract[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchContracts = async () => {
+        try {
+            const data = await getAvailableContracts();
+            setContracts(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchContracts();
+    }, []);
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchContracts();
+    };
+
+    const handleApply = async (id: string, title: string) => {
+        try {
+            await applyForContract(id);
+            Alert.alert('Application Sent', `You have successfully applied for: ${title}`);
+            fetchContracts(); // Refresh to update count
+        } catch (error: any) {
+            Alert.alert('Error', error.message);
+        }
+    };
+
+    const heartScale = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(heartScale, {
+                    toValue: 1.3,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(heartScale, {
+                    toValue: 1,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
+
+
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="MAHTO Contractor" subtitle="Manage your projects & team" />
+            <DashboardHeader title="Contractor" subtitle="Manage your projects & team" showSearch={false} />
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
                 <View style={styles.actionGrid}>
                     <TouchableOpacity style={styles.actionCard}>
                         <View style={styles.actionIcon}><MaterialCommunityIcons name="plus-box" size={24} color="white" /></View>
@@ -16,37 +77,52 @@ export default function ContractorDashboard() {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionCard}>
                         <View style={[styles.actionIcon, { backgroundColor: '#333' }]}><MaterialCommunityIcons name="file-document-plus" size={24} color="white" /></View>
-                        <Text style={styles.actionLabel}>New Contract</Text>
+                        <Text style={styles.actionLabel}>My Bids</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Active Projects</Text>
+                    <Text style={styles.sectionTitle}>New Contracts</Text>
+                    <TouchableOpacity onPress={onRefresh}><Text style={styles.seeAll}>Refresh</Text></TouchableOpacity>
                 </View>
 
-                <View style={styles.projectCard}>
-                    <View style={styles.projectHeader}>
-                        <Text style={styles.projectTitle}>Green Valley Villa</Text>
-                        <View style={styles.statusBadge}><Text style={styles.statusText}>In Progress</Text></View>
+                {loading ? (
+                    <ActivityIndicator color="black" style={{ marginTop: 20 }} />
+                ) : contracts.length === 0 ? (
+                    <View style={styles.emptyState}>
+                        <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={Colors.light.border} />
+                        <Text style={styles.emptyText}>No new contracts available</Text>
                     </View>
-                    <Text style={styles.projectLocation}>Sector 45, Gurgaon</Text>
-                    <View style={styles.projectStats}>
-                        <View><Text style={styles.statSub}>Workers</Text><Text style={styles.statVal}>8/12</Text></View>
-                        <View><Text style={styles.statSub}>Timeline</Text><Text style={styles.statVal}>45 Days left</Text></View>
-                    </View>
+                ) : (
+                    contracts.map((item) => (
+                        <View key={item.id} style={styles.contractListCard}>
+                            <View style={styles.cardHeader}>
+                                <Text style={styles.categoryBadge}>{item.category}</Text>
+                                <Text style={styles.applicantText}>{item.applicantCount} Applicants</Text>
+                            </View>
+                            <Text style={styles.contractTitle}>{item.title}</Text>
+                            <Text style={styles.contractBudget}>₹{item.budget}</Text>
+                            <Text style={styles.contractLocation}>
+                                <MaterialCommunityIcons name="map-marker" size={12} color={Colors.light.muted} /> {item.location}
+                            </Text>
+                            <Text style={styles.contractDescription} numberOfLines={2}>{item.description}</Text>
+
+                            <TouchableOpacity
+                                style={styles.applyBtn}
+                                onPress={() => handleApply(item.id!, item.title)}
+                            >
+                                <Text style={styles.applyBtnText}>Apply Now</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))
+                )}
+
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
+                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                        <MaterialCommunityIcons name="heart" size={18} color="#ef4444" />
+                    </Animated.View>
                 </View>
-
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Homeowner Contracts</Text>
-                    <TouchableOpacity><Text style={styles.seeAll}>Browse</Text></TouchableOpacity>
-                </View>
-
-                <TouchableOpacity style={styles.contractListCard}>
-                    <Text style={styles.contractTitle}>Luxury Penthouse Renovation</Text>
-                    <Text style={styles.contractBudget}>Est. Budget: ₹15L - ₹20L</Text>
-                    <Text style={styles.contractMeta}>Bids: 4 Received • Closes in 2d</Text>
-                </TouchableOpacity>
-
             </ScrollView>
         </SafeAreaView>
     );
@@ -59,6 +135,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: Spacing.lg,
+        paddingBottom: 40,
     },
     actionGrid: {
         flexDirection: 'row',
@@ -97,76 +174,90 @@ const styles = StyleSheet.create({
         fontWeight: '800',
     },
     seeAll: {
-        color: Colors.light.muted,
-        fontWeight: '600',
-    },
-    projectCard: {
-        backgroundColor: Colors.light.background,
-        borderWidth: 1,
-        borderColor: Colors.light.border,
-        borderRadius: BorderRadius.lg,
-        padding: Spacing.md,
-        marginBottom: Spacing.md,
-    },
-    projectHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    projectTitle: {
-        fontSize: 18,
-        fontWeight: '800',
-    },
-    statusBadge: {
-        backgroundColor: '#E6F4EA',
-        paddingVertical: 4,
-        paddingHorizontal: 10,
-        borderRadius: 6,
-    },
-    statusText: {
-        color: '#1E7E34',
-        fontSize: 11,
-        fontWeight: '700',
-    },
-    projectLocation: {
-        color: Colors.light.muted,
-        marginTop: 4,
-    },
-    projectStats: {
-        flexDirection: 'row',
-        marginTop: Spacing.md,
-        gap: Spacing.xl,
-        paddingTop: Spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: Colors.light.surface,
-    },
-    statSub: {
-        fontSize: 11,
-        color: Colors.light.muted,
-        textTransform: 'uppercase',
-    },
-    statVal: {
-        fontSize: 15,
+        color: '#6366f1',
         fontWeight: '700',
     },
     contractListCard: {
-        padding: Spacing.md,
+        padding: Spacing.lg,
+        backgroundColor: 'white',
         borderWidth: 1,
         borderColor: Colors.light.border,
-        borderRadius: BorderRadius.md,
-        marginBottom: Spacing.sm,
+        borderRadius: 20,
+        marginBottom: Spacing.md,
     },
-    contractTitle: {
-        fontSize: 16,
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    categoryBadge: {
+        backgroundColor: '#f3f4f6',
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        fontSize: 11,
         fontWeight: '700',
+        color: '#374151',
     },
-    contractBudget: {
-        marginTop: 4,
+    applicantText: {
+        fontSize: 11,
+        color: '#059669',
         fontWeight: '600',
     },
-    contractMeta: {
-        fontSize: 12,
+    contractTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: 'black',
+    },
+    contractBudget: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#10b981',
+        marginVertical: 4,
+    },
+    contractLocation: {
+        fontSize: 13,
         color: Colors.light.muted,
-        marginTop: 4,
+        marginBottom: 8,
+    },
+    contractDescription: {
+        fontSize: 14,
+        color: '#4b5563',
+        lineHeight: 20,
+        marginBottom: 16,
+    },
+    applyBtn: {
+        backgroundColor: 'black',
+        padding: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    applyBtnText: {
+        color: 'white',
+        fontWeight: '700',
+        fontSize: 14,
+    },
+    emptyState: {
+        alignItems: 'center',
+        marginTop: 40,
+        gap: 12,
+    },
+    emptyText: {
+        color: Colors.light.muted,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+        opacity: 0.6,
+    },
+    footerText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: Colors.light.muted,
     }
 });

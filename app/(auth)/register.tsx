@@ -12,6 +12,7 @@ export default function RegisterScreen() {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleRegister = async () => {
@@ -28,7 +29,8 @@ export default function RegisterScreen() {
         setLoading(true);
         try {
             await registerUser(phone, password, role as any, name);
-            router.replace(`/${role}`);
+            console.log("Registration success, navigating to:", role);
+            router.replace(`/(tabs)` as any); // Navigate to the main tabs
         } catch (error: any) {
             Alert.alert('Registration Failed', error.message);
         } finally {
@@ -73,13 +75,25 @@ export default function RegisterScreen() {
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Minimum 6 characters"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                        />
+                        <View style={styles.passwordContainer}>
+                            <TextInput
+                                style={styles.passwordInput}
+                                placeholder="Minimum 6 characters"
+                                secureTextEntry={!showPassword}
+                                value={password}
+                                onChangeText={setPassword}
+                            />
+                            <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}
+                                style={styles.eyeIcon}
+                            >
+                                <MaterialCommunityIcons
+                                    name={showPassword ? "eye-off" : "eye"}
+                                    size={24}
+                                    color={Colors.light.muted}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <TouchableOpacity
@@ -141,6 +155,22 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.md,
         fontSize: 16,
         backgroundColor: Colors.light.surface,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.light.border,
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.light.surface,
+    },
+    passwordInput: {
+        flex: 1,
+        padding: Spacing.md,
+        fontSize: 16,
+    },
+    eyeIcon: {
+        padding: Spacing.md,
     },
     submitBtn: {
         backgroundColor: 'black',

@@ -14,23 +14,34 @@ const formatPhoneAsEmail = (phone: string) => {
  */
 export const registerUser = async (phone: string, password: string, role: UserProfile['role'], name: string) => {
     try {
+        console.log("Starting registration for:", phone);
         const email = formatPhoneAsEmail(phone);
+
+        console.log("Attempting to create Firebase user...");
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        console.log("Firebase Auth user created:", user.uid);
 
         // Create the profile in Firestore
-        await saveUserProfile({
-            uid: user.uid,
-            role: role,
-            name: name,
-            email: email, // This is our dummy internal email
-            phoneNumber: phone,
-            createdAt: Date.now()
-        });
+        console.log("Saving user profile to Firestore...");
+        try {
+            await saveUserProfile({
+                uid: user.uid,
+                role: role,
+                name: name,
+                email: email,
+                phoneNumber: phone,
+                createdAt: Date.now()
+            });
+            console.log("Firestore profile saved successfully.");
+        } catch (dbError) {
+            console.error("Firestore error (non-fatal):", dbError);
+            // We don't throw here so the user can still be logged in
+        }
 
         return { user, success: true };
     } catch (error: any) {
-        console.error("Error registering user:", error);
+        console.error("Critical registration error:", error);
         throw error;
     }
 };

@@ -3,15 +3,15 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// These values come from your Firebase Console
-// Go to Firebase Console > Project Settings > General > Your apps > Web app (create one if needed)
+// Firebase configuration from your console
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-app.firebaseapp.com",
-    projectId: "your-app",
-    storageBucket: "your-app.firebasestorage.app",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+    apiKey: "AIzaSyDoPGNRRvF2ncxnm76lByRi3qbSrXD1TAw",
+    authDomain: "mahto-b8626.firebaseapp.com",
+    projectId: "mahto-b8626",
+    storageBucket: "mahto-b8626.firebasestorage.app",
+    messagingSenderId: "94425344059",
+    appId: "1:94425344059:web:afadf0806f41e3baf0d41e",
+    measurementId: "G-T54WEHLCP7"
 };
 
 // Initialize Firebase

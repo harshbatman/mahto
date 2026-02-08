@@ -1,9 +1,7 @@
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Dimensions, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const roles = [
     {
@@ -36,9 +34,11 @@ export default function RoleSelection() {
     const router = useRouter();
 
     const handleRoleSelect = (roleId: string) => {
-        // In a real app, we'd save this to context/storage
-        // For now, we navigate to the specific role group
-        router.replace(`/${roleId}`);
+        // Navigate to registration with the selected role
+        router.push({
+            pathname: '/(auth)/register',
+            params: { role: roleId }
+        });
     };
 
     return (
@@ -69,6 +69,10 @@ export default function RoleSelection() {
                         </TouchableOpacity>
                     ))}
                 </View>
+
+                <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/(auth)/email-login')}>
+                    <Text style={styles.loginText}>Already have an account? <Text style={styles.bold}>Log in</Text></Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.footer}>
@@ -119,7 +123,6 @@ const styles = StyleSheet.create({
         padding: Spacing.md,
         borderRadius: BorderRadius.md,
         marginBottom: Spacing.md,
-        // Minimal shadow for white theme
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
@@ -147,6 +150,18 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: Colors.light.muted,
         marginTop: 2,
+    },
+    loginLink: {
+        marginTop: Spacing.lg,
+        alignItems: 'center',
+    },
+    loginText: {
+        fontSize: 15,
+        color: Colors.light.muted,
+    },
+    bold: {
+        fontWeight: '800',
+        color: 'black',
     },
     footer: {
         padding: Spacing.lg,

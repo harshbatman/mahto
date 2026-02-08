@@ -1,21 +1,9 @@
-
+import { SKILLS_DATA } from '@/constants/skills';
 import { Colors, Spacing } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const SKILLS_DATA = [
-    { id: '1', name: 'Masonry', image: require('@/assets/images/skills/masonry.jpg') },
-    { id: '2', name: 'Carpentry', image: require('@/assets/images/skills/carpentry.png') },
-    { id: '3', name: 'Labor', image: require('@/assets/images/skills/labor.jpg') },
-    { id: '4', name: 'Electrician', image: require('@/assets/images/skills/electrician.jpg') },
-    { id: '5', name: 'Gardener', image: require('@/assets/images/skills/gardener.jpg') },
-    { id: '6', name: 'Plumber', image: { uri: 'https://images.unsplash.com/photo-1598449356475-b9f71db7d847?w=500&auto=format&fit=crop&q=60' } },
-    { id: '7', name: 'Painter', image: { uri: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=500&auto=format&fit=crop&q=60' } },
-    { id: '8', name: 'Welder', image: { uri: 'https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5b?w=500&auto=format&fit=crop&q=60' } },
-    { id: '9', name: 'Mechanic', image: { uri: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=500&auto=format&fit=crop&q=60' } },
-];
 
 export default function SelectSkillsScreen() {
     const router = useRouter();

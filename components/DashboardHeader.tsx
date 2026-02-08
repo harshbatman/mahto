@@ -21,7 +21,7 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
             <View style={styles.topRow}>
                 <TouchableOpacity
                     style={styles.profileBtn}
-                    onPress={() => router.push('/edit-profile')}
+                    onPress={() => router.push('/profile-menu')}
                 >
                     {profile?.photoURL ? (
                         <Image source={{ uri: profile.photoURL }} style={styles.profileImg} />

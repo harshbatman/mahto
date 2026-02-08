@@ -1,7 +1,9 @@
 import { Colors, Spacing } from '@/constants/theme';
+import { getUserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function UserProfileScreen() {
     const router = useRouter();
@@ -9,14 +11,46 @@ export default function UserProfileScreen() {
 
     // In a real app, we might fetch the latest data here using the ID
     // For now, we'll use the passed params for instant feedback
-    const { name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about } = params;
+    const { name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable } = params;
+    const isActuallyAvailable = isAvailable === 'true';
     const skills = skillsStr ? JSON.parse(skillsStr as string) : [];
+
+
+    const [displayPhoto, setDisplayPhoto] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        // 1. Initial set from params (for immediate feedback)
+        const initialPhoto = Array.isArray(params.photoURL) ? params.photoURL[0] : params.photoURL;
+        if (initialPhoto && initialPhoto !== 'null' && initialPhoto !== 'undefined' && initialPhoto !== '') {
+            setDisplayPhoto(initialPhoto);
+        }
+
+        // 2. Fetch fresh data from Firestore to ensure valid URL
+        const fetchLatestProfile = async () => {
+            const uid = Array.isArray(params.id) ? params.id[0] : params.id;
+            if (uid) {
+                try {
+                    const userProfile = await getUserProfile(uid);
+                    if (userProfile && userProfile.photoURL) {
+                        console.log('UserProfile - Fetched fresh photoURL:', userProfile.photoURL);
+                        setDisplayPhoto(userProfile.photoURL);
+                    }
+                } catch (error) {
+                    console.error('Error fetching user profile:', error);
+                }
+            }
+        };
+
+        fetchLatestProfile();
+    }, [params.id, params.photoURL]);
 
     const handleCall = () => {
         if (phoneNumber) {
             Linking.openURL(`tel:${phoneNumber}`);
         }
     };
+
+    const [modalVisible, setModalVisible] = useState(false);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -30,13 +64,29 @@ export default function UserProfileScreen() {
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.profileHero}>
-                    <View style={styles.avatarContainer}>
-                        <MaterialCommunityIcons
-                            name={role === 'shop' ? "store" : "account"}
-                            size={60}
-                            color="black"
-                        />
-                    </View>
+                    <TouchableOpacity
+                        style={[styles.avatarContainer, { backgroundColor: '#e5e7eb' }]}
+                        onPress={() => {
+                            console.log('Avatar clicked, displayPhoto:', displayPhoto);
+                            if (displayPhoto) setModalVisible(true);
+                        }}
+                        activeOpacity={displayPhoto ? 0.8 : 1}
+                    >
+                        {displayPhoto ? (
+                            <Image
+                                source={{ uri: displayPhoto }}
+                                style={styles.avatarImage}
+                                resizeMode="cover"
+                                onError={(e) => console.log('Profile Image Error:', e.nativeEvent.error)}
+                            />
+                        ) : (
+                            <MaterialCommunityIcons
+                                name={role === 'shop' ? "store" : "account"}
+                                size={60}
+                                color="#9ca3af"
+                            />
+                        )}
+                    </TouchableOpacity>
                     <Text style={styles.userName}>{name}</Text>
                     <Text style={styles.userRole}>{category || role}</Text>
 
@@ -50,7 +100,34 @@ export default function UserProfileScreen() {
                             <Text style={styles.statValue}>{distance || 'Nearby'}</Text>
                             <Text style={styles.statLabel}>Distance</Text>
                         </View>
+                        {dailyRate && parseInt(dailyRate as string) > 0 && (
+                            <>
+                                <View style={styles.statDivider} />
+                                <View style={styles.statItem}>
+                                    <Text style={[styles.statValue, { color: '#10b981' }]}>₹{dailyRate}</Text>
+                                    <Text style={styles.statLabel}>Per Day</Text>
+                                </View>
+                            </>
+                        )}
                     </View>
+
+                    {role === 'worker' && (
+                        <View style={[
+                            styles.availabilityBadge,
+                            { backgroundColor: isActuallyAvailable ? '#f0fdf4' : '#fef2f2' }
+                        ]}>
+                            <View style={[
+                                styles.availabilityDot,
+                                { backgroundColor: isActuallyAvailable ? '#22c55e' : '#ef4444' }
+                            ]} />
+                            <Text style={[
+                                styles.availabilityText,
+                                { color: isActuallyAvailable ? '#166534' : '#991b1b' }
+                            ]}>
+                                {isActuallyAvailable ? 'Available for work' : 'Currently Unavailable'}
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 <View style={styles.content}>
@@ -99,6 +176,21 @@ export default function UserProfileScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            <Modal visible={modalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
+                <View style={styles.modalContainer}>
+                    <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+                        <MaterialCommunityIcons name="close" size={30} color="white" />
+                    </TouchableOpacity>
+                    {displayPhoto && (
+                        <Image
+                            source={{ uri: displayPhoto }}
+                            style={styles.fullImage}
+                            resizeMode="contain"
+                        />
+                    )}
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -144,6 +236,14 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+    },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#f5f5f5',
     },
     userName: {
         fontSize: 24,
@@ -258,6 +358,42 @@ const styles = StyleSheet.create({
     secondaryBtnText: {
         color: 'black',
         fontSize: 16,
+        fontWeight: '700',
+
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    closeBtn: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 10,
+        padding: 10,
+    },
+    fullImage: {
+        width: '100%',
+        height: '80%',
+    },
+    availabilityBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        marginTop: 16,
+        gap: 6,
+    },
+    availabilityDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    availabilityText: {
+        fontSize: 13,
         fontWeight: '700',
     }
 });

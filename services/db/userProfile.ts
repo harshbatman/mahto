@@ -15,6 +15,8 @@ export interface UserProfile {
     experienceYears?: number;
     about?: string;
     isProfileSetup?: boolean;
+    dailyRate?: number;
+    isAvailable?: boolean;
 }
 
 /**

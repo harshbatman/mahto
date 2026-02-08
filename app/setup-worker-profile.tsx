@@ -16,6 +16,7 @@ import {
     SafeAreaView,
     ScrollView,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -33,6 +34,8 @@ export default function SetupWorkerProfile() {
     const [photo, setPhoto] = useState<string | null>(null);
     const [experience, setExperience] = useState('');
     const [about, setAbout] = useState('');
+    const [dailyRate, setDailyRate] = useState('');
+    const [isAvailable, setIsAvailable] = useState(true);
     const [newSkill, setNewSkill] = useState('');
 
     // Initialize skills from params if available
@@ -133,6 +136,8 @@ export default function SetupWorkerProfile() {
                 createdAt: profile?.createdAt || Date.now(),
                 skills: skills,
                 experienceYears: parseInt(experience) || 0,
+                dailyRate: parseInt(dailyRate) || 0,
+                isAvailable: isAvailable,
                 about: about,
                 isProfileSetup: true
             } as any);
@@ -227,6 +232,30 @@ export default function SetupWorkerProfile() {
                                     keyboardType="numeric"
                                 />
                             </View>
+                            <View style={[styles.inputGroup, { flex: 1 }]}>
+                                <Text style={styles.label}>Daily Rate (₹)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={dailyRate}
+                                    onChangeText={setDailyRate}
+                                    placeholder="e.g. 500"
+                                    keyboardType="numeric"
+                                />
+                            </View>
+                        </View>
+
+
+                        <View style={styles.switchContainer}>
+                            <View>
+                                <Text style={styles.label}>Available for work</Text>
+                                <Text style={styles.helperText}>Switch off if you are not looking for work</Text>
+                            </View>
+                            <Switch
+                                value={isAvailable}
+                                onValueChange={setIsAvailable}
+                                trackColor={{ false: '#767577', true: '#4ade80' }}
+                                thumbColor={isAvailable ? '#f4f3f4' : '#f4f3f4'}
+                            />
                         </View>
 
                         <View style={styles.inputGroup}>
@@ -288,7 +317,7 @@ export default function SetupWorkerProfile() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -363,6 +392,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#fcfcfc',
         color: 'black',
     },
+    helperText: {
+        fontSize: 12,
+        color: Colors.light.muted,
+        marginTop: 2,
+    },
     addressContainer: {
         position: 'relative',
     },
@@ -418,6 +452,17 @@ const styles = StyleSheet.create({
     aboutInput: {
         minHeight: 120,
         textAlignVertical: 'top',
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        backgroundColor: '#f9fafb',
+        paddingHorizontal: 16,
+        borderRadius: 14,
+        borderWidth: 1.5,
+        borderColor: '#eee',
     },
     saveBtn: {
         backgroundColor: 'black',

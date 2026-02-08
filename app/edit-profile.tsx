@@ -1,6 +1,6 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { deleteUserAccount } from '@/services/auth/authService';
+
 import { saveUserProfile } from '@/services/db/userProfile';
 import { uploadImage } from '@/services/storage/imageService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -12,12 +12,10 @@ import {
     ActivityIndicator,
     Alert,
     Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
     SafeAreaView,
     ScrollView,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -25,7 +23,7 @@ import {
 } from 'react-native';
 
 export default function EditProfileScreen() {
-    const { user, profile, logout } = useAuth();
+    const { user, profile } = useAuth();
     const router = useRouter();
 
     const [name, setName] = useState(profile?.name || '');
@@ -39,23 +37,62 @@ export default function EditProfileScreen() {
     const [skills, setSkills] = useState<string[]>(profile?.skills || []);
     const [experience, setExperience] = useState(profile?.experienceYears?.toString() || '');
     const [about, setAbout] = useState(profile?.about || '');
+    const [dailyRate, setDailyRate] = useState(profile?.dailyRate?.toString() || '');
+    const [isAvailable, setIsAvailable] = useState(profile?.isAvailable ?? true);
     const [newSkill, setNewSkill] = useState('');
 
-    // Delete account states
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [confirmPhone, setConfirmPhone] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [deleteLoading, setDeleteLoading] = useState(false);
+
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
-            allowsEditing: false,
+            allowsEditing: true, // Allow editing to get square crops if desired
             quality: 0.5,
+            aspect: [1, 1],
         });
 
-        if (!result.canceled) {
-            setPhoto(result.assets[0].uri);
+        if (!result.canceled && result.assets[0].uri) {
+            const localUri = result.assets[0].uri;
+            setPhoto(localUri); // Show immediately for feedback
+
+            // Auto-save logic
+            if (user) {
+                setLoading(true);
+                try {
+                    // 1. Upload to Firebase Storage
+                    const storagePath = `profiles/${user.uid}_${Date.now()}.jpg`;
+                    const uploadedUrl = await uploadImage(localUri, storagePath);
+
+                    // Update photo state with remote URL
+                    setPhoto(uploadedUrl);
+
+                    // Update Firestore immediately
+                    await saveUserProfile({
+                        ...profile,
+                        uid: user.uid,
+                        name: name,
+                        phoneNumber: phone,
+                        address: address,
+                        email: user.email || '',
+                        role: profile?.role || 'homeowner',
+                        createdAt: profile?.createdAt || Date.now(),
+                        photoURL: uploadedUrl,
+                        skills: skills,
+                        experienceYears: parseInt(experience) || 0,
+                        dailyRate: parseInt(dailyRate) || 0,
+                        isAvailable: isAvailable,
+                        about: about,
+                        isProfileSetup: true
+                    } as any);
+
+                    Alert.alert('Photo Updated', 'Your profile photo has been updated successfully.');
+                } catch (error: any) {
+                    console.error("Auto-save photo error:", error);
+                    Alert.alert('Upload Failed', 'Could not save profile photo. Please try again.');
+                } finally {
+                    setLoading(false);
+                }
+            }
         }
     };
 
@@ -119,6 +156,8 @@ export default function EditProfileScreen() {
                 createdAt: profile?.createdAt || Date.now(),
                 skills: profile?.role === 'worker' ? skills : [],
                 experienceYears: profile?.role === 'worker' ? parseInt(experience) || 0 : 0,
+                dailyRate: profile?.role === 'worker' ? parseInt(dailyRate) || 0 : undefined,
+                isAvailable: profile?.role === 'worker' ? isAvailable : undefined,
                 about: about,
                 isProfileSetup: true
             } as any);
@@ -132,25 +171,7 @@ export default function EditProfileScreen() {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        if (!confirmPhone || !confirmPassword) {
-            Alert.alert('Error', 'Please enter both phone and password to confirm.');
-            return;
-        }
 
-        setDeleteLoading(true);
-        try {
-            await deleteUserAccount(confirmPhone, confirmPassword);
-            setShowDeleteModal(false);
-            Alert.alert('Account Deleted', 'Your account and data have been permanently removed.');
-            router.replace('/(auth)/select-role');
-            // Root index will automatically redirect to register since user is null
-        } catch (error: any) {
-            Alert.alert('Deletion Failed', error.message || 'Verification failed. Please check credentials.');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -159,9 +180,7 @@ export default function EditProfileScreen() {
                     <MaterialCommunityIcons name="close" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Edit Profile</Text>
-                <TouchableOpacity onPress={handleSave} disabled={loading}>
-                    {loading ? <ActivityIndicator size="small" color="black" /> : <Text style={styles.saveBtnText}>Save</Text>}
-                </TouchableOpacity>
+                <View style={{ width: 24 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -268,6 +287,27 @@ export default function EditProfileScreen() {
                             </View>
 
                             <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Charge per day (₹)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={dailyRate}
+                                    onChangeText={setDailyRate}
+                                    placeholder="e.g. 500"
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View style={styles.switchContainer}>
+                                <Text style={styles.label}>Available for work</Text>
+                                <Switch
+                                    value={isAvailable}
+                                    onValueChange={setIsAvailable}
+                                    trackColor={{ false: '#767577', true: '#4ade80' }}
+                                    thumbColor={isAvailable ? '#f4f3f4' : '#f4f3f4'}
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
                                 <Text style={styles.label}>Skills</Text>
                                 <View style={styles.skillInputRow}>
                                     <TextInput
@@ -313,114 +353,25 @@ export default function EditProfileScreen() {
                         </>
                     )}
 
-                    <TouchableOpacity
-                        style={styles.settingsBtn}
-                        onPress={() => router.push('/settings')}
-                    >
-                        <View style={styles.settingsBtnLeft}>
-                            <MaterialCommunityIcons name="cog-outline" size={24} color="black" />
-                            <Text style={styles.settingsBtnText}>App Settings</Text>
-                        </View>
-                        <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
-                    </TouchableOpacity>
+
 
                     <TouchableOpacity
-                        style={styles.logoutBtn}
-                        onPress={() => {
-                            Alert.alert(
-                                "Logout",
-                                "Do you want to logout?",
-                                [
-                                    { text: "No", style: "cancel" },
-                                    {
-                                        text: "Yes",
-                                        style: "destructive",
-                                        onPress: async () => {
-                                            try {
-                                                await logout();
-                                                router.replace('/(auth)/select-role');
-                                            } catch (error) {
-                                                Alert.alert("Error", "Logout failed.");
-                                            }
-                                        }
-                                    }
-                                ]
-                            );
-                        }}
+                        style={styles.bottomSaveBtn}
+                        onPress={handleSave}
+                        disabled={loading}
                     >
-                        <MaterialCommunityIcons name="logout" size={24} color="#ef4444" />
-                        <Text style={styles.logoutText}>Logout from Account</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.deleteInitBtn}
-                        onPress={() => setShowDeleteModal(true)}
-                    >
-                        <Text style={styles.deleteInitText}>Permanently Delete Account</Text>
+                        {loading ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <>
+                                <Text style={styles.bottomSaveBtnText}>Save & Update Profile</Text>
+                            </>
+                        )}
                     </TouchableOpacity>
                 </View>
             </ScrollView>
 
-            {/* Delete Confirmation Modal */}
-            <Modal
-                visible={showDeleteModal}
-                transparent={true}
-                animationType="slide"
-            >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.modalOverlay}
-                >
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Confirm account deletion</Text>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
-                                <MaterialCommunityIcons name="close" size={24} color="black" />
-                            </TouchableOpacity>
-                        </View>
 
-                        <Text style={styles.modalSubtitle}>
-                            This action is permanent and cannot be undone. Enter your credentials to proceed.
-                        </Text>
-
-                        <View style={styles.modalForm}>
-                            <View style={styles.modalInputGroup}>
-                                <Text style={styles.modalLabel}>Phone Number</Text>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Enter your phone number"
-                                    keyboardType="phone-pad"
-                                    value={confirmPhone}
-                                    onChangeText={setConfirmPhone}
-                                />
-                            </View>
-
-                            <View style={styles.modalInputGroup}>
-                                <Text style={styles.modalLabel}>Password</Text>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Enter your password"
-                                    secureTextEntry
-                                    value={confirmPassword}
-                                    onChangeText={setConfirmPassword}
-                                />
-                            </View>
-
-                            <TouchableOpacity
-                                style={[styles.deleteBtn, deleteLoading && styles.disabledBtn]}
-                                onPress={handleDeleteAccount}
-                                disabled={deleteLoading}
-                            >
-                                {deleteLoading ? (
-                                    <ActivityIndicator color="white" />
-                                ) : (
-                                    <Text style={styles.deleteBtnText}>Confirm Deletion</Text>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -717,5 +668,37 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#374151',
+    },
+    bottomSaveBtn: {
+        backgroundColor: 'black',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 18,
+        borderRadius: 16,
+        gap: 10,
+        marginTop: 30,
+        marginBottom: 40,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    bottomSaveBtnText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        backgroundColor: '#f9fafb',
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#eee',
     },
 });

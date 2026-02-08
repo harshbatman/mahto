@@ -3,7 +3,7 @@ import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SearchResultsScreen() {
     const { role, title } = useLocalSearchParams<{ role: string; title: string }>();
@@ -58,6 +58,8 @@ export default function SearchResultsScreen() {
                 photoURL: user.photoURL,
                 skills: JSON.stringify(user.skills || []),
                 experienceYears: user.experienceYears?.toString() || '0',
+                dailyRate: user.dailyRate?.toString() || '0',
+                isAvailable: user.isAvailable?.toString() || 'true',
                 about: user.about || ""
             }
         });
@@ -103,11 +105,23 @@ export default function SearchResultsScreen() {
                     renderItem={({ item }) => (
                         <TouchableOpacity style={styles.resultCard} onPress={() => handleNavigate(item)}>
                             <View style={styles.avatar}>
-                                <MaterialCommunityIcons
-                                    name={item.role === 'shop' ? 'store' : 'account'}
-                                    size={24}
-                                    color="black"
-                                />
+                                {item.photoURL ? (
+                                    <Image
+                                        source={{ uri: item.photoURL }}
+                                        style={styles.avatarImage}
+                                        resizeMode="cover"
+                                        onError={(e) => console.log('List Image Error:', e.nativeEvent.error, 'for URL:', item.photoURL)}
+                                    />
+                                ) : (
+                                    <MaterialCommunityIcons
+                                        name={item.role === 'shop' ? 'store' : 'account'}
+                                        size={24}
+                                        color="black"
+                                    />
+                                )}
+                                {item.role === 'worker' && item.isAvailable !== false && (
+                                    <View style={styles.availableDot} />
+                                )}
                             </View>
                             <View style={styles.info}>
                                 <Text style={styles.name}>{item.name}</Text>
@@ -115,6 +129,9 @@ export default function SearchResultsScreen() {
                                 <View style={styles.ratingRow}>
                                     <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
                                     <Text style={styles.ratingText}>{item.rating || '4.5'} • {item.distance || '0.5 km'}</Text>
+                                    {item.dailyRate > 0 && (
+                                        <Text style={styles.priceTag}>₹{item.dailyRate}/day</Text>
+                                    )}
                                 </View>
                             </View>
                             <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.border} />
@@ -202,6 +219,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
+        overflow: 'hidden',
+    },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
     },
     info: {
         flex: 1,
@@ -236,5 +258,26 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.light.muted,
         fontWeight: '500',
+    },
+    availableDot: {
+        position: 'absolute',
+        bottom: 2,
+        right: 2,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#4ade80',
+        borderWidth: 2,
+        borderColor: 'white',
+    },
+    priceTag: {
+        marginLeft: 8,
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#10b981',
+        backgroundColor: '#f0fdf4',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 6,
     }
 });

@@ -18,5 +18,5 @@ export default function Index() {
         return <Redirect href={`/${profile.role}` as any} />;
     }
 
-    return <Redirect href="/(auth)/register" />;
+    return <Redirect href="/(auth)/select-role" />;
 }

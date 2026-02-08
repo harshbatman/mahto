@@ -133,7 +133,7 @@ export default function EditProfileScreen() {
             await deleteUserAccount(confirmPhone, confirmPassword);
             setShowDeleteModal(false);
             Alert.alert('Account Deleted', 'Your account and data have been permanently removed.');
-            router.replace('/(auth)/register');
+            router.replace('/(auth)/select-role');
             // Root index will automatically redirect to register since user is null
         } catch (error: any) {
             Alert.alert('Deletion Failed', error.message || 'Verification failed. Please check credentials.');
@@ -266,7 +266,7 @@ export default function EditProfileScreen() {
                                         onPress: async () => {
                                             try {
                                                 await logout();
-                                                router.replace('/(auth)/register');
+                                                router.replace('/(auth)/select-role');
                                             } catch (error) {
                                                 Alert.alert("Error", "Logout failed.");
                                             }

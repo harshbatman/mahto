@@ -1,6 +1,6 @@
+import { auth } from '@/lib/firebase';
+import { saveUserProfile, UserProfile } from '@/services/db/userProfile';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { auth } from '../../lib/firebase';
-import { saveUserProfile, UserProfile } from '../db/userProfile';
 
 // Helper to convert phone number to a dummy email for Firebase
 const formatPhoneAsEmail = (phone: string) => {

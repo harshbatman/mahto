@@ -3,7 +3,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
+    FlatList,
+    Modal,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -13,19 +14,36 @@ import {
     View
 } from 'react-native';
 
+const LANGUAGES = [
+    { id: 'en', name: 'English', local: 'English' },
+    { id: 'hi', name: 'Hindi', local: 'हिंदी' },
+    { id: 'ks', name: 'Kashmiri', local: 'کٲشُر' },
+    { id: 'ur', name: 'Urdu', local: 'اردو' },
+    { id: 'rj', name: 'Rajasthani', local: 'राजस्थानी' },
+    { id: 'pa', name: 'Punjabi', local: 'ਪੰਜਾਬੀ' },
+    { id: 'hr', name: 'Haryanvi', local: 'हरियाणवी' },
+    { id: 'mr', name: 'Marathi', local: 'मराठी' },
+    { id: 'kn', name: 'Kannada', local: 'ಕನ್ನಡ' },
+    { id: 'te', name: 'Telugu', local: 'తెలుగు' },
+    { id: 'ml', name: 'Malayalam', local: 'മലയാളം' },
+    { id: 'or', name: 'Odiya', local: 'ଓଡ଼ିଆ' },
+    { id: 'bn', name: 'Bengali', local: 'বাংলা' },
+    { id: 'ne', name: 'Nepali', local: 'नेपाली' },
+    { id: 'bh', name: 'Bhojpuri', local: 'भोजपुरी' },
+    { id: 'mai', name: 'Maithili', local: 'मैथिली' },
+];
+
 export default function SettingsScreen() {
     const router = useRouter();
     const [notifications, setNotifications] = useState(true);
+    const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+    const [showLangModal, setShowLangModal] = useState(false);
 
     const menuItems = [
         { id: 'about', title: 'About Us', icon: 'information-outline' },
         { id: 'terms', title: 'Terms & Conditions', icon: 'file-document-outline' },
         { id: 'privacy', title: 'Privacy Policy', icon: 'shield-check-outline' },
     ];
-
-    const handleLanguageChange = () => {
-        Alert.alert('Language', 'Language selection will be available in the next update.');
-    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -52,13 +70,16 @@ export default function SettingsScreen() {
                                 trackColor={{ false: '#ddd', true: '#10b981' }}
                             />
                         </View>
-                        <TouchableOpacity style={[styles.row, { borderTopWidth: 1, borderTopColor: '#f0f0f0' }]} onPress={handleLanguageChange}>
+                        <TouchableOpacity
+                            style={[styles.row, { borderTopWidth: 1, borderTopColor: '#f0f0f0' }]}
+                            onPress={() => setShowLangModal(true)}
+                        >
                             <View style={styles.rowLeft}>
                                 <MaterialCommunityIcons name="translate" size={22} color="black" />
                                 <Text style={styles.rowLabel}>Language</Text>
                             </View>
                             <View style={styles.rowRight}>
-                                <Text style={styles.rowValue}>English</Text>
+                                <Text style={styles.rowValue}>{selectedLang.local}</Text>
                                 <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
                             </View>
                         </TouchableOpacity>
@@ -88,6 +109,52 @@ export default function SettingsScreen() {
 
                 <Text style={styles.versionText}>MAHTO App v1.0.0</Text>
             </ScrollView>
+
+            <Modal
+                visible={showLangModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowLangModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Choose Language</Text>
+                            <TouchableOpacity onPress={() => setShowLangModal(false)}>
+                                <MaterialCommunityIcons name="close" size={24} color="black" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <FlatList
+                            data={LANGUAGES}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.langItem,
+                                        selectedLang.id === item.id && styles.selectedLangItem
+                                    ]}
+                                    onPress={() => {
+                                        setSelectedLang(item);
+                                        setShowLangModal(false);
+                                    }}
+                                >
+                                    <View>
+                                        <Text style={[
+                                            styles.langName,
+                                            selectedLang.id === item.id && styles.selectedLangText
+                                        ]}>{item.name}</Text>
+                                        <Text style={styles.langLocal}>{item.local}</Text>
+                                    </View>
+                                    {selectedLang.id === item.id && (
+                                        <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
+                                    )}
+                                </TouchableOpacity>
+                            )}
+                        />
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -165,5 +232,61 @@ const styles = StyleSheet.create({
         color: '#999',
         fontSize: 12,
         fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 24,
+        width: '100%',
+        maxHeight: '80%',
+        padding: 20,
+        elevation: 10,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        paddingBottom: 15,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+    },
+    langItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 14,
+        paddingHorizontal: 10,
+        borderRadius: 12,
+        marginBottom: 4,
+    },
+    selectedLangItem: {
+        backgroundColor: '#f0fdf4',
+    },
+    langName: {
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    selectedLangText: {
+        color: '#10b981',
+    },
+    langLocal: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 2,
     }
 });

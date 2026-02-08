@@ -171,6 +171,24 @@ export default function EditProfileScreen() {
 
                 <View style={styles.form}>
                     <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Account type</Text>
+                        <View style={styles.roleDisplay}>
+                            <MaterialCommunityIcons
+                                name={
+                                    profile?.role === 'worker' ? 'account-hard-hat' :
+                                        profile?.role === 'contractor' ? 'briefcase-account' :
+                                            profile?.role === 'shop' ? 'storefront' : 'home-account'
+                                }
+                                size={20}
+                                color="black"
+                            />
+                            <Text style={styles.roleText}>
+                                {profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'User'}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.inputGroup}>
                         <Text style={styles.label}>Full Name</Text>
                         <TextInput
                             style={styles.input}
@@ -221,6 +239,17 @@ export default function EditProfileScreen() {
                             editable={false}
                         />
                     </View>
+
+                    <TouchableOpacity
+                        style={styles.settingsBtn}
+                        onPress={() => router.push('/settings')}
+                    >
+                        <View style={styles.settingsBtnLeft}>
+                            <MaterialCommunityIcons name="cog-outline" size={24} color="black" />
+                            <Text style={styles.settingsBtnText}>App Settings</Text>
+                        </View>
+                        <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
+                    </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.logoutBtn}
@@ -418,6 +447,21 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#333',
     },
+    roleDisplay: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        backgroundColor: '#f5f5f5',
+        padding: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    roleText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: 'black',
+    },
     input: {
         borderWidth: 1,
         borderColor: '#ddd',
@@ -444,6 +488,27 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: Colors.light.muted,
         marginTop: 2,
+    },
+    settingsBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 24,
+        padding: 16,
+        borderRadius: 16,
+        backgroundColor: '#f8f9fa',
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    settingsBtnLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    settingsBtnText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: 'black',
     },
     logoutBtn: {
         flexDirection: 'row',

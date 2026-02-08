@@ -91,7 +91,11 @@ export default function ShopOwnerDashboard() {
             </ScrollView>
 
             <View style={styles.footer}>
-                <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
+                <Text style={styles.footerText}>Made in India </Text>
+                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                    <Text style={styles.footerText}>🇮🇳</Text>
+                </Animated.View>
+                <Text style={styles.footerText}> with </Text>
                 <Animated.View style={{ transform: [{ scale: heartScale }] }}>
                     <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
                 </Animated.View>

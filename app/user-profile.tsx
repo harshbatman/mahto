@@ -9,7 +9,8 @@ export default function UserProfileScreen() {
 
     // In a real app, we might fetch the latest data here using the ID
     // For now, we'll use the passed params for instant feedback
-    const { name, role, category, rating, distance, phoneNumber, location } = params;
+    const { name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about } = params;
+    const skills = skillsStr ? JSON.parse(skillsStr as string) : [];
 
     const handleCall = () => {
         if (phoneNumber) {
@@ -70,10 +71,22 @@ export default function UserProfileScreen() {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>About</Text>
                         <Text style={styles.aboutText}>
-                            Professional {category || role} with over 5 years of experience in the construction industry.
-                            Verified member of the MAHTO platform.
+                            {about || `Professional ${category || role} with over ${experienceYears || '5'} years of experience in the construction industry. Verified member of the MAHTO platform.`}
                         </Text>
                     </View>
+
+                    {skills.length > 0 && (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Skills</Text>
+                            <View style={styles.skillsContainer}>
+                                {skills.map((skill: string) => (
+                                    <View key={skill} style={styles.skillBadge}>
+                                        <Text style={styles.skillBadgeText}>{skill}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
 
                     <TouchableOpacity style={styles.primaryBtn} onPress={handleCall}>
                         <MaterialCommunityIcons name="phone" size={20} color="white" />
@@ -196,6 +209,24 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#666',
         lineHeight: 22,
+    },
+    skillsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    skillBadge: {
+        backgroundColor: '#f3f4f6',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    skillBadgeText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#374151',
     },
     primaryBtn: {
         backgroundColor: 'black',

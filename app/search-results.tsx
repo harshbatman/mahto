@@ -55,7 +55,10 @@ export default function SearchResultsScreen() {
                 distance: user.distance,
                 phoneNumber: user.phoneNumber,
                 location: user.location,
-                photoURL: user.photoURL
+                photoURL: user.photoURL,
+                skills: JSON.stringify(user.skills || []),
+                experienceYears: user.experienceYears?.toString() || '0',
+                about: user.about || ""
             }
         });
     };

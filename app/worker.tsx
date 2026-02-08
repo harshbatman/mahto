@@ -209,7 +209,36 @@ export default function WorkerDashboard() {
                     )
                 )}
 
+                <View style={styles.networkingSection}>
+                    <Text style={styles.sectionTitle}>Find Professionals</Text>
+                    <View style={styles.networkingGrid}>
+                        <TouchableOpacity
+                            style={[styles.networkCard, { backgroundColor: '#f5f3ff' }]}
+                            onPress={() => router.push({
+                                pathname: '/search-results',
+                                params: { role: 'worker', title: 'Workers' }
+                            })}
+                        >
+                            <View style={[styles.networkIcon, { backgroundColor: '#ddd6fe' }]}>
+                                <MaterialCommunityIcons name="account-group" size={24} color="#6d28d9" />
+                            </View>
+                            <Text style={styles.networkLabel}>Find Workers</Text>
+                        </TouchableOpacity>
 
+                        <TouchableOpacity
+                            style={[styles.networkCard, { backgroundColor: '#fdf2f8' }]}
+                            onPress={() => router.push({
+                                pathname: '/search-results',
+                                params: { role: 'contractor', title: 'Contractors' }
+                            })}
+                        >
+                            <View style={[styles.networkIcon, { backgroundColor: '#fbcfe8' }]}>
+                                <MaterialCommunityIcons name="briefcase-check" size={24} color="#db2777" />
+                            </View>
+                            <Text style={styles.networkLabel}>Contractors</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
             </ScrollView>
 
@@ -374,6 +403,34 @@ const styles = StyleSheet.create({
         color: Colors.light.muted,
         fontSize: 15,
         fontWeight: '500',
+    },
+    networkingSection: {
+        marginTop: 24,
+        paddingBottom: 40,
+    },
+    networkingGrid: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 12,
+    },
+    networkCard: {
+        flex: 1,
+        padding: 16,
+        borderRadius: 20,
+        alignItems: 'center',
+        gap: 8,
+    },
+    networkIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    networkLabel: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#1f2937',
     },
     footer: {
         flexDirection: 'row',

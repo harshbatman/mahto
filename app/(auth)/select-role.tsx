@@ -7,7 +7,7 @@ const roles = [
     {
         id: 'homeowner',
         title: 'Homeowner',
-        subtitle: 'I want to hire pros for my property',
+        subtitle: 'I want to build or renovate my home',
         icon: 'home-account',
         color: '#6366f1'
     },
@@ -21,7 +21,7 @@ const roles = [
     {
         id: 'contractor',
         title: 'Contractor',
-        subtitle: 'I manage construction projects',
+        subtitle: 'Find Workers and Win Contracts',
         icon: 'briefcase-account',
         color: '#ec4899'
     },

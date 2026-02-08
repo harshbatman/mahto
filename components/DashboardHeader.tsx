@@ -37,7 +37,7 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     style={styles.messageBtn}
                     onPress={() => router.push('/messages')}
                 >
-                    <MaterialCommunityIcons name="message-outline" size={24} color="black" />
+                    <MaterialCommunityIcons name="message-text" size={24} color="black" />
                 </TouchableOpacity>
             </View>
 

@@ -74,4 +74,29 @@ export const SHOP_CATEGORIES = [
         name: 'Shuttering & Scaffolding',
         image: require('@/assets/images/shop-categories/shuttering.jpg'),
     },
+    {
+        id: 'ss_gates',
+        name: 'SS Gates',
+        image: require('@/assets/images/shop-categories/ss_gates.jpg'),
+    },
+    {
+        id: 'window_grills',
+        name: 'Window Grills',
+        image: require('@/assets/images/shop-categories/window_grills.jpg'),
+    },
+    {
+        id: 'tiles',
+        name: 'Tiles & Vitrified',
+        image: require('@/assets/images/shop-categories/tiles.jpg'),
+    },
+    {
+        id: 'tmt_bars',
+        name: 'TMT Bars (Sariya)',
+        image: require('@/assets/images/shop-categories/tmt_bars.png'),
+    },
+    {
+        id: 'wooden_doors',
+        name: 'Wooden Doors',
+        image: require('@/assets/images/shop-categories/wooden_doors.jpg'),
+    },
 ];

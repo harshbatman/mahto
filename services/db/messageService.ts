@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { addDoc, collection, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
 
 export interface Message {
     id?: string;
@@ -72,21 +72,20 @@ export const subscribeToMessages = (chatId: string, callback: (messages: Message
 };
 
 /**
- * Fetches all chats for a user
+ * Fetches all chats for a user with real-time updates
  */
-export const getMyChats = async (userId: string) => {
+export const subscribeToMyChats = (userId: string, callback: (chats: Chat[]) => void) => {
     const chatsRef = collection(db, 'chats');
     const q = query(
         chatsRef,
-        where('participants', 'array-contains', userId),
-        orderBy('updatedAt', 'desc')
+        where('participants', 'array-contains', userId)
     );
 
-    const snapshot = await getDocs(q);
-    const chats = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    } as Chat));
-
-    return chats;
+    return onSnapshot(q, (snapshot) => {
+        const chats = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Chat));
+        callback(chats);
+    });
 };

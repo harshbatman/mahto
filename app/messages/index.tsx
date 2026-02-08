@@ -1,6 +1,6 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { Chat, getMyChats } from '@/services/db/messageService';
+import { Chat, subscribeToMyChats } from '@/services/db/messageService';
 import { getUserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -16,10 +16,8 @@ export default function MessagesScreen() {
     useEffect(() => {
         if (!user) return;
 
-        const loadChats = async () => {
+        const unsubscribe = subscribeToMyChats(user.uid, async (myChats) => {
             try {
-                const myChats = await getMyChats(user.uid);
-
                 // Fetch other user details for each chat
                 const chatsWithDetails = await Promise.all(myChats.map(async (chat) => {
                     const otherUserId = chat.participants.find(id => id !== user.uid);
@@ -36,15 +34,22 @@ export default function MessagesScreen() {
                     return chat;
                 }));
 
-                setChats(chatsWithDetails);
+                // Sort locally since we removed orderBy (to avoid indexing issues)
+                const sortedChats = chatsWithDetails.sort((a: any, b: any) => {
+                    const timeA = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : (a.updatedAt || 0);
+                    const timeB = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : (b.updatedAt || 0);
+                    return timeB - timeA;
+                });
+
+                setChats(sortedChats);
             } catch (error) {
                 console.error("Error loading chats:", error);
             } finally {
                 setLoading(false);
             }
-        };
+        });
 
-        loadChats();
+        return () => unsubscribe();
     }, [user]);
 
     const formatTime = (timestamp: any) => {

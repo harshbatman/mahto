@@ -1,5 +1,6 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { deleteUserAccount } from '@/services/auth/authService';
 import { saveUserProfile } from '@/services/db/userProfile';
 import { uploadImage } from '@/services/storage/imageService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,6 +12,9 @@ import {
     ActivityIndicator,
     Alert,
     Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -28,27 +32,24 @@ export default function EditProfileScreen() {
     const [phone, setPhone] = useState(profile?.phoneNumber || '');
     const [address, setAddress] = useState(profile?.address || '');
     const [photo, setPhoto] = useState(profile?.photoURL || null);
-    const [newPhoto, setNewPhoto] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [locLoading, setLocLoading] = useState(false);
+
+    // Delete account states
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [confirmPhone, setConfirmPhone] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [1, 1],
+            allowsEditing: false,
             quality: 0.5,
         });
 
         if (!result.canceled) {
-            setNewPhoto(result.assets[0].uri);
-        }
-    };
-
-    const confirmPhoto = () => {
-        if (newPhoto) {
-            setPhoto(newPhoto);
-            setNewPhoto(null);
+            setPhoto(result.assets[0].uri);
         }
     };
 
@@ -94,12 +95,10 @@ export default function EditProfileScreen() {
         if (!user) return;
         setLoading(true);
         try {
-            // Use new photo if picked, otherwise keep existing
-            let currentPhotoPath = newPhoto || photo;
-            let photoURL = currentPhotoPath;
-
-            if (currentPhotoPath && currentPhotoPath.startsWith('file://')) {
-                photoURL = await uploadImage(currentPhotoPath, `profiles/${user.uid}.jpg`);
+            // Upload photo if it's a new local selection
+            let photoURL = photo || "";
+            if (photo && photo.startsWith('file://')) {
+                photoURL = await uploadImage(photo, `profiles/${user.uid}.jpg`);
             }
 
             await saveUserProfile({
@@ -123,6 +122,25 @@ export default function EditProfileScreen() {
         }
     };
 
+    const handleDeleteAccount = async () => {
+        if (!confirmPhone || !confirmPassword) {
+            Alert.alert('Error', 'Please enter both phone and password to confirm.');
+            return;
+        }
+
+        setDeleteLoading(true);
+        try {
+            await deleteUserAccount(confirmPhone, confirmPassword);
+            setShowDeleteModal(false);
+            Alert.alert('Account Deleted', 'Your account and data have been permanently removed.');
+            // Root index will automatically redirect to login since user is null
+        } catch (error: any) {
+            Alert.alert('Deletion Failed', error.message || 'Verification failed. Please check credentials.');
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -139,30 +157,16 @@ export default function EditProfileScreen() {
                 <View style={styles.photoSection}>
                     <View style={styles.photoContainer}>
                         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
-                            {newPhoto ? (
-                                <Image source={{ uri: newPhoto }} style={[styles.avatar, { opacity: 0.6 }]} />
-                            ) : photo ? (
+                            {photo ? (
                                 <Image source={{ uri: photo }} style={styles.avatar} />
                             ) : (
                                 <MaterialCommunityIcons name="camera-plus" size={32} color={Colors.light.muted} />
                             )}
                         </TouchableOpacity>
-
-                        {newPhoto && (
-                            <TouchableOpacity onPress={confirmPhoto} style={styles.confirmCircle}>
-                                <MaterialCommunityIcons name="check" size={28} color="white" />
-                            </TouchableOpacity>
-                        )}
                     </View>
                     <Text style={styles.photoTip}>
-                        {newPhoto ? "Click 'OK' to confirm photo" : "Tap to change profile picture"}
+                        Tap to change profile picture
                     </Text>
-
-                    {newPhoto && (
-                        <TouchableOpacity style={styles.okBtn} onPress={confirmPhoto}>
-                            <Text style={styles.okBtnText}>OK, Use This</Text>
-                        </TouchableOpacity>
-                    )}
                 </View>
 
                 <View style={styles.form}>
@@ -244,8 +248,76 @@ export default function EditProfileScreen() {
                         <MaterialCommunityIcons name="logout" size={24} color="#ef4444" />
                         <Text style={styles.logoutText}>Logout from Account</Text>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.deleteInitBtn}
+                        onPress={() => setShowDeleteModal(true)}
+                    >
+                        <Text style={styles.deleteInitText}>Permanently Delete Account</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                visible={showDeleteModal}
+                transparent={true}
+                animationType="slide"
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalOverlay}
+                >
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Confirm account deletion</Text>
+                            <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
+                                <MaterialCommunityIcons name="close" size={24} color="black" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={styles.modalSubtitle}>
+                            This action is permanent and cannot be undone. Enter your credentials to proceed.
+                        </Text>
+
+                        <View style={styles.modalForm}>
+                            <View style={styles.modalInputGroup}>
+                                <Text style={styles.modalLabel}>Phone Number</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="Enter your phone number"
+                                    keyboardType="phone-pad"
+                                    value={confirmPhone}
+                                    onChangeText={setConfirmPhone}
+                                />
+                            </View>
+
+                            <View style={styles.modalInputGroup}>
+                                <Text style={styles.modalLabel}>Password</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="Enter your password"
+                                    secureTextEntry
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                />
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.deleteBtn, deleteLoading && styles.disabledBtn]}
+                                onPress={handleDeleteAccount}
+                                disabled={deleteLoading}
+                            >
+                                {deleteLoading ? (
+                                    <ActivityIndicator color="white" />
+                                ) : (
+                                    <Text style={styles.deleteBtnText}>Confirm Deletion</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -390,5 +462,76 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
         color: '#ef4444',
+    },
+    deleteInitBtn: {
+        alignItems: 'center',
+        paddingVertical: 10,
+        marginBottom: 80,
+    },
+    deleteInitText: {
+        color: '#999',
+        fontSize: 14,
+        fontWeight: '600',
+        textDecorationLine: 'underline',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        padding: Spacing.lg,
+        paddingBottom: 40,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: Spacing.md,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '800',
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
+        marginBottom: 24,
+    },
+    modalForm: {
+        gap: 16,
+    },
+    modalInputGroup: {
+        gap: 8,
+    },
+    modalLabel: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    modalInput: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 12,
+        padding: 14,
+        fontSize: 16,
+    },
+    deleteBtn: {
+        backgroundColor: '#ef4444',
+        padding: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    disabledBtn: {
+        opacity: 0.5,
+    },
+    deleteBtnText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '700',
     }
 });

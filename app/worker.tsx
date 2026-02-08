@@ -62,7 +62,7 @@ export default function WorkerDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="Worker Dashboard" subtitle={`${jobs.length} New jobs nearby`} showSearch={false} />
+            <DashboardHeader title="Worker Dashboard" showSearch={false} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
@@ -140,13 +140,14 @@ export default function WorkerDashboard() {
                     </View>
                 </View>
 
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
-                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                        <MaterialCommunityIcons name="heart" size={18} color="#ef4444" />
-                    </Animated.View>
-                </View>
             </ScrollView>
+
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
+                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                    <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
+                </Animated.View>
+            </View>
         </SafeAreaView>
     );
 }
@@ -323,12 +324,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
-        opacity: 0.6,
+        paddingVertical: 16,
+        marginBottom: 20,
+        opacity: 1,
     },
     footerText: {
         fontSize: 14,
-        fontWeight: '600',
-        color: Colors.light.muted,
+        fontWeight: '700',
+        color: Colors.light.text,
     }
 });

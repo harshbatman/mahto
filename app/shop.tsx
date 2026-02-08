@@ -1,7 +1,8 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const products = [
     { id: '1', name: 'Ultratech Cement', price: '₹380/bag', stock: '450 bags', category: 'Cement' },
@@ -10,9 +11,28 @@ const products = [
 ];
 
 export default function ShopOwnerDashboard() {
+    const heartScale = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(heartScale, {
+                    toValue: 1.3,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(heartScale, {
+                    toValue: 1,
+                    duration: 700,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="MAHTO Shop" subtitle="Inventory & Sales Overview" />
+            <DashboardHeader title="MAHTO Shop" />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.metricsGrid}>
@@ -69,11 +89,31 @@ export default function ShopOwnerDashboard() {
                 </TouchableOpacity>
 
             </ScrollView>
+
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
+                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                    <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
+                </Animated.View>
+            </View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        marginBottom: 20,
+        opacity: 1,
+    },
+    footerText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: Colors.light.text,
+    },
     container: {
         flex: 1,
         backgroundColor: Colors.light.background,

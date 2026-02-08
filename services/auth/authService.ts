@@ -1,9 +1,10 @@
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { saveUserProfile, UserProfile } from '@/services/db/userProfile';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, deleteUser, EmailAuthProvider, reauthenticateWithCredential, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { deleteDoc, doc } from 'firebase/firestore';
 
 // Helper to convert phone number to a dummy email for Firebase
-const formatPhoneAsEmail = (phone: string) => {
+export const formatPhoneAsEmail = (phone: string) => {
     // Removes any non-digit characters and appends a dummy domain
     const cleanPhone = phone.replace(/\D/g, '');
     return `${cleanPhone}@mahto.app`;
@@ -69,6 +70,34 @@ export const logoutUser = async () => {
         return { success: true };
     } catch (error) {
         console.error("Error logging out:", error);
+        throw error;
+    }
+};
+
+/**
+ * Deletes the user account after re-authentication
+ */
+export const deleteUserAccount = async (phone: string, password: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user logged in");
+
+    try {
+        const email = formatPhoneAsEmail(phone);
+        const credential = EmailAuthProvider.credential(email, password);
+
+        // Re-authenticate user before deletion (security requirement)
+        await reauthenticateWithCredential(user, credential);
+
+        // 1. Delete Firestore profile
+        const userRef = doc(db, 'users', user.uid);
+        await deleteDoc(userRef);
+
+        // 2. Delete Auth account
+        await deleteUser(user);
+
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error deleting account:", error);
         throw error;
     }
 };

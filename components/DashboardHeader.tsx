@@ -53,7 +53,7 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: Spacing.lg,
-        paddingTop: Spacing.xl,
+        paddingTop: Spacing.xxl,
         paddingBottom: Spacing.md,
         backgroundColor: Colors.light.background,
     },

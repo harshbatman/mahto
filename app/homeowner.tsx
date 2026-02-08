@@ -88,7 +88,6 @@ export default function HomeownerDashboard() {
         <SafeAreaView style={styles.container}>
             <DashboardHeader
                 title={profile?.name || "Homeowner"}
-                subtitle="Manage your dream project"
                 showSearch={false}
             />
 
@@ -125,17 +124,17 @@ export default function HomeownerDashboard() {
                 {/* Search Bar - Handled by DashboardHeader but adding a custom search prompt here if needed */}
 
                 {/* Post Contract & Job Cards */}
-                <View style={[styles.actionRow, { paddingHorizontal: 20 }]}>
-                    <TouchableOpacity style={[styles.actionBox, { backgroundColor: 'white', borderWidth: 1, borderColor: '#f0f0f0' }]} onPress={() => router.push('/post-contract')}>
+                <View style={styles.actionRow}>
+                    <TouchableOpacity style={styles.actionBox} onPress={() => router.push('/post-contract')}>
                         <MaterialCommunityIcons name="file-document-edit" size={24} color="black" />
-                        <Text style={[styles.actionTitle, { color: 'black' }]}>Post Contract</Text>
-                        <Text style={[styles.actionSub, { color: '#666' }]}>Hire Contractor</Text>
+                        <Text style={styles.actionTitle}>Post Contract</Text>
+                        <Text style={styles.actionSub}>Hire Contractor</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.actionBox, { backgroundColor: 'white', borderWidth: 1, borderColor: '#f0f0f0' }]} onPress={() => router.push('/post-job')}>
+                    <TouchableOpacity style={styles.actionBox} onPress={() => router.push('/post-job')}>
                         <MaterialCommunityIcons name="account-hard-hat" size={24} color="black" />
-                        <Text style={[styles.actionTitle, { color: 'black' }]}>Post Job</Text>
-                        <Text style={[styles.actionSub, { color: '#666' }]}>Hire Worker</Text>
+                        <Text style={styles.actionTitle}>Post Job</Text>
+                        <Text style={styles.actionSub}>Hire Worker</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -155,13 +154,14 @@ export default function HomeownerDashboard() {
                     ))}
                 </View>
 
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
-                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                        <MaterialCommunityIcons name="heart" size={18} color="#ef4444" />
-                    </Animated.View>
-                </View>
             </ScrollView>
+
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>Made in India 🇮🇳 with </Text>
+                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                    <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
+                </Animated.View>
+            </View>
         </SafeAreaView>
     );
 }
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     },
     categoryCard: {
         alignItems: 'center',
-        width: (width - Spacing.lg * 2) / 4.5,
+        width: (width - Spacing.lg * 2) / 3.5,
     },
     iconBox: {
         width: 56,
@@ -226,11 +226,14 @@ const styles = StyleSheet.create({
     },
     actionBox: {
         flex: 1,
-        aspectRatio: 1,
-        padding: 12,
-        borderRadius: 20,
+        aspectRatio: 1.3,
+        padding: 10,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
@@ -238,13 +241,13 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
     },
     actionTitle: {
-        color: 'white',
+        color: 'black',
         fontSize: 14,
         fontWeight: '900',
         marginTop: 6,
     },
     actionSub: {
-        color: 'rgba(255,255,255,0.7)',
+        color: '#666',
         fontSize: 10,
         fontWeight: '600',
         marginTop: 2,
@@ -421,13 +424,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
-        opacity: 0.6,
+        paddingVertical: 16,
+        marginBottom: 20,
+        opacity: 1,
     },
     footerText: {
         fontSize: 14,
-        fontWeight: '600',
-        color: Colors.light.muted,
+        fontWeight: '700',
+        color: Colors.light.text,
     }
 });
 

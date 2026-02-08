@@ -2,11 +2,19 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { auth } from '../../lib/firebase';
 import { saveUserProfile, UserProfile } from '../db/userProfile';
 
+// Helper to convert phone number to a dummy email for Firebase
+const formatPhoneAsEmail = (phone: string) => {
+    // Removes any non-digit characters and appends a dummy domain
+    const cleanPhone = phone.replace(/\D/g, '');
+    return `${cleanPhone}@mahto.app`;
+};
+
 /**
- * Registers a new user and creates their role-specific profile in Firestore
+ * Registers a new user using Phone Number + Password
  */
-export const registerUser = async (email: string, password: string, role: UserProfile['role'], name: string) => {
+export const registerUser = async (phone: string, password: string, role: UserProfile['role'], name: string) => {
     try {
+        const email = formatPhoneAsEmail(phone);
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
@@ -15,25 +23,27 @@ export const registerUser = async (email: string, password: string, role: UserPr
             uid: user.uid,
             role: role,
             name: name,
-            email: email,
+            email: email, // This is our dummy internal email
+            phoneNumber: phone,
             createdAt: Date.now()
         });
 
         return { user, success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error registering user:", error);
         throw error;
     }
 };
 
 /**
- * Logs in an existing user
+ * Logs in an existing user using Phone Number + Password
  */
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (phone: string, password: string) => {
     try {
+        const email = formatPhoneAsEmail(phone);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return { user: userCredential.user, success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error logging in user:", error);
         throw error;
     }

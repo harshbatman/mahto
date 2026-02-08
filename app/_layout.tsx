@@ -25,7 +25,7 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)/login" options={{ animation: 'fade' }} />
           <Stack.Screen name="(auth)/register" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="(auth)/email-login" options={{ animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="(auth)/phone-login" options={{ animation: 'slide_from_bottom' }} />
           <Stack.Screen name="worker" />
           <Stack.Screen name="contractor" />
           <Stack.Screen name="homeowner" />

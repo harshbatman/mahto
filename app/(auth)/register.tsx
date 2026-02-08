@@ -10,19 +10,24 @@ export default function RegisterScreen() {
     const { role } = useLocalSearchParams<{ role: string }>();
 
     const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleRegister = async () => {
-        if (!name || !email || !password) {
+        if (!name || !phone || !password) {
             Alert.alert('Error', 'Please fill in all fields');
+            return;
+        }
+
+        if (phone.length < 10) {
+            Alert.alert('Error', 'Please enter a valid phone number');
             return;
         }
 
         setLoading(true);
         try {
-            await registerUser(email, password, role as any, name);
+            await registerUser(phone, password, role as any, name);
             router.replace(`/${role}`);
         } catch (error: any) {
             Alert.alert('Registration Failed', error.message);
@@ -40,7 +45,7 @@ export default function RegisterScreen() {
 
                 <View style={styles.header}>
                     <Text style={styles.title}>Join as {role?.charAt(0).toUpperCase() + role?.slice(1)}</Text>
-                    <Text style={styles.subtitle}>Create an account to get started</Text>
+                    <Text style={styles.subtitle}>Create your profile using phone</Text>
                 </View>
 
                 <View style={styles.form}>
@@ -55,14 +60,14 @@ export default function RegisterScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email Address</Text>
+                        <Text style={styles.label}>Phone Number</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="name@example.com"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            value={email}
-                            onChangeText={setEmail}
+                            placeholder="10-digit mobile number"
+                            keyboardType="phone-pad"
+                            value={phone}
+                            onChangeText={setPhone}
+                            maxLength={10}
                         />
                     </View>
 

@@ -6,28 +6,27 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function EmailLoginScreen() {
+export default function PhoneLoginScreen() {
     const router = useRouter();
 
-    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
-        if (!email || !password) {
+        if (!phone || !password) {
             Alert.alert('Error', 'Please fill in all fields');
             return;
         }
 
         setLoading(true);
         try {
-            const { user } = await loginUser(email, password);
+            const { user } = await loginUser(phone, password);
             const profile = await getUserProfile(user.uid);
 
             if (profile) {
                 router.replace(`/${profile.role}`);
             } else {
-                // Fallback if profile doesn't exist (shouldn't happen with our registration flow)
                 router.replace('/(auth)/login');
             }
         } catch (error: any) {
@@ -46,19 +45,19 @@ export default function EmailLoginScreen() {
 
                 <View style={styles.header}>
                     <Text style={styles.title}>Welcome Back</Text>
-                    <Text style={styles.subtitle}>Log in to your MAHTO account</Text>
+                    <Text style={styles.subtitle}>Log in using your phone number</Text>
                 </View>
 
                 <View style={styles.form}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email Address</Text>
+                        <Text style={styles.label}>Phone Number</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="name@example.com"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            value={email}
-                            onChangeText={setEmail}
+                            placeholder="10-digit mobile number"
+                            keyboardType="phone-pad"
+                            value={phone}
+                            onChangeText={setPhone}
+                            maxLength={10}
                         />
                     </View>
 
@@ -91,7 +90,6 @@ export default function EmailLoginScreen() {
 }
 
 const styles = StyleSheet.create({
-    // Reuse styles from register.tsx for consistency
     container: {
         flex: 1,
         backgroundColor: Colors.light.background,

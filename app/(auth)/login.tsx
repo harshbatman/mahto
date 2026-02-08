@@ -70,7 +70,7 @@ export default function RoleSelection() {
                     ))}
                 </View>
 
-                <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/(auth)/email-login')}>
+                <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/(auth)/phone-login')}>
                     <Text style={styles.loginText}>Already have an account? <Text style={styles.bold}>Log in</Text></Text>
                 </TouchableOpacity>
             </View>

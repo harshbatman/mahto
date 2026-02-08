@@ -12,9 +12,10 @@ export default function UserProfileScreen() {
     const router = useRouter();
     const { user: currentUser, profile: currentProfile } = useAuth();
     const params = useLocalSearchParams();
-    const { id: profileUid, name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable } = params;
+    const { id: profileUid, name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable, shopCategories: shopCategoriesStr } = params;
     const isActuallyAvailable = isAvailable === 'true';
     const skills = skillsStr ? JSON.parse(skillsStr as string) : [];
+    const shopCategories = shopCategoriesStr ? JSON.parse(shopCategoriesStr as string) : [];
 
 
     const [displayPhoto, setDisplayPhoto] = useState<string | undefined>(undefined);
@@ -174,7 +175,9 @@ export default function UserProfileScreen() {
                         )}
                     </TouchableOpacity>
                     <Text style={styles.userName}>{name}</Text>
-                    <Text style={styles.userRole}>{category || role}</Text>
+                    <Text style={styles.userRole}>
+                        {role === 'shop' ? (freshProfile?.shopCategories?.join(', ') || shopCategories.join(', ') || category) : (category || role)}
+                    </Text>
 
                     <View style={styles.statsRow}>
                         <View style={styles.statItem}>

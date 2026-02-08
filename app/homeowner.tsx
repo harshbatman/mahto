@@ -86,7 +86,8 @@ export default function HomeownerDashboard() {
                 experienceYears: user.experienceYears?.toString() || '0',
                 dailyRate: user.dailyRate?.toString() || '0',
                 isAvailable: user.isAvailable?.toString() || 'true',
-                about: user.about || ""
+                about: user.about || "",
+                shopCategories: JSON.stringify(user.shopCategories || [])
             }
         });
     };
@@ -123,7 +124,7 @@ export default function HomeownerDashboard() {
                                 </View>
                                 <View style={styles.resultInfo}>
                                     <Text style={styles.resultName}>{user.name}</Text>
-                                    <Text style={styles.resultSub}>{user.category} • {user.role}</Text>
+                                    <Text style={styles.resultSub}>{(user.shopCategories?.join(', ') || user.category)} • {user.role}</Text>
                                     <View style={styles.ratingRow}>
                                         <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
                                         <Text style={styles.ratingText}>

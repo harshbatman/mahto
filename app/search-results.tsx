@@ -38,6 +38,7 @@ export default function SearchResultsScreen() {
         const filtered = results.filter(item =>
             item.name?.toLowerCase().includes(lowerText) ||
             item.category?.toLowerCase().includes(lowerText) ||
+            item.shopCategories?.some((c: string) => c.toLowerCase().includes(lowerText)) ||
             item.location?.toLowerCase().includes(lowerText)
         );
         setFilteredResults(filtered);
@@ -61,7 +62,8 @@ export default function SearchResultsScreen() {
                 experienceYears: user.experienceYears?.toString() || '0',
                 dailyRate: user.dailyRate?.toString() || '0',
                 isAvailable: user.isAvailable?.toString() || 'true',
-                about: user.about || ""
+                about: user.about || "",
+                shopCategories: JSON.stringify(user.shopCategories || [])
             }
         });
     };
@@ -126,7 +128,9 @@ export default function SearchResultsScreen() {
                             </View>
                             <View style={styles.info}>
                                 <Text style={styles.name}>{item.name}</Text>
-                                <Text style={styles.sub}>{item.category} • {item.location || 'Nearby'}</Text>
+                                <Text style={styles.sub} numberOfLines={1}>
+                                    {(item.shopCategories?.join(', ') || item.category)} • {item.location || 'Nearby'}
+                                </Text>
                                 <View style={styles.ratingRow}>
                                     <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
                                     <Text style={styles.ratingText}>

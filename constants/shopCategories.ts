@@ -24,4 +24,29 @@ export const SHOP_CATEGORIES = [
         name: 'Electrical & Hardware',
         image: require('@/assets/images/shop-categories/electrical_hardware.png'),
     },
+    {
+        id: 'red_bricks',
+        name: 'Red Bricks',
+        image: require('@/assets/images/shop-categories/red_bricks.png'),
+    },
+    {
+        id: 'cement_bricks',
+        name: 'Cement Bricks',
+        image: require('@/assets/images/shop-categories/cement_bricks.jpg'),
+    },
+    {
+        id: 'marble_granite',
+        name: 'Marble & Granite',
+        image: require('@/assets/images/shop-categories/marble_granite.jpg'),
+    },
+    {
+        id: 'pipes_plumbing',
+        name: 'Pipes & Plumbing',
+        image: require('@/assets/images/shop-categories/pipes_plumbing.png'),
+    },
+    {
+        id: 'hardware_fittings',
+        name: 'Hardware & Fittings',
+        image: require('@/assets/images/shop-categories/hardware_fittings.jpg'),
+    },
 ];

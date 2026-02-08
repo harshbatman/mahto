@@ -11,7 +11,8 @@ import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, StyleSheet, 
 export default function SetupShopProfileScreen() {
     const router = useRouter();
     const { profile, user } = useAuth();
-    const { category } = useLocalSearchParams<{ category: string }>();
+    const { categories: categoriesStr } = useLocalSearchParams<{ categories: string }>();
+    const categories = categoriesStr ? JSON.parse(categoriesStr) : [];
 
     const [shopBanner, setShopBanner] = useState<string | null>(null);
     const [shopLogo, setShopLogo] = useState<string | null>(null);
@@ -92,7 +93,7 @@ export default function SetupShopProfileScreen() {
                 address,
                 shopBanner: shopBanner || undefined,
                 shopLogo: shopLogo || undefined,
-                shopCategory: category,
+                shopCategories: categories,
                 openingTime,
                 closingTime,
                 isHomeDeliveryAvailable: isHomeDelivery,
@@ -207,11 +208,12 @@ export default function SetupShopProfileScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Shop Category</Text>
+                        <Text style={styles.label}>Shop Categories</Text>
                         <TextInput
                             style={[styles.input, { backgroundColor: '#f5f5f5' }]}
-                            value={category}
+                            value={categories.join(', ')}
                             editable={false}
+                            multiline
                         />
                     </View>
 

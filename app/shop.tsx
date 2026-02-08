@@ -13,7 +13,7 @@ export default function ShopDashboard() {
         <SafeAreaView style={styles.container}>
             <DashboardHeader
                 title={profile?.shopName || "My Shop"}
-                subtitle={profile?.shopCategory}
+                subtitle={profile?.shopCategories?.join(', ')}
             />
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>

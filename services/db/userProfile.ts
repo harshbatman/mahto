@@ -20,7 +20,7 @@ export interface UserProfile {
     averageRating?: number;
     ratingCount?: number;
     // Shop specific
-    shopCategory?: string;
+    shopCategories?: string[];
     shopBanner?: string;
     shopLogo?: string;
     shopName?: string;

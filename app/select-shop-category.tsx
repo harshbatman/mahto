@@ -1,29 +1,55 @@
 import { SHOP_CATEGORIES } from '@/constants/shopCategories';
 import { Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { saveUserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SelectShopCategoryScreen() {
     const router = useRouter();
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const params = useLocalSearchParams<{ initialCategories: string, mode: string }>();
+    const { profile } = useAuth();
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(
+        params.initialCategories ? JSON.parse(params.initialCategories) : []
+    );
 
-    const handleContinue = () => {
-        if (selectedCategory) {
-            router.push({
-                pathname: '/setup-shop-profile',
-                params: { category: selectedCategory }
-            });
+    const toggleCategory = (categoryName: string) => {
+        if (selectedCategories.includes(categoryName)) {
+            setSelectedCategories(prev => prev.filter(c => c !== categoryName));
+        } else {
+            setSelectedCategories(prev => [...prev, categoryName]);
+        }
+    };
+
+    const handleContinue = async () => {
+        if (selectedCategories.length > 0) {
+            if (params.mode === 'edit') {
+                try {
+                    await saveUserProfile({
+                        ...profile!,
+                        shopCategories: selectedCategories
+                    });
+                    router.back();
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                router.push({
+                    pathname: '/setup-shop-profile',
+                    params: { categories: JSON.stringify(selectedCategories) }
+                });
+            }
         }
     };
 
     const renderItem = ({ item }: { item: any }) => {
-        const isSelected = selectedCategory === item.name;
+        const isSelected = selectedCategories.includes(item.name);
         return (
             <TouchableOpacity
                 style={[styles.categoryCard, isSelected && styles.selectedCard]}
-                onPress={() => setSelectedCategory(item.name)}
+                onPress={() => toggleCategory(item.name)}
                 activeOpacity={0.7}
             >
                 <Image source={item.image} style={styles.categoryImage} resizeMode="cover" />
@@ -61,9 +87,9 @@ export default function SelectShopCategoryScreen() {
 
             <View style={styles.footer}>
                 <TouchableOpacity
-                    style={[styles.continueBtn, !selectedCategory && styles.disabledBtn]}
+                    style={[styles.continueBtn, selectedCategories.length === 0 && styles.disabledBtn]}
                     onPress={handleContinue}
-                    disabled={!selectedCategory}
+                    disabled={selectedCategories.length === 0}
                 >
                     <Text style={styles.continueBtnText}>Continue</Text>
                     <MaterialCommunityIcons name="arrow-right" size={20} color="white" />

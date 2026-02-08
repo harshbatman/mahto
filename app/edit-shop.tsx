@@ -235,6 +235,27 @@ export default function EditShopScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Shop Categories</Text>
+                            <TouchableOpacity onPress={() => router.push({
+                                pathname: '/select-shop-category',
+                                params: {
+                                    initialCategories: JSON.stringify(profile?.shopCategories || []),
+                                    mode: 'edit'
+                                }
+                            })}>
+                                <Text style={styles.geoBtnText}>Change</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <TextInput
+                            style={[styles.input, { backgroundColor: '#f5f5f5' }]}
+                            value={profile?.shopCategories?.join(', ')}
+                            editable={false}
+                            multiline
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
                         <Text style={styles.label}>GST Number (Optional)</Text>
                         <TextInput
                             style={styles.input}

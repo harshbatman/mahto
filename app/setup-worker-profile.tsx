@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -37,6 +37,13 @@ export default function SetupWorkerProfile() {
 
     const [loading, setLoading] = useState(false);
     const [locLoading, setLocLoading] = useState(false);
+
+    useEffect(() => {
+        if (profile) {
+            if (!name && profile.name) setName(profile.name);
+            if (!phone && profile.phoneNumber) setPhone(profile.phoneNumber);
+        }
+    }, [profile]);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({

@@ -100,16 +100,7 @@ export default function WorkerDashboard() {
                 contentContainerStyle={styles.scrollContent}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
-                <View style={styles.statsRow}>
-                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: '#10b981' }]}>
-                        <Text style={styles.statValue}>₹12,400</Text>
-                        <Text style={styles.statLabel}>Earnings</Text>
-                    </View>
-                    <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: '#6366f1' }]}>
-                        <Text style={styles.statValue}>{profile?.experienceYears || 0} Yrs</Text>
-                        <Text style={styles.statLabel}>Experience</Text>
-                    </View>
-                </View>
+
 
                 {/* Tab Switcher */}
                 <View style={styles.tabContainer}>
@@ -244,32 +235,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         padding: Spacing.lg,
     },
-    statsRow: {
-        flexDirection: 'row',
-        gap: Spacing.md,
-        marginBottom: Spacing.lg,
-    },
-    statCard: {
-        flex: 1,
-        backgroundColor: 'white',
-        padding: Spacing.md,
-        borderRadius: 16,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 5,
-    },
-    statValue: {
-        fontSize: 22,
-        fontWeight: '900',
-    },
-    statLabel: {
-        fontSize: 12,
-        color: Colors.light.muted,
-        fontWeight: '600',
-        marginTop: 2,
-    },
+
     tabContainer: {
         flexDirection: 'row',
         backgroundColor: '#f3f4f6',

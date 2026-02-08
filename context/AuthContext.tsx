@@ -1,6 +1,5 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
-import * as React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth } from '../lib/firebase';
 import { getUserProfile, UserProfile } from '../services/db/userProfile';
 
@@ -23,21 +22,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            try {
-                setUser(firebaseUser);
-                if (firebaseUser) {
+            setUser(firebaseUser);
+            if (firebaseUser) {
+                try {
                     const userProfile = await getUserProfile(firebaseUser.uid);
                     setProfile(userProfile);
-                } else {
+                } catch (error) {
+                    console.error("Error fetching profile:", error);
                     setProfile(null);
                 }
-            } catch (error) {
-                console.error("Auth context error:", error);
-                // Don't crash the whole app if profile fetch fails
+            } else {
                 setProfile(null);
-            } finally {
-                setLoading(false);
             }
+            setLoading(false);
         });
 
         return unsubscribe;

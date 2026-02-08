@@ -1,7 +1,7 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getChatId } from '@/services/db/messageService';
-import { submitRating } from '@/services/db/ratingService';
+import { getWorkerReviews, Review, submitRating } from '@/services/db/ratingService';
 import { getUserProfile, UserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -23,6 +23,8 @@ export default function UserProfileScreen() {
     const [selectedRating, setSelectedRating] = useState(0);
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loadingReviews, setLoadingReviews] = useState(true);
 
     useEffect(() => {
         // 1. Initial set from params (for immediate feedback)
@@ -49,7 +51,29 @@ export default function UserProfileScreen() {
             }
         };
 
+        // 3. Fetch reviews
+        const fetchReviews = async () => {
+            const uid = Array.isArray(params.id) ? params.id[0] : params.id;
+            if (uid) {
+                try {
+                    const data = await getWorkerReviews(uid);
+                    // Sort reviews by date descending if they have createdAt
+                    const sorted = data.sort((a: any, b: any) => {
+                        const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime();
+                        const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime();
+                        return dateB - dateA;
+                    });
+                    setReviews(sorted);
+                } catch (error) {
+                    console.error('Error fetching reviews:', error);
+                } finally {
+                    setLoadingReviews(false);
+                }
+            }
+        };
+
         fetchLatestProfile();
+        fetchReviews();
     }, [params.id, params.photoURL]);
 
     const handleCall = () => {
@@ -95,9 +119,11 @@ export default function UserProfileScreen() {
             setRatingModalVisible(false);
             alert('Thank you for your rating!');
 
-            // Refresh profile data
+            // Refresh profile and reviews
             const updated = await getUserProfile(uid);
             if (updated) setFreshProfile(updated);
+            const freshReviews = await getWorkerReviews(uid);
+            setReviews(freshReviews.sort((a: any, b: any) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)));
 
             // Reset input
             setSelectedRating(0);
@@ -240,6 +266,47 @@ export default function UserProfileScreen() {
                             <MaterialCommunityIcons name="star" size={20} color="#f59e0b" />
                             <Text style={styles.ratingBtnText}>Rate this Worker</Text>
                         </TouchableOpacity>
+                    )}
+
+                    {role === 'worker' && (
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionTitle}>Reviews ({reviews.length})</Text>
+                            </View>
+
+                            {reviews.length > 0 ? (
+                                reviews.map((rev, idx) => (
+                                    <View key={rev.id || idx} style={styles.reviewCard}>
+                                        <View style={styles.reviewHeader}>
+                                            <View style={styles.reviewerInfo}>
+                                                <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
+                                                <View style={styles.reviewStars}>
+                                                    {[1, 2, 3, 4, 5].map(s => (
+                                                        <MaterialCommunityIcons
+                                                            key={s}
+                                                            name={s <= rev.rating ? "star" : "star-outline"}
+                                                            size={14}
+                                                            color="#f59e0b"
+                                                        />
+                                                    ))}
+                                                </View>
+                                            </View>
+                                            <Text style={styles.reviewDate}>
+                                                {rev.createdAt?.toDate ? rev.createdAt.toDate().toLocaleDateString() : new Date(rev.createdAt).toLocaleDateString()}
+                                            </Text>
+                                        </View>
+                                        {rev.comment ? (
+                                            <Text style={styles.reviewComment}>{rev.comment}</Text>
+                                        ) : null}
+                                    </View>
+                                ))
+                            ) : (
+                                <View style={styles.emptyReviews}>
+                                    <MaterialCommunityIcons name="comment-outline" size={32} color="#ccc" />
+                                    <Text style={styles.emptyReviewsText}>No reviews yet</Text>
+                                </View>
+                            )}
+                        </View>
                     )}
                 </View>
             </ScrollView>
@@ -592,5 +659,56 @@ const styles = StyleSheet.create({
     submitRatingBtnText: {
         color: 'white',
         fontWeight: '700',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    reviewCard: {
+        backgroundColor: '#f9fafb',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    reviewerInfo: {
+        flex: 1,
+    },
+    reviewerName: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: 'black',
+    },
+    reviewStars: {
+        flexDirection: 'row',
+        marginTop: 2,
+    },
+    reviewDate: {
+        fontSize: 12,
+        color: '#94a3b8',
+    },
+    reviewComment: {
+        fontSize: 14,
+        color: '#475569',
+        lineHeight: 20,
+    },
+    emptyReviews: {
+        alignItems: 'center',
+        paddingVertical: 20,
+        backgroundColor: '#f9fafb',
+        borderRadius: 16,
+    },
+    emptyReviewsText: {
+        marginTop: 8,
+        fontSize: 14,
+        color: '#94a3b8',
     }
 });

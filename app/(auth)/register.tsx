@@ -31,7 +31,7 @@ export default function RegisterScreen() {
             await registerUser(phone, password, role as any, name);
             console.log("Registration success, navigating based on role:", role);
             if (role === 'worker') {
-                router.replace('/setup-worker-profile');
+                router.replace('/select-skills');
             } else {
                 router.replace(`/(tabs)` as any);
             }

@@ -5,7 +5,7 @@ import { uploadImage } from '@/services/storage/imageService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -21,19 +21,31 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-
+// ...
 export default function SetupWorkerProfile() {
     const { user, profile } = useAuth();
     const router = useRouter();
+    const params = useLocalSearchParams();
 
     const [name, setName] = useState(profile?.name || '');
     const [phone, setPhone] = useState(profile?.phoneNumber || '');
     const [address, setAddress] = useState('');
     const [photo, setPhoto] = useState<string | null>(null);
-    const [skills, setSkills] = useState<string[]>([]);
     const [experience, setExperience] = useState('');
     const [about, setAbout] = useState('');
     const [newSkill, setNewSkill] = useState('');
+
+    // Initialize skills from params if available
+    const [skills, setSkills] = useState<string[]>(() => {
+        if (params.skills) {
+            try {
+                return JSON.parse(params.skills as string);
+            } catch (e) {
+                return [];
+            }
+        }
+        return [];
+    });
 
     const [loading, setLoading] = useState(false);
     const [locLoading, setLocLoading] = useState(false);

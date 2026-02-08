@@ -42,7 +42,20 @@ export default function ChatScreen() {
     const formatTime = (timestamp: any) => {
         if (!timestamp) return '';
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const now = new Date();
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (date.toDateString() === now.toDateString()) {
+            return timeStr;
+        }
+
+        const yesterday = new Date();
+        yesterday.setDate(now.getDate() - 1);
+        if (date.toDateString() === yesterday.toDateString()) {
+            return `Yesterday, ${timeStr}`;
+        }
+
+        return `${date.toLocaleDateString([], { day: '2-digit', month: 'short' })}, ${timeStr}`;
     };
 
     return (

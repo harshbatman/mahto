@@ -14,6 +14,7 @@ export interface Contract {
     status: 'open' | 'active' | 'completed';
     createdAt: number;
     applicantCount: number;
+    images?: string[];
 }
 
 export const postContract = async (contract: Omit<Contract, 'id' | 'createdAt' | 'status' | 'applicantCount'>) => {

@@ -1,12 +1,15 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { postContract } from '@/services/db/contractService';
+import { uploadImage } from '@/services/storage/imageService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
@@ -24,6 +27,7 @@ export default function PostContractScreen() {
     const { profile } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [images, setImages] = useState<string[]>([]);
 
     const [form, setForm] = useState({
         title: '',
@@ -34,6 +38,29 @@ export default function PostContractScreen() {
         duration: '',
     });
 
+    const pickImages = async () => {
+        if (images.length >= 7) {
+            Alert.alert('Limit Reached', 'You can upload up to 7 images only.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsMultipleSelection: true,
+            selectionLimit: 7 - images.length,
+            quality: 0.8,
+        });
+
+        if (!result.canceled) {
+            const newImages = result.assets.map(asset => asset.uri);
+            setImages([...images, ...newImages].slice(0, 7));
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setImages(images.filter((_, i) => i !== index));
+    };
+
     const handlePost = async () => {
         if (!form.title || !form.budget || !form.description) {
             Alert.alert('Missing Fields', 'Please fill in the title, budget, and description.');
@@ -42,6 +69,15 @@ export default function PostContractScreen() {
 
         setLoading(true);
         try {
+            // 1. Upload images if any
+            const uploadedUrls: string[] = [];
+            for (let i = 0; i < images.length; i++) {
+                const path = `contracts/${profile?.uid}/${Date.now()}_${i}.jpg`;
+                const url = await uploadImage(images[i], path);
+                uploadedUrls.push(url);
+            }
+
+            // 2. Post contract with image URLs
             await postContract({
                 homeownerId: profile?.uid || '',
                 homeownerName: profile?.name || 'Anonymous',
@@ -50,8 +86,10 @@ export default function PostContractScreen() {
                 budget: form.budget,
                 description: form.description,
                 location: form.location,
-                duration: form.duration
+                duration: form.duration,
+                images: uploadedUrls
             });
+
             Alert.alert('Success', 'Your contract has been posted and is now visible to contractors!');
             router.back();
         } catch (error: any) {
@@ -114,7 +152,7 @@ export default function PostContractScreen() {
                                 <Text style={styles.currencySymbol}>₹</Text>
                                 <TextInput
                                     style={[styles.input, { paddingLeft: 35 }]}
-                                    placeholder="50,00,000"
+                                    placeholder="50,0,000"
                                     keyboardType="numeric"
                                     value={form.budget}
                                     onChangeText={(t) => setForm({ ...form, budget: t })}
@@ -143,6 +181,28 @@ export default function PostContractScreen() {
                         </View>
 
                         <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Project Images (Max 7)</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesScroll}>
+                                <TouchableOpacity style={styles.addImageBtn} onPress={pickImages}>
+                                    <MaterialCommunityIcons name="camera-plus" size={32} color="#666" />
+                                    <Text style={styles.addImageText}>{images.length}/7</Text>
+                                </TouchableOpacity>
+
+                                {images.map((uri, index) => (
+                                    <View key={index} style={styles.imageWrapper}>
+                                        <Image source={{ uri }} style={styles.selectedImage} />
+                                        <TouchableOpacity
+                                            style={styles.removeImageBtn}
+                                            onPress={() => removeImage(index)}
+                                        >
+                                            <MaterialCommunityIcons name="close-circle" size={20} color="#ef4444" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        </View>
+
+                        <View style={styles.inputGroup}>
                             <Text style={styles.label}>Project Details</Text>
                             <TextInput
                                 style={[styles.input, styles.textArea]}
@@ -155,7 +215,7 @@ export default function PostContractScreen() {
                         </View>
 
                         <TouchableOpacity
-                            style={styles.postBtn}
+                            style={[styles.postBtn, loading && styles.disabledBtn]}
                             onPress={handlePost}
                             disabled={loading}
                         >
@@ -197,7 +257,7 @@ const styles = StyleSheet.create({
         padding: Spacing.lg,
     },
     form: {
-        gap: 24,
+        gap: 20,
     },
     inputGroup: {
         gap: 8,
@@ -213,7 +273,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 14,
         fontSize: 16,
-        backgroundColor: '#fff',
+        backgroundColor: '#f9f9f9',
     },
     textArea: {
         height: 120,
@@ -229,8 +289,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#ddd',
-        backgroundColor: '#f9f9f9',
+        borderColor: '#eee',
+        backgroundColor: '#fff',
     },
     categoryBtnActive: {
         borderColor: '#6366f1',
@@ -256,6 +316,44 @@ const styles = StyleSheet.create({
         color: '#333',
         zIndex: 1,
     },
+    imagesScroll: {
+        flexDirection: 'row',
+        marginBottom: 8,
+    },
+    addImageBtn: {
+        width: 100,
+        height: 100,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderStyle: 'dashed',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f9f9f9',
+        marginRight: 12,
+    },
+    addImageText: {
+        fontSize: 12,
+        color: '#666',
+        fontWeight: '700',
+        marginTop: 4,
+    },
+    imageWrapper: {
+        position: 'relative',
+        marginRight: 12,
+    },
+    selectedImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 16,
+    },
+    removeImageBtn: {
+        position: 'absolute',
+        top: -8,
+        right: -8,
+        backgroundColor: 'white',
+        borderRadius: 10,
+    },
     postBtn: {
         backgroundColor: '#6366f1',
         padding: 18,
@@ -269,9 +367,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
     },
+    disabledBtn: {
+        opacity: 0.6,
+    },
     postBtnText: {
         color: 'white',
         fontSize: 16,
         fontWeight: '800',
     },
 });
+

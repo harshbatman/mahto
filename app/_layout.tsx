@@ -20,11 +20,12 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
         <Stack.Screen name="(auth)/login" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(worker)/index" />
-        <Stack.Screen name="(contractor)/index" />
-        <Stack.Screen name="(homeowner)/index" />
-        <Stack.Screen name="(shop)/index" />
+        <Stack.Screen name="worker" />
+        <Stack.Screen name="contractor" />
+        <Stack.Screen name="homeowner" />
+        <Stack.Screen name="shop" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

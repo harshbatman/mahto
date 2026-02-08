@@ -49,4 +49,29 @@ export const SHOP_CATEGORIES = [
         name: 'Hardware & Fittings',
         image: require('@/assets/images/shop-categories/hardware_fittings.jpg'),
     },
+    {
+        id: 'dust_sand',
+        name: 'Stone Dust & Sand',
+        image: require('@/assets/images/shop-categories/dust_sand.jpg'),
+    },
+    {
+        id: 'paints',
+        name: 'Paints & Interior',
+        image: require('@/assets/images/shop-categories/paints.png'),
+    },
+    {
+        id: 'clay_bricks',
+        name: 'Clay Bricks',
+        image: require('@/assets/images/shop-categories/clay_bricks.jpg'),
+    },
+    {
+        id: 'fly_ash_bricks',
+        name: 'Fly Ash Bricks',
+        image: require('@/assets/images/shop-categories/fly_ash_bricks.jpg'),
+    },
+    {
+        id: 'shuttering',
+        name: 'Shuttering & Scaffolding',
+        image: require('@/assets/images/shop-categories/shuttering.jpg'),
+    },
 ];

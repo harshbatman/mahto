@@ -51,7 +51,8 @@ export default function SearchResultsScreen() {
                 name: user.name,
                 role: user.role,
                 category: user.category,
-                rating: user.rating,
+                averageRating: user.averageRating?.toString() || user.rating || '0',
+                ratingCount: user.ratingCount?.toString() || '0',
                 distance: user.distance,
                 phoneNumber: user.phoneNumber,
                 location: user.location,
@@ -128,7 +129,9 @@ export default function SearchResultsScreen() {
                                 <Text style={styles.sub}>{item.category} • {item.location || 'Nearby'}</Text>
                                 <View style={styles.ratingRow}>
                                     <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
-                                    <Text style={styles.ratingText}>{item.rating || '4.5'} • {item.distance || '0.5 km'}</Text>
+                                    <Text style={styles.ratingText}>
+                                        {item.averageRating || item.rating || '0'} ({item.ratingCount || 0}) • {item.distance || '0.5 km'}
+                                    </Text>
                                     {item.dailyRate > 0 && (
                                         <Text style={styles.priceTag}>₹{item.dailyRate}/day</Text>
                                     )}

@@ -1,15 +1,16 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getChatId } from '@/services/db/messageService';
-import { getUserProfile } from '@/services/db/userProfile';
+import { submitRating } from '@/services/db/ratingService';
+import { getUserProfile, UserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Image, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function UserProfileScreen() {
     const router = useRouter();
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, profile: currentProfile } = useAuth();
     const params = useLocalSearchParams();
     const { id: profileUid, name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable } = params;
     const isActuallyAvailable = isAvailable === 'true';
@@ -17,6 +18,11 @@ export default function UserProfileScreen() {
 
 
     const [displayPhoto, setDisplayPhoto] = useState<string | undefined>(undefined);
+    const [freshProfile, setFreshProfile] = useState<UserProfile | null>(null);
+    const [ratingModalVisible, setRatingModalVisible] = useState(false);
+    const [selectedRating, setSelectedRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         // 1. Initial set from params (for immediate feedback)
@@ -25,15 +31,17 @@ export default function UserProfileScreen() {
             setDisplayPhoto(initialPhoto);
         }
 
-        // 2. Fetch fresh data from Firestore to ensure valid URL
+        // 2. Fetch fresh data from Firestore
         const fetchLatestProfile = async () => {
             const uid = Array.isArray(params.id) ? params.id[0] : params.id;
             if (uid) {
                 try {
                     const userProfile = await getUserProfile(uid);
-                    if (userProfile && userProfile.photoURL) {
-                        console.log('UserProfile - Fetched fresh photoURL:', userProfile.photoURL);
-                        setDisplayPhoto(userProfile.photoURL);
+                    if (userProfile) {
+                        setFreshProfile(userProfile);
+                        if (userProfile.photoURL) {
+                            setDisplayPhoto(userProfile.photoURL);
+                        }
                     }
                 } catch (error) {
                     console.error('Error fetching user profile:', error);
@@ -68,6 +76,38 @@ export default function UserProfileScreen() {
                 otherUserName: name as string
             }
         });
+    };
+
+    const handleRatingSubmit = async () => {
+        if (!currentUser || !selectedRating || !profileUid) return;
+
+        setSubmitting(true);
+        try {
+            const uid = Array.isArray(profileUid) ? profileUid[0] : profileUid;
+            await submitRating({
+                workerId: uid,
+                reviewerId: currentUser.uid,
+                reviewerName: currentProfile?.name || 'Anonymous',
+                rating: selectedRating,
+                comment: comment,
+                createdAt: new Date()
+            });
+            setRatingModalVisible(false);
+            alert('Thank you for your rating!');
+
+            // Refresh profile data
+            const updated = await getUserProfile(uid);
+            if (updated) setFreshProfile(updated);
+
+            // Reset input
+            setSelectedRating(0);
+            setComment('');
+        } catch (error) {
+            console.error(error);
+            alert('Failed to submit rating');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const [modalVisible, setModalVisible] = useState(false);
@@ -112,8 +152,8 @@ export default function UserProfileScreen() {
 
                     <View style={styles.statsRow}>
                         <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{rating || '4.5'}</Text>
-                            <Text style={styles.statLabel}>Rating</Text>
+                            <Text style={styles.statValue}>{freshProfile?.averageRating || rating || '0'}</Text>
+                            <Text style={styles.statLabel}>{freshProfile?.ratingCount || 0} Ratings</Text>
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
@@ -194,6 +234,13 @@ export default function UserProfileScreen() {
                         <MaterialCommunityIcons name="message-text" size={20} color="black" />
                         <Text style={styles.secondaryBtnText}>Send Message</Text>
                     </TouchableOpacity>
+
+                    {(currentProfile?.role === 'homeowner' || currentProfile?.role === 'contractor') && role === 'worker' && (
+                        <TouchableOpacity style={styles.ratingBtn} onPress={() => setRatingModalVisible(true)}>
+                            <MaterialCommunityIcons name="star" size={20} color="#f59e0b" />
+                            <Text style={styles.ratingBtnText}>Rate this Worker</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </ScrollView>
 
@@ -209,6 +256,54 @@ export default function UserProfileScreen() {
                             resizeMode="contain"
                         />
                     )}
+                </View>
+            </Modal>
+
+            {/* Rating Modal */}
+            <Modal visible={ratingModalVisible} transparent={true} animationType="slide">
+                <View style={styles.ratingModalOverlay}>
+                    <View style={styles.ratingModalContent}>
+                        <Text style={styles.ratingModalTitle}>Rate Worker</Text>
+                        <Text style={styles.ratingModalSub}>How was your experience with {name}?</Text>
+
+                        <View style={styles.starRow}>
+                            {[1, 2, 3, 4, 5].map(star => (
+                                <TouchableOpacity key={star} onPress={() => setSelectedRating(star)}>
+                                    <MaterialCommunityIcons
+                                        name={star <= selectedRating ? "star" : "star-outline"}
+                                        size={40}
+                                        color="#f59e0b"
+                                    />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <TextInput
+                            style={styles.reviewInput}
+                            placeholder="Add a comment (optional)"
+                            value={comment}
+                            onChangeText={setComment}
+                            multiline
+                        />
+
+                        <View style={styles.ratingModalButtons}>
+                            <TouchableOpacity
+                                style={styles.cancelBtn}
+                                onPress={() => setRatingModalVisible(false)}
+                            >
+                                <Text style={styles.cancelBtnText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.submitRatingBtn, !selectedRating && { opacity: 0.5 }]}
+                                onPress={handleRatingSubmit}
+                                disabled={!selectedRating || submitting}
+                            >
+                                <Text style={styles.submitRatingBtnText}>
+                                    {submitting ? 'Submitting...' : 'Submit'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
             </Modal>
         </SafeAreaView>
@@ -414,6 +509,88 @@ const styles = StyleSheet.create({
     },
     availabilityText: {
         fontSize: 13,
+        fontWeight: '700',
+    },
+    ratingBtn: {
+        backgroundColor: '#fffbeb',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        borderRadius: 16,
+        gap: 8,
+        borderWidth: 1,
+        borderColor: '#fef3c7',
+        marginBottom: 40,
+    },
+    ratingBtnText: {
+        color: '#b45309',
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    ratingModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    ratingModalContent: {
+        backgroundColor: 'white',
+        borderRadius: 24,
+        padding: 24,
+        alignItems: 'center',
+    },
+    ratingModalTitle: {
+        fontSize: 20,
+        fontWeight: '800',
+        marginBottom: 8,
+    },
+    ratingModalSub: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    starRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginBottom: 20,
+    },
+    reviewInput: {
+        width: '100%',
+        backgroundColor: '#f5f5f5',
+        borderRadius: 12,
+        padding: 12,
+        height: 100,
+        textAlignVertical: 'top',
+        marginBottom: 20,
+    },
+    ratingModalButtons: {
+        flexDirection: 'row',
+        gap: 12,
+        width: '100%',
+    },
+    cancelBtn: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    cancelBtnText: {
+        fontWeight: '700',
+        color: '#666',
+    },
+    submitRatingBtn: {
+        flex: 1,
+        backgroundColor: 'black',
+        padding: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    submitRatingBtnText: {
+        color: 'white',
         fontWeight: '700',
     }
 });

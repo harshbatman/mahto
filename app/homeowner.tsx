@@ -72,6 +72,13 @@ export default function HomeownerDashboard() {
         router.push({
             pathname: '/user-profile',
             params: {
+                id: user.uid || user.id,
+                name: user.name,
+                role: user.role,
+                category: user.category,
+                averageRating: user.averageRating?.toString() || user.rating || '0',
+                ratingCount: user.ratingCount?.toString() || '0',
+                distance: user.distance,
                 phoneNumber: user.phoneNumber,
                 location: user.location,
                 photoURL: user.photoURL,
@@ -119,7 +126,9 @@ export default function HomeownerDashboard() {
                                     <Text style={styles.resultSub}>{user.category} • {user.role}</Text>
                                     <View style={styles.ratingRow}>
                                         <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
-                                        <Text style={styles.ratingText}>{user.rating || '4.5'} • {user.distance || '0.5 km'}</Text>
+                                        <Text style={styles.ratingText}>
+                                            {user.averageRating || user.rating || '0'} ({user.ratingCount || 0}) • {user.distance || '0.5 km'}
+                                        </Text>
                                         {user.role === 'worker' && user.dailyRate > 0 && (
                                             <Text style={styles.priceTag}>₹{user.dailyRate}/day</Text>
                                         )}

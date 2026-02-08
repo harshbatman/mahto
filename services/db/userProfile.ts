@@ -17,6 +17,8 @@ export interface UserProfile {
     isProfileSetup?: boolean;
     dailyRate?: number;
     isAvailable?: boolean;
+    averageRating?: number;
+    ratingCount?: number;
 }
 
 /**

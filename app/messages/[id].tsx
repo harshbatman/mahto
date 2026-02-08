@@ -4,7 +4,8 @@ import { Message, sendMessage, subscribeToMessages } from '@/services/db/message
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ChatScreen() {
     const { id, otherUserId, otherUserName } = useLocalSearchParams<{ id: string, otherUserId: string, otherUserName: string }>();
@@ -13,6 +14,7 @@ export default function ChatScreen() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const flatListRef = useRef<FlatList>(null);
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         if (!id) return;
@@ -80,7 +82,10 @@ export default function ChatScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
-                <View style={styles.inputContainer}>
+                <View style={[
+                    styles.inputContainer,
+                    { paddingBottom: Math.max(insets.bottom, 12) }
+                ]}>
                     <TextInput
                         style={styles.input}
                         placeholder="Type a message..."

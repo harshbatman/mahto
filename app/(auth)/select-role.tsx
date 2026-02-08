@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-end',
         paddingHorizontal: Spacing.lg,
-        paddingTop: 12,
+        paddingTop: 20,
     },
     langBtn: {
         flexDirection: 'row',

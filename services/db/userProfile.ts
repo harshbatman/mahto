@@ -32,6 +32,12 @@ export interface UserProfile {
     gstNumber?: string;
     latitude?: number;
     longitude?: number;
+    // Contractor specific
+    contractorServices?: string[];
+    companyName?: string;
+    companyLogo?: string;
+    companyBanner?: string;
+    ownerName?: string;
 }
 
 /**
@@ -40,7 +46,11 @@ export interface UserProfile {
 export const saveUserProfile = async (profile: UserProfile) => {
     try {
         const userRef = doc(db, 'users', profile.uid);
-        await setDoc(userRef, profile, { merge: true });
+        // Remove undefined fields which Firestore doesn't like
+        const cleanProfile = Object.fromEntries(
+            Object.entries(profile).filter(([_, v]) => v !== undefined)
+        );
+        await setDoc(userRef, cleanProfile, { merge: true });
         return { success: true };
     } catch (error) {
         console.error("Error saving user profile:", error);

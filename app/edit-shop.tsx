@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function EditShopScreen() {
@@ -27,6 +27,23 @@ export default function EditShopScreen() {
     const [coords, setCoords] = useState<{ latitude: number, longitude: number } | null>(
         profile?.latitude && profile?.longitude ? { latitude: profile.latitude, longitude: profile.longitude } : null
     );
+
+    // Sync state with profile if it updates (important if profile loads after component mounts)
+    useEffect(() => {
+        if (profile) {
+            if (profile.shopBanner) setShopBanner(profile.shopBanner);
+            if (profile.shopLogo) setShopLogo(profile.shopLogo);
+            if (profile.shopName) setShopName(profile.shopName);
+            if (profile.shopOwnerName) setShopOwnerName(profile.shopOwnerName);
+            if (profile.address) setAddress(profile.address);
+            if (profile.openingTime) setOpeningTime(profile.openingTime);
+            if (profile.closingTime) setClosingTime(profile.closingTime);
+            if (profile.isHomeDeliveryAvailable !== undefined) setIsHomeDelivery(profile.isHomeDeliveryAvailable);
+            if (profile.yearsInBusiness) setYearsInBusiness(profile.yearsInBusiness.toString());
+            if (profile.gstNumber) setGstNumber(profile.gstNumber);
+            if (profile.latitude && profile.longitude) setCoords({ latitude: profile.latitude, longitude: profile.longitude });
+        }
+    }, [profile]);
 
     const pickImage = async (type: 'banner' | 'logo') => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -290,7 +307,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: Spacing.lg,
-        paddingTop: 10,
+        paddingTop: 20,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 16,
@@ -304,13 +321,18 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     bannerUpload: {
-        width: '100%',
+        width: '92%',
         height: 180,
         backgroundColor: '#f3f4f6',
+        borderRadius: 20,
+        overflow: 'hidden',
+        alignSelf: 'center',
+        marginTop: 10,
     },
     bannerImage: {
         width: '100%',
         height: '100%',
+        borderRadius: 20,
     },
     bannerPlaceholder: {
         flex: 1,

@@ -4,29 +4,44 @@ import { saveUserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function SetupShopProfileScreen() {
+export default function SetupContractorProfileScreen() {
     const router = useRouter();
     const { profile, user } = useAuth();
-    const { categories: categoriesStr } = useLocalSearchParams<{ categories: string }>();
-    const categories = categoriesStr ? JSON.parse(categoriesStr) : [];
 
-    const [shopBanner, setShopBanner] = useState<string | null>(null);
-    const [shopLogo, setShopLogo] = useState<string | null>(null);
-    const [shopName, setShopName] = useState('');
-    const [shopOwnerName, setShopOwnerName] = useState(profile?.name || '');
-    const [address, setAddress] = useState('');
-    const [openingTime, setOpeningTime] = useState('09:00 AM');
-    const [closingTime, setClosingTime] = useState('08:00 PM');
-    const [isHomeDelivery, setIsHomeDelivery] = useState(false);
-    const [yearsInBusiness, setYearsInBusiness] = useState('');
-    const [gstNumber, setGstNumber] = useState('');
+    const [companyBanner, setCompanyBanner] = useState<string | null>(profile?.companyBanner || null);
+    const [companyLogo, setCompanyLogo] = useState<string | null>(profile?.companyLogo || null);
+    const [companyName, setCompanyName] = useState(profile?.companyName || '');
+    const [ownerName, setOwnerName] = useState(profile?.ownerName || profile?.name || '');
+    const [address, setAddress] = useState(profile?.address || '');
+    const [services, setServices] = useState(profile?.contractorServices?.join(', ') || '');
+    const [yearsInBusiness, setYearsInBusiness] = useState(profile?.yearsInBusiness?.toString() || '');
+    const [about, setAbout] = useState(profile?.about || '');
     const [loading, setLoading] = useState(false);
     const [locationLoading, setLocationLoading] = useState(false);
-    const [coords, setCoords] = useState<{ latitude: number, longitude: number } | null>(null);
+    const [coords, setCoords] = useState<{ latitude: number, longitude: number } | null>(
+        profile?.latitude && profile?.longitude ? { latitude: profile.latitude, longitude: profile.longitude } : null
+    );
+
+    useEffect(() => {
+        if (profile) {
+            if (profile.companyBanner) setCompanyBanner(profile.companyBanner);
+            if (profile.companyLogo) setCompanyLogo(profile.companyLogo);
+            if (profile.companyName) setCompanyName(profile.companyName);
+            if (profile.ownerName) setOwnerName(profile.ownerName);
+            // Default to profile name if owner name not set
+            else if (profile.name) setOwnerName(profile.name);
+
+            if (profile.address) setAddress(profile.address);
+            if (profile.contractorServices) setServices(profile.contractorServices.join(', '));
+            if (profile.yearsInBusiness) setYearsInBusiness(profile.yearsInBusiness.toString());
+            if (profile.about) setAbout(profile.about);
+            if (profile.latitude && profile.longitude) setCoords({ latitude: profile.latitude, longitude: profile.longitude });
+        }
+    }, [profile]);
 
     const pickImage = async (type: 'banner' | 'logo') => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -37,8 +52,8 @@ export default function SetupShopProfileScreen() {
         });
 
         if (!result.canceled) {
-            if (type === 'banner') setShopBanner(result.assets[0].uri);
-            else setShopLogo(result.assets[0].uri);
+            if (type === 'banner') setCompanyBanner(result.assets[0].uri);
+            else setCompanyLogo(result.assets[0].uri);
         }
     };
 
@@ -57,7 +72,6 @@ export default function SetupShopProfileScreen() {
                 longitude: location.coords.longitude
             });
 
-            // Reverse geocode to get address
             let reverseData = await Location.reverseGeocodeAsync({
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude
@@ -66,7 +80,7 @@ export default function SetupShopProfileScreen() {
             if (reverseData.length > 0) {
                 const item = reverseData[0];
                 const addr = `${item.name || ''}, ${item.street || ''}, ${item.city || ''}, ${item.region || ''}, ${item.postalCode || ''}`;
-                setAddress(addr.replace(/^, /, ''));
+                setAddress(addr.replace(/^, /, '')); // Remove leading comma if any
             }
         } catch (error) {
             console.error(error);
@@ -77,38 +91,38 @@ export default function SetupShopProfileScreen() {
     };
 
     const handleSave = async () => {
-        if (!shopName || !shopOwnerName || !address) {
-            Alert.alert('Missing info', 'Please fill in shop name, owner name and address');
+        if (!companyName || !ownerName || !address) {
+            Alert.alert('Missing Info', 'Please fill in Company Name, Owner Name, and Address.');
             return;
         }
 
         setLoading(true);
         try {
-            if (!user) return;
+            if (!user || !profile) return;
+
+            // Process services string into array
+            const servicesArray = services.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
             await saveUserProfile({
-                ...profile!,
-                shopName,
-                shopOwnerName,
+                ...profile,
+                companyName,
+                ownerName,
                 address,
-                shopBanner: shopBanner || undefined,
-                shopLogo: shopLogo || undefined,
-                shopCategories: categories,
-                openingTime,
-                closingTime,
-                isHomeDeliveryAvailable: isHomeDelivery,
+                companyBanner: companyBanner || undefined,
+                companyLogo: companyLogo || undefined,
+                contractorServices: servicesArray,
                 yearsInBusiness: parseInt(yearsInBusiness) || 0,
-                gstNumber: gstNumber || undefined,
+                about,
                 latitude: coords?.latitude,
                 longitude: coords?.longitude,
-                isProfileSetup: true,
-                phoneNumber: profile?.phoneNumber || user.phoneNumber || undefined,
+                isProfileSetup: true, // Mark profile as setup
             });
 
-            router.replace('/shop' as any);
+            Alert.alert('Success', 'Profile setup complete!');
+            router.replace('/contractor'); // Navigate to contractor dashboard
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Failed to save shop profile');
+            Alert.alert('Error', 'Failed to save profile');
         } finally {
             setLoading(false);
         }
@@ -116,22 +130,20 @@ export default function SetupShopProfileScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text style={styles.title}>Setup Your Shop</Text>
-            </View>
-
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Setup Company Profile</Text>
+                    <Text style={styles.headerSub}>Let's get your business profile ready.</Text>
+                </View>
+
                 {/* Banner Upload */}
                 <TouchableOpacity style={styles.bannerUpload} onPress={() => pickImage('banner')}>
-                    {shopBanner ? (
-                        <Image source={{ uri: shopBanner }} style={styles.bannerImage} />
+                    {companyBanner ? (
+                        <Image source={{ uri: companyBanner }} style={styles.bannerImage} />
                     ) : (
                         <View style={styles.bannerPlaceholder}>
                             <MaterialCommunityIcons name="image-plus" size={32} color="#9ca3af" />
-                            <Text style={styles.uploadText}>Upload Shop Banner</Text>
+                            <Text style={styles.uploadText}>Upload Company Banner</Text>
                         </View>
                     )}
                 </TouchableOpacity>
@@ -139,115 +151,82 @@ export default function SetupShopProfileScreen() {
                 {/* Logo Upload */}
                 <View style={styles.logoUploadContainer}>
                     <TouchableOpacity style={styles.logoUpload} onPress={() => pickImage('logo')}>
-                        {shopLogo ? (
-                            <Image source={{ uri: shopLogo }} style={styles.logoImage} />
+                        {companyLogo ? (
+                            <Image source={{ uri: companyLogo }} style={styles.logoImage} />
                         ) : (
                             <View style={styles.logoPlaceholder}>
-                                <MaterialCommunityIcons name="storefront-outline" size={32} color="#9ca3af" />
-                                <Text style={styles.logoUploadText}>Logo</Text>
+                                <MaterialCommunityIcons name="briefcase-outline" size={32} color="#9ca3af" />
                             </View>
                         )}
                         <View style={styles.editIconBadge}>
-                            <MaterialCommunityIcons name="pencil" size={14} color="white" />
+                            <MaterialCommunityIcons name="camera" size={14} color="white" />
                         </View>
                     </TouchableOpacity>
+                    <Text style={styles.logoLabel}>Company Logo</Text>
                 </View>
 
                 <View style={styles.form}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Shop Name</Text>
+                        <Text style={styles.label}>Company Name</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter Shop Name"
-                            value={shopName}
-                            onChangeText={setShopName}
+                            placeholder="Enter Company Name"
+                            value={companyName}
+                            onChangeText={setCompanyName}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Shop Owner Name</Text>
+                        <Text style={styles.label}>Owner Name</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Enter Owner Name"
-                            value={shopOwnerName}
-                            onChangeText={setShopOwnerName}
+                            value={ownerName}
+                            onChangeText={setOwnerName}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Phone Number</Text>
                         <TextInput
-                            style={[styles.input, { backgroundColor: '#f5f5f5' }]}
-                            value={profile?.phoneNumber || user?.phoneNumber || ''}
+                            style={[styles.input, { backgroundColor: '#f3f4f6', color: '#6b7280' }]}
+                            value={profile?.phoneNumber || ''}
                             editable={false}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
                         <View style={styles.labelRow}>
-                            <Text style={styles.label}>Shop Address</Text>
+                            <Text style={styles.label}>Company Address</Text>
                             <TouchableOpacity onPress={getCurrentLocation} style={styles.geoBtn}>
                                 {locationLoading ? (
                                     <ActivityIndicator size="small" color="#6366f1" />
                                 ) : (
                                     <>
                                         <MaterialCommunityIcons name="map-marker-radius" size={16} color="#6366f1" />
-                                        <Text style={styles.geoBtnText}>Get Current</Text>
+                                        <Text style={styles.geoBtnText}>Get Location</Text>
                                     </>
                                 )}
                             </TouchableOpacity>
                         </View>
                         <TextInput
                             style={[styles.input, styles.textArea]}
-                            placeholder="Full Shop Address"
+                            placeholder="Full Company Address"
                             value={address}
                             onChangeText={setAddress}
                             multiline
-                            numberOfLines={3}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Shop Categories</Text>
+                        <Text style={styles.label}>Services Offered</Text>
+                        <Text style={styles.helperText}>e.g. Renovation, Interior Design, Construction (comma separated)</Text>
                         <TextInput
-                            style={[styles.input, { backgroundColor: '#f5f5f5' }]}
-                            value={categories.join(', ')}
-                            editable={false}
+                            style={[styles.input, styles.textArea]}
+                            placeholder="List your services here..."
+                            value={services}
+                            onChangeText={setServices}
                             multiline
-                        />
-                    </View>
-
-                    <View style={styles.row}>
-                        <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                            <Text style={styles.label}>Opening Time</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="09:00 AM"
-                                value={openingTime}
-                                onChangeText={setOpeningTime}
-                            />
-                        </View>
-                        <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                            <Text style={styles.label}>Closing Time</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="08:00 PM"
-                                value={closingTime}
-                                onChangeText={setClosingTime}
-                            />
-                        </View>
-                    </View>
-
-                    <View style={styles.toggleGroup}>
-                        <View>
-                            <Text style={styles.toggleLabel}>Home Delivery Available</Text>
-                            <Text style={styles.toggleSub}>Do you provide home delivery?</Text>
-                        </View>
-                        <Switch
-                            value={isHomeDelivery}
-                            onValueChange={setIsHomeDelivery}
-                            trackColor={{ false: '#767577', true: '#10b981' }}
-                            thumbColor={isHomeDelivery ? '#fff' : '#f4f3f4'}
                         />
                     </View>
 
@@ -263,13 +242,13 @@ export default function SetupShopProfileScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>GST Number (Optional)</Text>
+                        <Text style={styles.label}>Description</Text>
                         <TextInput
-                            style={styles.input}
-                            placeholder="Enter GST Number"
-                            value={gstNumber}
-                            onChangeText={setGstNumber}
-                            autoCapitalize="characters"
+                            style={[styles.input, styles.textArea]}
+                            placeholder="Tell us about your company..."
+                            value={about}
+                            onChangeText={setAbout}
+                            multiline
                         />
                     </View>
 
@@ -295,32 +274,37 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
     },
+    scrollContent: {
+        paddingBottom: 40,
+    },
     header: {
         padding: Spacing.lg,
         paddingTop: 20,
-        flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
     },
-    backBtn: {},
-    title: {
+    headerTitle: {
         fontSize: 24,
         fontWeight: '900',
-        color: 'black',
+        color: '#111827',
+        textAlign: 'center',
     },
-    scrollContent: {
-        paddingBottom: 40,
+    headerSub: {
+        fontSize: 14,
+        color: '#6b7280',
+        marginTop: 4,
+        textAlign: 'center',
     },
     bannerUpload: {
         width: '92%',
         height: 180,
         backgroundColor: '#f3f4f6',
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
         borderRadius: 20,
         overflow: 'hidden',
+        alignSelf: 'center',
         marginTop: 10,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        borderStyle: 'dashed'
     },
     bannerImage: {
         width: '100%',
@@ -328,6 +312,8 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     bannerPlaceholder: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
     },
@@ -364,11 +350,6 @@ const styles = StyleSheet.create({
     logoPlaceholder: {
         alignItems: 'center',
     },
-    logoUploadText: {
-        fontSize: 12,
-        color: '#9ca3af',
-        marginTop: 4,
-    },
     editIconBadge: {
         position: 'absolute',
         bottom: 0,
@@ -382,12 +363,23 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'white',
     },
+    logoLabel: {
+        marginTop: 8,
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#4b5563',
+    },
     form: {
         padding: Spacing.lg,
-        marginTop: 10,
     },
     inputGroup: {
         marginBottom: 20,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
     },
     label: {
         fontSize: 14,
@@ -395,11 +387,11 @@ const styles = StyleSheet.create({
         color: '#374151',
         marginBottom: 8,
     },
-    labelRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    helperText: {
+        fontSize: 12,
+        color: '#6b7280',
         marginBottom: 8,
+        fontStyle: 'italic',
     },
     input: {
         backgroundColor: '#f9fafb',
@@ -408,46 +400,25 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 14,
         fontSize: 15,
-        color: 'black',
+        color: '#111827',
     },
     textArea: {
-        height: 80,
+        height: 100,
         textAlignVertical: 'top',
     },
     geoBtn: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
+        backgroundColor: '#e0e7ff',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 8,
     },
     geoBtnText: {
         fontSize: 12,
         fontWeight: '700',
         color: '#6366f1',
-    },
-    row: {
-        flexDirection: 'row',
-        marginBottom: 20,
-    },
-    toggleGroup: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#f9fafb',
-        padding: 16,
-        borderRadius: 16,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-    },
-    toggleLabel: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: 'black',
-    },
-    toggleSub: {
-        fontSize: 12,
-        color: '#6b7280',
-        marginTop: 2,
     },
     saveBtn: {
         backgroundColor: 'black',
@@ -455,13 +426,18 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: 'center',
         marginTop: 10,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 5,
     },
     disabledBtn: {
         opacity: 0.5,
     },
     saveBtnText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '900',
     },
 });

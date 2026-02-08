@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: Spacing.lg,
-        paddingTop: 10,
+        paddingTop: 20,
     },
     backBtn: {
         marginBottom: 20,

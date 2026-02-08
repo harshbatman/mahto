@@ -87,7 +87,12 @@ export default function HomeownerDashboard() {
                 dailyRate: user.dailyRate?.toString() || '0',
                 isAvailable: user.isAvailable?.toString() || 'true',
                 about: user.about || "",
-                shopCategories: JSON.stringify(user.shopCategories || [])
+                shopCategories: JSON.stringify(user.shopCategories || []),
+                companyName: user.companyName,
+                companyLogo: user.companyLogo,
+                companyBanner: user.companyBanner,
+                ownerName: user.ownerName,
+                contractorServices: JSON.stringify(user.contractorServices || [])
             }
         });
     };
@@ -113,17 +118,17 @@ export default function HomeownerDashboard() {
                         {searchResults.map((user, i) => (
                             <TouchableOpacity key={i} style={styles.resultCard} onPress={() => handleNavigate(user)}>
                                 <View style={styles.resultAvatar}>
-                                    {user.photoURL ? (
-                                        <Image source={{ uri: user.photoURL }} style={styles.avatarImage} />
+                                    {(user.shopLogo || user.companyLogo || user.photoURL) ? (
+                                        <Image source={{ uri: user.shopLogo || user.companyLogo || user.photoURL }} style={styles.avatarImage} />
                                     ) : (
-                                        <MaterialCommunityIcons name={user.role === 'shop' ? 'store' : 'account'} size={24} color="black" />
+                                        <MaterialCommunityIcons name={user.role === 'shop' ? 'store' : user.role === 'contractor' ? 'briefcase' : 'account'} size={24} color="black" />
                                     )}
                                     {user.role === 'worker' && user.isAvailable !== false && (
                                         <View style={styles.availableDot} />
                                     )}
                                 </View>
                                 <View style={styles.resultInfo}>
-                                    <Text style={styles.resultName}>{user.name}</Text>
+                                    <Text style={styles.resultName}>{user.companyName || user.shopName || user.name}</Text>
                                     <Text style={styles.resultSub}>{(user.shopCategories?.join(', ') || user.category)} • {user.role}</Text>
                                     <View style={styles.ratingRow}>
                                         <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />

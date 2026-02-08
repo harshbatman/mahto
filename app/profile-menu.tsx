@@ -60,22 +60,56 @@ export default function ProfileMenuScreen() {
 
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.profileSummary}>
-                    <View style={styles.avatarContainer}>
-                        {profile?.photoURL ? (
-                            <Image source={{ uri: profile.photoURL }} style={styles.avatar} />
-                        ) : (
-                            <MaterialCommunityIcons name="account-circle" size={80} color={Colors.light.muted} />
-                        )}
-                    </View>
-                    <Text style={styles.userName}>{profile?.name || 'User'}</Text>
-                    <Text style={styles.userRole}>{profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : ''}</Text>
+                    {(profile?.role === 'shop' || profile?.role === 'contractor') ? (
+                        <>
+                            <View style={styles.avatarContainer}>
+                                {(profile?.shopLogo || profile?.companyLogo) ? (
+                                    <Image source={{ uri: profile.shopLogo || profile?.companyLogo }} style={styles.avatar} />
+                                ) : (
+                                    <MaterialCommunityIcons name={profile?.role === 'shop' ? "store" : "briefcase"} size={60} color="#9ca3af" />
+                                )}
+                            </View>
+                            <Text style={styles.userName}>{profile?.shopName || profile?.companyName || profile?.name || (profile?.role === 'shop' ? 'Shop' : 'Company')}</Text>
+                        </>
+                    ) : (
+                        <>
+                            <View style={styles.avatarContainer}>
+                                {profile?.photoURL ? (
+                                    <Image source={{ uri: profile.photoURL }} style={styles.avatar} />
+                                ) : (
+                                    <MaterialCommunityIcons name="account-circle" size={80} color="#9ca3af" />
+                                )}
+                            </View>
+                            <Text style={styles.userName}>{profile?.name || 'User'}</Text>
+                            <Text style={styles.userRole}>{profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : ''}</Text>
+                        </>
+                    )}
                 </View>
 
                 <View style={styles.menuList}>
-                    <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/edit-profile')}>
+                    {/* Display Account Type */}
+                    <View style={styles.menuItem}>
                         <View style={styles.menuItemLeft}>
-                            <MaterialCommunityIcons name="account-edit-outline" size={24} color="black" />
-                            <Text style={styles.menuItemText}>Edit Profile</Text>
+                            <MaterialCommunityIcons name="shield-account" size={24} color="#6366f1" />
+                            <Text style={styles.menuItemText}>
+                                {profile?.role === 'shop' ? 'Shop Owner' : (profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'User')}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => router.push(profile?.role === 'shop' ? '/edit-shop' : profile?.role === 'contractor' ? '/edit-contractor-profile' : '/edit-profile')}
+                    >
+                        <View style={styles.menuItemLeft}>
+                            <MaterialCommunityIcons
+                                name={profile?.role === 'shop' ? "storefront-outline" : profile?.role === 'contractor' ? "briefcase-edit-outline" : "account-edit-outline"}
+                                size={24}
+                                color="black"
+                            />
+                            <Text style={styles.menuItemText}>
+                                {profile?.role === 'shop' ? 'Edit Shop' : profile?.role === 'contractor' ? 'Edit Company' : 'Edit Profile'}
+                            </Text>
                         </View>
                         <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.muted} />
                     </TouchableOpacity>

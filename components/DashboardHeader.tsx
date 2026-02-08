@@ -23,7 +23,11 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     style={styles.profileBtn}
                     onPress={() => router.push('/profile-menu')}
                 >
-                    {profile?.photoURL ? (
+                    {profile?.role === 'shop' && profile?.shopLogo ? (
+                        <Image source={{ uri: profile.shopLogo }} style={styles.profileImg} />
+                    ) : profile?.role === 'contractor' && profile?.companyLogo ? (
+                        <Image source={{ uri: profile.companyLogo }} style={styles.profileImg} />
+                    ) : profile?.photoURL ? (
                         <Image source={{ uri: profile.photoURL }} style={styles.profileImg} />
                     ) : (
                         <MaterialCommunityIcons name="account-circle" size={36} color="black" />

@@ -66,7 +66,7 @@ export default function ContractorDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title={profile?.name || "Contractor"} showSearch={false} />
+            <DashboardHeader title={profile?.companyName || profile?.name || "Contractor"} showSearch={false} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}

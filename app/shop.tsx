@@ -1,5 +1,6 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { Animated, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -11,6 +12,7 @@ const products = [
 ];
 
 export default function ShopOwnerDashboard() {
+    const { profile } = useAuth();
     const heartScale = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
@@ -32,7 +34,7 @@ export default function ShopOwnerDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="MAHTO Shop" />
+            <DashboardHeader title={profile?.name || "Shop Owner"} />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.metricsGrid}>

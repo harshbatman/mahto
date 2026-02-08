@@ -1,11 +1,13 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ContractorDashboard() {
+    const { profile } = useAuth();
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -64,7 +66,7 @@ export default function ContractorDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="Contractor" showSearch={false} />
+            <DashboardHeader title={profile?.name || "Contractor"} showSearch={false} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}

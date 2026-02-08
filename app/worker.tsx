@@ -94,7 +94,7 @@ export default function WorkerDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="Worker Dashboard" showSearch={true} />
+            <DashboardHeader title={profile?.name || "Worker"} showSearch={true} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}

@@ -6,7 +6,7 @@ import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -72,14 +72,14 @@ export default function HomeownerDashboard() {
         router.push({
             pathname: '/user-profile',
             params: {
-                id: user.uid || user.id,
-                name: user.name,
-                role: user.role,
-                category: user.category,
-                rating: user.rating,
-                distance: user.distance,
                 phoneNumber: user.phoneNumber,
-                location: user.location
+                location: user.location,
+                photoURL: user.photoURL,
+                skills: JSON.stringify(user.skills || []),
+                experienceYears: user.experienceYears?.toString() || '0',
+                dailyRate: user.dailyRate?.toString() || '0',
+                isAvailable: user.isAvailable?.toString() || 'true',
+                about: user.about || ""
             }
         });
     };
@@ -105,11 +105,33 @@ export default function HomeownerDashboard() {
                         {searchResults.map((user, i) => (
                             <TouchableOpacity key={i} style={styles.resultCard} onPress={() => handleNavigate(user)}>
                                 <View style={styles.resultAvatar}>
-                                    <MaterialCommunityIcons name={user.role === 'shop' ? 'store' : 'account'} size={24} color="black" />
+                                    {user.photoURL ? (
+                                        <Image source={{ uri: user.photoURL }} style={styles.avatarImage} />
+                                    ) : (
+                                        <MaterialCommunityIcons name={user.role === 'shop' ? 'store' : 'account'} size={24} color="black" />
+                                    )}
+                                    {user.role === 'worker' && user.isAvailable !== false && (
+                                        <View style={styles.availableDot} />
+                                    )}
                                 </View>
                                 <View style={styles.resultInfo}>
                                     <Text style={styles.resultName}>{user.name}</Text>
                                     <Text style={styles.resultSub}>{user.category} • {user.role}</Text>
+                                    <View style={styles.ratingRow}>
+                                        <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
+                                        <Text style={styles.ratingText}>{user.rating || '4.5'} • {user.distance || '0.5 km'}</Text>
+                                        {user.role === 'worker' && user.dailyRate > 0 && (
+                                            <Text style={styles.priceTag}>₹{user.dailyRate}/day</Text>
+                                        )}
+                                    </View>
+                                    {user.skills && user.skills.length > 0 && (
+                                        <View style={styles.skillsPreview}>
+                                            <MaterialCommunityIcons name="tools" size={12} color="#666" />
+                                            <Text style={styles.skillsText} numberOfLines={1}>
+                                                {user.skills.join(', ')}
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
                                 <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.border} />
                             </TouchableOpacity>
@@ -437,6 +459,55 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         color: Colors.light.text,
+    },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 22,
+    },
+    availableDot: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#4ade80',
+        borderWidth: 2,
+        borderColor: 'white',
+    },
+    ratingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+        gap: 4,
+    },
+    ratingText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: Colors.light.muted,
+    },
+    priceTag: {
+        marginLeft: 8,
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#10b981',
+        backgroundColor: '#f0fdf4',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 6,
+    },
+    skillsPreview: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 6,
+    },
+    skillsText: {
+        fontSize: 12,
+        color: '#666',
+        fontWeight: '500',
+        flex: 1,
     }
 });
 

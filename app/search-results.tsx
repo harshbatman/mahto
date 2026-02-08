@@ -133,6 +133,14 @@ export default function SearchResultsScreen() {
                                         <Text style={styles.priceTag}>₹{item.dailyRate}/day</Text>
                                     )}
                                 </View>
+                                {item.skills && item.skills.length > 0 && (
+                                    <View style={styles.skillsPreview}>
+                                        <MaterialCommunityIcons name="tools" size={12} color="#666" />
+                                        <Text style={styles.skillsText} numberOfLines={1}>
+                                            {item.skills.join(', ')}
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
                             <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.border} />
                         </TouchableOpacity>
@@ -279,5 +287,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 6,
+    },
+    skillsPreview: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 6,
+    },
+    skillsText: {
+        fontSize: 12,
+        color: '#666',
+        fontWeight: '500',
+        flex: 1,
     }
 });

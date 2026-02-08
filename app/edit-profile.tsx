@@ -35,6 +35,12 @@ export default function EditProfileScreen() {
     const [loading, setLoading] = useState(false);
     const [locLoading, setLocLoading] = useState(false);
 
+    // Worker specific states
+    const [skills, setSkills] = useState<string[]>(profile?.skills || []);
+    const [experience, setExperience] = useState(profile?.experienceYears?.toString() || '');
+    const [about, setAbout] = useState(profile?.about || '');
+    const [newSkill, setNewSkill] = useState('');
+
     // Delete account states
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [confirmPhone, setConfirmPhone] = useState('');
@@ -110,7 +116,10 @@ export default function EditProfileScreen() {
                 photoURL: photoURL || "",
                 email: user.email || '',
                 role: profile?.role || 'homeowner',
-                createdAt: profile?.createdAt || Date.now()
+                createdAt: profile?.createdAt || Date.now(),
+                skills: profile?.role === 'worker' ? skills : [],
+                experienceYears: profile?.role === 'worker' ? parseInt(experience) || 0 : 0,
+                about: about
             } as any);
 
             Alert.alert('Success', 'Profile updated successfully!');
@@ -240,6 +249,68 @@ export default function EditProfileScreen() {
                             editable={false}
                         />
                     </View>
+
+                    {profile?.role === 'worker' && (
+                        <>
+                            <View style={styles.divider} />
+                            <Text style={styles.sectionTitle}>Professional Details</Text>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Years of Experience</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={experience}
+                                    onChangeText={setExperience}
+                                    placeholder="e.g. 5"
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Skills</Text>
+                                <View style={styles.skillInputRow}>
+                                    <TextInput
+                                        style={[styles.input, { flex: 1 }]}
+                                        value={newSkill}
+                                        onChangeText={setNewSkill}
+                                        placeholder="Add a skill (e.g. Masonry)"
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.addSkillBtn}
+                                        onPress={() => {
+                                            if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+                                                setSkills([...skills, newSkill.trim()]);
+                                                setNewSkill('');
+                                            }
+                                        }}
+                                    >
+                                        <MaterialCommunityIcons name="plus" size={24} color="white" />
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.skillsList}>
+                                    {skills.map((skill, index) => (
+                                        <View key={index} style={styles.skillBadge}>
+                                            <Text style={styles.skillBadgeText}>{skill}</Text>
+                                            <TouchableOpacity onPress={() => setSkills(skills.filter((_, i) => i !== index))}>
+                                                <MaterialCommunityIcons name="close-circle" size={16} color="#666" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>About Me</Text>
+                                <TextInput
+                                    style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+                                    value={about}
+                                    onChangeText={setAbout}
+                                    placeholder="Tell potential employers about your work..."
+                                    multiline
+                                />
+                            </View>
+                        </>
+                    )}
 
                     <TouchableOpacity
                         style={styles.settingsBtn}
@@ -600,5 +671,50 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '700',
-    }
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#f0f0f0',
+        marginVertical: 10,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: 'black',
+        marginBottom: 10,
+    },
+    skillInputRow: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    addSkillBtn: {
+        backgroundColor: 'black',
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    skillsList: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 10,
+    },
+    skillBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f3f4f6',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        gap: 6,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    skillBadgeText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#374151',
+    },
 });

@@ -10,6 +10,10 @@ export interface UserProfile {
     photoURL?: string;
     address?: string;
     createdAt: number;
+    // Worker specific
+    skills?: string[];
+    experienceYears?: number;
+    about?: string;
 }
 
 /**

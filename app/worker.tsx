@@ -1,19 +1,41 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
 import { applyForJob, getAvailableJobs, Job } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    ActivityIndicator,
+    Alert,
+    Animated,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 export default function WorkerDashboard() {
+    const router = useRouter();
+    const { profile } = useAuth();
     const [jobs, setJobs] = useState<Job[]>([]);
+    const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeTab, setActiveTab] = useState<'jobs' | 'contracts'>('jobs');
 
-    const fetchJobs = async () => {
+    const fetchData = async () => {
         try {
-            const data = await getAvailableJobs();
-            setJobs(data);
+            const [jobsData, contractsData] = await Promise.all([
+                getAvailableJobs(),
+                getAvailableContracts()
+            ]);
+            setJobs(jobsData);
+            setContracts(contractsData);
         } catch (error) {
             console.error(error);
         } finally {
@@ -23,19 +45,29 @@ export default function WorkerDashboard() {
     };
 
     useEffect(() => {
-        fetchJobs();
+        fetchData();
     }, []);
 
     const onRefresh = () => {
         setRefreshing(true);
-        fetchJobs();
+        fetchData();
     };
 
-    const handleApply = async (id: string, title: string) => {
+    const handleApplyJob = async (id: string, title: string) => {
         try {
             await applyForJob(id);
-            Alert.alert('Applied!', `You have applied for: ${title}. The homeowner will contact you if interested.`);
-            fetchJobs(); // Update counts
+            Alert.alert('Applied!', `You have applied for: ${title}. The homeowner/contractor will contact you.`);
+            fetchData();
+        } catch (error: any) {
+            Alert.alert('Error', error.message);
+        }
+    };
+
+    const handleApplyContract = async (id: string, title: string) => {
+        try {
+            await applyForContract(id);
+            Alert.alert('Application Sent', `You have successfully applied for contract: ${title}`);
+            fetchData();
         } catch (error: any) {
             Alert.alert('Error', error.message);
         }
@@ -62,7 +94,7 @@ export default function WorkerDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title="Worker Dashboard" showSearch={false} />
+            <DashboardHeader title="Worker Dashboard" showSearch={true} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
@@ -74,70 +106,137 @@ export default function WorkerDashboard() {
                         <Text style={styles.statLabel}>Earnings</Text>
                     </View>
                     <View style={[styles.statCard, { borderLeftWidth: 4, borderLeftColor: '#6366f1' }]}>
-                        <Text style={styles.statValue}>{jobs.length}</Text>
-                        <Text style={styles.statLabel}>New Jobs</Text>
+                        <Text style={styles.statValue}>{profile?.experienceYears || 0} Yrs</Text>
+                        <Text style={styles.statLabel}>Experience</Text>
                     </View>
                 </View>
 
+                {/* Tab Switcher */}
+                <View style={styles.tabContainer}>
+                    <TouchableOpacity
+                        style={[styles.tab, activeTab === 'jobs' && styles.activeTab]}
+                        onPress={() => setActiveTab('jobs')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'jobs' && styles.activeTabText]}>Daily Jobs</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.tab, activeTab === 'contracts' && styles.activeTab]}
+                        onPress={() => setActiveTab('contracts')}
+                    >
+                        <Text style={[styles.tabText, activeTab === 'contracts' && styles.activeTabText]}>Contracts</Text>
+                    </TouchableOpacity>
+                </View>
+
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Jobs for You</Text>
+                    <Text style={styles.sectionTitle}>{activeTab === 'jobs' ? 'Browse Jobs' : 'Project Contracts'}</Text>
                     <TouchableOpacity onPress={onRefresh}><Text style={styles.seeAll}>Refresh</Text></TouchableOpacity>
                 </View>
 
                 {loading ? (
                     <ActivityIndicator color="black" style={{ marginTop: 20 }} />
-                ) : jobs.length === 0 ? (
-                    <View style={styles.emptyState}>
-                        <MaterialCommunityIcons name="briefcase-off-outline" size={48} color={Colors.light.border} />
-                        <Text style={styles.emptyText}>No new jobs available right now</Text>
-                    </View>
                 ) : (
-                    jobs.map(job => (
-                        <View key={job.id} style={styles.jobCard}>
-                            <View style={styles.jobHeader}>
-                                <View style={styles.categoryBadge}>
-                                    <Text style={styles.categoryText}>{job.category}</Text>
-                                </View>
-                                <Text style={styles.applicantCount}>{job.applicantCount} applied</Text>
+                    activeTab === 'jobs' ? (
+                        jobs.length === 0 ? (
+                            <View style={styles.emptyState}>
+                                <MaterialCommunityIcons name="briefcase-off-outline" size={48} color={Colors.light.border} />
+                                <Text style={styles.emptyText}>No new jobs available right now</Text>
                             </View>
+                        ) : (
+                            jobs.map(job => (
+                                <View key={job.id} style={styles.jobCard}>
+                                    <View style={styles.jobHeader}>
+                                        <View style={styles.categoryBadge}>
+                                            <Text style={styles.categoryText}>{job.category}</Text>
+                                        </View>
+                                        <Text style={styles.applicantCount}>{job.applicantCount} applied</Text>
+                                    </View>
 
-                            <View style={styles.jobBody}>
-                                <View style={styles.jobInfo}>
-                                    <Text style={styles.jobTitle}>{job.title}</Text>
-                                    <Text style={styles.jobLocation}>
-                                        <MaterialCommunityIcons name="map-marker" size={12} color={Colors.light.muted} /> {job.location}
-                                    </Text>
+                                    <View style={styles.jobBody}>
+                                        <View style={styles.jobInfo}>
+                                            <Text style={styles.jobTitle}>{job.title}</Text>
+                                            <Text style={styles.jobLocation}>
+                                                <MaterialCommunityIcons name="map-marker" size={12} color={Colors.light.muted} /> {job.location}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.payInfo}>
+                                            <Text style={styles.jobPay}>₹{job.wage}</Text>
+                                            <Text style={styles.paySub}>per day</Text>
+                                        </View>
+                                    </View>
+
+                                    <Text style={styles.description} numberOfLines={2}>{job.description}</Text>
+
+                                    <TouchableOpacity
+                                        style={styles.applyBtn}
+                                        onPress={() => handleApplyJob(job.id!, job.title)}
+                                    >
+                                        <Text style={styles.applyBtnText}>Apply Now</Text>
+                                    </TouchableOpacity>
                                 </View>
-                                <View style={styles.payInfo}>
-                                    <Text style={styles.jobPay}>₹{job.wage}</Text>
-                                    <Text style={styles.paySub}>per day</Text>
-                                </View>
+                            ))
+                        )
+                    ) : (
+                        contracts.length === 0 ? (
+                            <View style={styles.emptyState}>
+                                <MaterialCommunityIcons name="file-document-outline" size={48} color={Colors.light.border} />
+                                <Text style={styles.emptyText}>No project contracts available</Text>
                             </View>
+                        ) : (
+                            contracts.map(contract => (
+                                <View key={contract.id} style={styles.jobCard}>
+                                    <View style={styles.jobHeader}>
+                                        <View style={[styles.categoryBadge, { backgroundColor: '#fdf2f8' }]}>
+                                            <Text style={[styles.categoryText, { color: '#be185d' }]}>{contract.category}</Text>
+                                        </View>
+                                        <Text style={styles.applicantCount}>{contract.applicantCount} bidders</Text>
+                                    </View>
 
-                            <Text style={styles.description} numberOfLines={2}>{job.description}</Text>
+                                    <View style={styles.jobBody}>
+                                        <View style={styles.jobInfo}>
+                                            <Text style={styles.jobTitle}>{contract.title}</Text>
+                                            <Text style={styles.jobLocation}>
+                                                <MaterialCommunityIcons name="map-marker" size={12} color={Colors.light.muted} /> {contract.location}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.payInfo}>
+                                            <Text style={[styles.jobPay, { color: '#6366f1' }]}>{contract.budget}</Text>
+                                            <Text style={styles.paySub}>Project Budget</Text>
+                                        </View>
+                                    </View>
 
-                            <TouchableOpacity
-                                style={styles.applyBtn}
-                                onPress={() => handleApply(job.id!, job.title)}
-                            >
-                                <Text style={styles.applyBtnText}>Apply Now</Text>
-                            </TouchableOpacity>
-                        </View>
-                    ))
+                                    <Text style={styles.description} numberOfLines={2}>{contract.description}</Text>
+
+                                    <TouchableOpacity
+                                        style={[styles.applyBtn, { backgroundColor: '#6366f1' }]}
+                                        onPress={() => handleApplyContract(contract.id!, contract.title)}
+                                    >
+                                        <Text style={styles.applyBtnText}>Bid on Project</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ))
+                        )
+                    )
                 )}
 
                 <View style={styles.profileSection}>
-                    <Text style={styles.sectionTitle}>Your Profile</Text>
-                    <View style={styles.skillsContainer}>
-                        {['Masonry', 'Plumbing', 'Painting'].map(skill => (
-                            <View key={skill} style={styles.skillBadge}>
-                                <Text style={styles.skillBadgeText}>{skill}</Text>
-                            </View>
-                        ))}
-                        <TouchableOpacity style={styles.addSkill}>
-                            <MaterialCommunityIcons name="plus" size={16} color="black" />
+                    <Text style={styles.sectionTitle}>Your Profile Skills</Text>
+                    {profile?.skills && profile.skills.length > 0 ? (
+                        <View style={styles.skillsContainer}>
+                            {profile.skills.map(skill => (
+                                <View key={skill} style={styles.skillBadge}>
+                                    <Text style={styles.skillBadgeText}>{skill}</Text>
+                                </View>
+                            ))}
+                            <TouchableOpacity style={styles.addSkill} onPress={() => router.push('/edit-profile')}>
+                                <MaterialCommunityIcons name="plus" size={16} color="black" />
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <TouchableOpacity style={styles.setupProfileBtn} onPress={() => router.push('/edit-profile')}>
+                            <Text style={styles.setupProfileText}>Add your skills & experience</Text>
+                            <MaterialCommunityIcons name="arrow-right" size={18} color="#6366f1" />
                         </TouchableOpacity>
-                    </View>
+                    )}
                 </View>
 
             </ScrollView>
@@ -167,7 +266,7 @@ const styles = StyleSheet.create({
     statsRow: {
         flexDirection: 'row',
         gap: Spacing.md,
-        marginBottom: Spacing.xl,
+        marginBottom: Spacing.lg,
     },
     statCard: {
         flex: 1,
@@ -190,6 +289,36 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginTop: 2,
     },
+    tabContainer: {
+        flexDirection: 'row',
+        backgroundColor: '#f3f4f6',
+        padding: 4,
+        borderRadius: 12,
+        marginBottom: 24,
+    },
+    tab: {
+        flex: 1,
+        paddingVertical: 10,
+        alignItems: 'center',
+        borderRadius: 10,
+    },
+    activeTab: {
+        backgroundColor: 'white',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+    },
+    activeTabText: {
+        color: 'black',
+        fontWeight: '800',
+    },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -206,12 +335,12 @@ const styles = StyleSheet.create({
     },
     jobCard: {
         backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 16,
+        borderRadius: 24,
+        padding: 20,
         marginBottom: 16,
         borderWidth: 1,
         borderColor: '#f0f0f0',
-        elevation: 3,
+        elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
@@ -276,19 +405,20 @@ const styles = StyleSheet.create({
         marginVertical: 12,
     },
     applyBtn: {
-        backgroundColor: '#6366f1',
-        padding: 12,
-        borderRadius: 12,
+        backgroundColor: 'black',
+        padding: 14,
+        borderRadius: 14,
         alignItems: 'center',
+        marginTop: 4,
     },
     applyBtnText: {
         color: 'white',
-        fontWeight: '700',
-        fontSize: 14,
+        fontWeight: '800',
+        fontSize: 15,
     },
     profileSection: {
         marginTop: Spacing.xl,
-        paddingBottom: 40,
+        paddingBottom: 60,
     },
     skillsContainer: {
         flexDirection: 'row',
@@ -301,6 +431,8 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#eee',
     },
     skillBadgeText: {
         fontSize: 13,
@@ -314,10 +446,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    setupProfileBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 12,
+        backgroundColor: '#f3f4ff',
+        padding: 16,
+        borderRadius: 16,
+    },
+    setupProfileText: {
+        color: '#6366f1',
+        fontWeight: '700',
+    },
     emptyState: {
         alignItems: 'center',
         marginTop: 40,
         gap: 12,
+        paddingBottom: 100,
     },
     emptyText: {
         color: Colors.light.muted,

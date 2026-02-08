@@ -99,4 +99,9 @@ export const SHOP_CATEGORIES = [
         name: 'Wooden Doors',
         image: require('@/assets/images/shop-categories/wooden_doors.jpg'),
     },
+    {
+        id: 'windows_frames',
+        name: 'Windows & Frames',
+        image: require('@/assets/images/shop-categories/windows_frames.jpg'),
+    },
 ];

@@ -19,6 +19,19 @@ export interface UserProfile {
     isAvailable?: boolean;
     averageRating?: number;
     ratingCount?: number;
+    // Shop specific
+    shopCategory?: string;
+    shopBanner?: string;
+    shopLogo?: string;
+    shopName?: string;
+    shopOwnerName?: string;
+    openingTime?: string;
+    closingTime?: string;
+    isHomeDeliveryAvailable?: boolean;
+    yearsInBusiness?: number;
+    gstNumber?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 /**

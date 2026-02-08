@@ -32,6 +32,8 @@ export default function RegisterScreen() {
             console.log("Registration success, navigating based on role:", role);
             if (role === 'worker') {
                 router.replace('/select-skills');
+            } else if (role === 'shop') {
+                router.replace('/select-shop-category');
             } else {
                 router.replace(`/(tabs)` as any);
             }

@@ -18,6 +18,9 @@ export default function Index() {
         if (profile.role === 'worker' && !profile.isProfileSetup) {
             return <Redirect href="/setup-worker-profile" />;
         }
+        if (profile.role === 'shop' && !profile.isProfileSetup) {
+            return <Redirect href="/select-shop-category" />;
+        }
         // Redirect to the correct dashboard based on role
         return <Redirect href={`/${profile.role}` as any} />;
     }

@@ -218,26 +218,7 @@ export default function WorkerDashboard() {
                     )
                 )}
 
-                <View style={styles.profileSection}>
-                    <Text style={styles.sectionTitle}>Your Profile Skills</Text>
-                    {profile?.skills && profile.skills.length > 0 ? (
-                        <View style={styles.skillsContainer}>
-                            {profile.skills.map(skill => (
-                                <View key={skill} style={styles.skillBadge}>
-                                    <Text style={styles.skillBadgeText}>{skill}</Text>
-                                </View>
-                            ))}
-                            <TouchableOpacity style={styles.addSkill} onPress={() => router.push('/edit-profile')}>
-                                <MaterialCommunityIcons name="plus" size={16} color="black" />
-                            </TouchableOpacity>
-                        </View>
-                    ) : (
-                        <TouchableOpacity style={styles.setupProfileBtn} onPress={() => router.push('/edit-profile')}>
-                            <Text style={styles.setupProfileText}>Add your skills & experience</Text>
-                            <MaterialCommunityIcons name="arrow-right" size={18} color="#6366f1" />
-                        </TouchableOpacity>
-                    )}
-                </View>
+
 
             </ScrollView>
 
@@ -416,49 +397,7 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         fontSize: 15,
     },
-    profileSection: {
-        marginTop: Spacing.xl,
-        paddingBottom: 60,
-    },
-    skillsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginTop: 12,
-    },
-    skillBadge: {
-        backgroundColor: '#f5f5f5',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: '#eee',
-    },
-    skillBadgeText: {
-        fontSize: 13,
-        fontWeight: '600',
-    },
-    addSkill: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#eee',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    setupProfileBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginTop: 12,
-        backgroundColor: '#f3f4ff',
-        padding: 16,
-        borderRadius: 16,
-    },
-    setupProfileText: {
-        color: '#6366f1',
-        fontWeight: '700',
-    },
+
     emptyState: {
         alignItems: 'center',
         marginTop: 40,

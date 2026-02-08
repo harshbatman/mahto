@@ -14,6 +14,10 @@ export default function Index() {
     }
 
     if (user && profile) {
+        // Force worker profile setup if not done
+        if (profile.role === 'worker' && !profile.isProfileSetup) {
+            return <Redirect href="/setup-worker-profile" />;
+        }
         // Redirect to the correct dashboard based on role
         return <Redirect href={`/${profile.role}` as any} />;
     }

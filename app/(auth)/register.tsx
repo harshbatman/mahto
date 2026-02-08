@@ -29,8 +29,12 @@ export default function RegisterScreen() {
         setLoading(true);
         try {
             await registerUser(phone, password, role as any, name);
-            console.log("Registration success, navigating to:", role);
-            router.replace(`/(tabs)` as any); // Navigate to the main tabs
+            console.log("Registration success, navigating based on role:", role);
+            if (role === 'worker') {
+                router.replace('/setup-worker-profile');
+            } else {
+                router.replace(`/(tabs)` as any);
+            }
         } catch (error: any) {
             Alert.alert('Registration Failed', error.message);
         } finally {

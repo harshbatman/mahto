@@ -14,6 +14,7 @@ export interface UserProfile {
     skills?: string[];
     experienceYears?: number;
     about?: string;
+    isProfileSetup?: boolean;
 }
 
 /**

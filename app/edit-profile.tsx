@@ -119,7 +119,8 @@ export default function EditProfileScreen() {
                 createdAt: profile?.createdAt || Date.now(),
                 skills: profile?.role === 'worker' ? skills : [],
                 experienceYears: profile?.role === 'worker' ? parseInt(experience) || 0 : 0,
-                about: about
+                about: about,
+                isProfileSetup: true
             } as any);
 
             Alert.alert('Success', 'Profile updated successfully!');

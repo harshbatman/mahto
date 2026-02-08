@@ -1,4 +1,6 @@
 import { Spacing } from '@/constants/theme';
+import { LANGUAGES } from '@/constants/translations';
+import { useLanguage } from '@/context/LanguageContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -14,35 +16,18 @@ import {
     View
 } from 'react-native';
 
-const LANGUAGES = [
-    { id: 'en', name: 'English', local: 'English' },
-    { id: 'hi', name: 'Hindi', local: 'हिंदी' },
-    { id: 'ks', name: 'Kashmiri', local: 'کٲشُر' },
-    { id: 'ur', name: 'Urdu', local: 'اردو' },
-    { id: 'rj', name: 'Rajasthani', local: 'राजस्थानी' },
-    { id: 'pa', name: 'Punjabi', local: 'ਪੰਜਾਬੀ' },
-    { id: 'hr', name: 'Haryanvi', local: 'हरियाणवी' },
-    { id: 'mr', name: 'Marathi', local: 'मराठी' },
-    { id: 'kn', name: 'Kannada', local: 'ಕನ್ನಡ' },
-    { id: 'te', name: 'Telugu', local: 'తెలుగు' },
-    { id: 'ml', name: 'Malayalam', local: 'മലയാളം' },
-    { id: 'or', name: 'Odiya', local: 'ଓଡ଼ିଆ' },
-    { id: 'bn', name: 'Bengali', local: 'বাংলা' },
-    { id: 'ne', name: 'Nepali', local: 'नेपाली' },
-    { id: 'bh', name: 'Bhojpuri', local: 'भोजपुरी' },
-    { id: 'mai', name: 'Maithili', local: 'मैथिली' },
-];
-
 export default function SettingsScreen() {
     const router = useRouter();
+    const { language, setLanguage, t } = useLanguage();
     const [notifications, setNotifications] = useState(true);
-    const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
     const [showLangModal, setShowLangModal] = useState(false);
 
+    const selectedLang = LANGUAGES.find(l => l.id === language) || LANGUAGES[0];
+
     const menuItems = [
-        { id: 'about', title: 'About Us', icon: 'information-outline' },
-        { id: 'terms', title: 'Terms & Conditions', icon: 'file-document-outline' },
-        { id: 'privacy', title: 'Privacy Policy', icon: 'shield-check-outline' },
+        { id: 'about', title: t.aboutUs, icon: 'information-outline' },
+        { id: 'terms', title: t.termsConditions, icon: 'file-document-outline' },
+        { id: 'privacy', title: t.privacyPolicy, icon: 'shield-check-outline' },
     ];
 
     return (
@@ -51,18 +36,18 @@ export default function SettingsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Settings</Text>
+                <Text style={styles.headerTitle}>{t.settings}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Preferences</Text>
+                    <Text style={styles.sectionTitle}>{t.preferences}</Text>
                     <View style={styles.card}>
                         <View style={styles.row}>
                             <View style={styles.rowLeft}>
                                 <MaterialCommunityIcons name="bell-outline" size={22} color="black" />
-                                <Text style={styles.rowLabel}>Push Notifications</Text>
+                                <Text style={styles.rowLabel}>{t.pushNotifications}</Text>
                             </View>
                             <Switch
                                 value={notifications}
@@ -76,7 +61,7 @@ export default function SettingsScreen() {
                         >
                             <View style={styles.rowLeft}>
                                 <MaterialCommunityIcons name="translate" size={22} color="black" />
-                                <Text style={styles.rowLabel}>Language</Text>
+                                <Text style={styles.rowLabel}>{t.selectLanguage}</Text>
                             </View>
                             <View style={styles.rowRight}>
                                 <Text style={styles.rowValue}>{selectedLang.local}</Text>
@@ -135,7 +120,7 @@ export default function SettingsScreen() {
                                         selectedLang.id === item.id && styles.selectedLangItem
                                     ]}
                                     onPress={() => {
-                                        setSelectedLang(item);
+                                        setLanguage(item.id as LanguageCode);
                                         setShowLangModal(false);
                                     }}
                                 >

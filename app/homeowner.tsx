@@ -1,6 +1,7 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,19 +10,20 @@ import { ActivityIndicator, Animated, Dimensions, SafeAreaView, ScrollView, Styl
 
 const { width } = Dimensions.get('window');
 
-const categories = [
-    { id: 'contractor', title: 'Contractors', icon: 'briefcase-check', color: '#6366f1' },
-    { id: 'worker', title: 'Workers', icon: 'account-hard-hat', color: '#a855f7' },
-    { id: 'shop', title: 'Materials', icon: 'storefront', color: '#ec4899' },
-];
-
 export default function HomeownerDashboard() {
     const { profile } = useAuth();
+    const { t } = useLanguage();
     const router = useRouter();
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [resultsTitle, setResultsTitle] = useState('');
     const heartScale = useRef(new Animated.Value(1)).current;
+
+    const categories = [
+        { id: 'contractor', title: t.contractors, icon: 'briefcase-check', color: '#6366f1' },
+        { id: 'worker', title: t.workers, icon: 'account-hard-hat', color: '#a855f7' },
+        { id: 'shop', title: t.materials, icon: 'storefront', color: '#ec4899' },
+    ];
 
     useEffect(() => {
         Animated.loop(
@@ -83,7 +85,6 @@ export default function HomeownerDashboard() {
     };
 
 
-
     return (
         <SafeAreaView style={styles.container}>
             <DashboardHeader
@@ -127,14 +128,14 @@ export default function HomeownerDashboard() {
                 <View style={styles.actionRow}>
                     <TouchableOpacity style={styles.actionBox} onPress={() => router.push('/post-contract')}>
                         <MaterialCommunityIcons name="file-document-edit" size={24} color="black" />
-                        <Text style={styles.actionTitle}>Post Contract</Text>
-                        <Text style={styles.actionSub}>Hire Contractor</Text>
+                        <Text style={styles.actionTitle}>{t.postContract}</Text>
+                        <Text style={styles.actionSub}>{t.hireContractor}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionBox} onPress={() => router.push('/post-job')}>
                         <MaterialCommunityIcons name="account-hard-hat" size={24} color="black" />
-                        <Text style={styles.actionTitle}>Post Job</Text>
-                        <Text style={styles.actionSub}>Hire Worker</Text>
+                        <Text style={styles.actionTitle}>{t.postJob}</Text>
+                        <Text style={styles.actionSub}>{t.hireWorker}</Text>
                     </TouchableOpacity>
                 </View>
 

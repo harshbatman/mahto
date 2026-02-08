@@ -33,6 +33,12 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     <Text style={styles.title}>{title}</Text>
                     {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
                 </View>
+                <TouchableOpacity
+                    style={styles.messageBtn}
+                    onPress={() => router.push('/messages')}
+                >
+                    <MaterialCommunityIcons name="message-outline" size={24} color="black" />
+                </TouchableOpacity>
             </View>
 
             {showSearch && (
@@ -101,5 +107,13 @@ const styles = StyleSheet.create({
         color: Colors.light.text,
         fontSize: 15,
         padding: 0,
+    },
+    messageBtn: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
     },
 });

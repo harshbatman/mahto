@@ -1,4 +1,6 @@
 import { Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { getChatId } from '@/services/db/messageService';
 import { getUserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,11 +9,9 @@ import { Image, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, Touc
 
 export default function UserProfileScreen() {
     const router = useRouter();
+    const { user: currentUser } = useAuth();
     const params = useLocalSearchParams();
-
-    // In a real app, we might fetch the latest data here using the ID
-    // For now, we'll use the passed params for instant feedback
-    const { name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable } = params;
+    const { id: profileUid, name, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable } = params;
     const isActuallyAvailable = isAvailable === 'true';
     const skills = skillsStr ? JSON.parse(skillsStr as string) : [];
 
@@ -48,6 +48,26 @@ export default function UserProfileScreen() {
         if (phoneNumber) {
             Linking.openURL(`tel:${phoneNumber}`);
         }
+    };
+
+    const handleMessage = () => {
+        if (!currentUser) {
+            router.push('/(auth)/phone-login');
+            return;
+        }
+
+        const otherUid = Array.isArray(profileUid) ? profileUid[0] : profileUid;
+        if (!otherUid) return;
+
+        const chatId = getChatId(currentUser.uid, otherUid);
+        router.push({
+            pathname: '/messages/[id]',
+            params: {
+                id: chatId,
+                otherUserId: otherUid,
+                otherUserName: name as string
+            }
+        });
     };
 
     const [modalVisible, setModalVisible] = useState(false);
@@ -170,7 +190,7 @@ export default function UserProfileScreen() {
                         <Text style={styles.primaryBtnText}>Call Now</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.secondaryBtn}>
+                    <TouchableOpacity style={styles.secondaryBtn} onPress={handleMessage}>
                         <MaterialCommunityIcons name="message-text" size={20} color="black" />
                         <Text style={styles.secondaryBtnText}>Send Message</Text>
                     </TouchableOpacity>

@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 16,
-        marginBottom: 20,
+        marginBottom: 80,
         opacity: 1,
     },
     footerText: {

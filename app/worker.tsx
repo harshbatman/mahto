@@ -210,8 +210,18 @@ export default function WorkerDashboard() {
                 )}
 
                 <View style={styles.networkingSection}>
-                    <Text style={styles.sectionTitle}>Find Professionals</Text>
+                    <Text style={styles.sectionTitle}>Explore MAHTO</Text>
                     <View style={styles.networkingGrid}>
+                        <TouchableOpacity
+                            style={[styles.networkCard, { backgroundColor: '#ecfdf5' }]}
+                            onPress={() => router.push('/browse-jobs')}
+                        >
+                            <View style={[styles.networkIcon, { backgroundColor: '#d1fae5' }]}>
+                                <MaterialCommunityIcons name="briefcase-search" size={24} color="#059669" />
+                            </View>
+                            <Text style={styles.networkLabel}>Find Jobs</Text>
+                        </TouchableOpacity>
+
                         <TouchableOpacity
                             style={[styles.networkCard, { backgroundColor: '#f5f3ff' }]}
                             onPress={() => router.push({

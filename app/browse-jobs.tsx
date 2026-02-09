@@ -1,4 +1,5 @@
 import { Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
 import { applyForJob, getAvailableJobs, Job } from '@/services/db/jobService';
 import { sanitizeError } from '@/utils/errorHandler';
@@ -16,6 +17,8 @@ export default function BrowseJobsScreen() {
     const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+
+    const { profile } = useAuth();
 
     const fetchData = async () => {
         try {
@@ -60,8 +63,12 @@ export default function BrowseJobsScreen() {
     };
 
     const handleApplyJob = async (id: string, title: string) => {
+        if (!profile?.uid) {
+            Alert.alert('Error', 'You must be logged in to apply.');
+            return;
+        }
         try {
-            await applyForJob(id);
+            await applyForJob(id, profile.uid, profile);
             Alert.alert('Applied!', `Application sent for: ${title}`);
             fetchData();
         } catch (error: any) {
@@ -70,6 +77,10 @@ export default function BrowseJobsScreen() {
     };
 
     const handleApplyContract = async (id: string, title: string) => {
+        if (!profile?.uid || profile.role !== 'contractor') {
+            Alert.alert('Restricted', 'Only contractors can bid on projects.');
+            return;
+        }
         try {
             await applyForContract(id);
             Alert.alert('Applied!', `Bid submitted for: ${title}`);

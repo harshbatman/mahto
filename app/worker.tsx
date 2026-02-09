@@ -88,6 +88,16 @@ export default function WorkerDashboard() {
                             </View>
                             <Text style={styles.networkLabel}>Contractors</Text>
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.networkCard, { backgroundColor: '#fff7ed' }]}
+                            onPress={() => router.push('/applied-jobs')}
+                        >
+                            <View style={[styles.networkIcon, { backgroundColor: '#ffedd5' }]}>
+                                <MaterialCommunityIcons name="clipboard-text-clock" size={24} color="#ea580c" />
+                            </View>
+                            <Text style={styles.networkLabel}>Applied Jobs</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
 

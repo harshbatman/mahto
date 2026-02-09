@@ -3,7 +3,7 @@ import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function SearchResultsScreen() {
     const { role, title } = useLocalSearchParams<{ role: string; title: string }>();
@@ -12,13 +12,16 @@ export default function SearchResultsScreen() {
     const [filteredResults, setFilteredResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const [minRating, setMinRating] = useState(0);
+    const [onlyAvailable, setOnlyAvailable] = useState(false);
 
     useEffect(() => {
         const fetchResults = async () => {
             try {
                 const data = await searchUsers(role);
                 setResults(data);
-                setFilteredResults(data);
+                applyFilters(data, searchQuery, minRating, onlyAvailable);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -28,20 +31,38 @@ export default function SearchResultsScreen() {
         fetchResults();
     }, [role]);
 
+    const applyFilters = (data: any[], query: string, rating: number, available: boolean) => {
+        let filtered = [...data];
+
+        if (query) {
+            const lowerText = query.toLowerCase();
+            filtered = filtered.filter(item =>
+                (item.name || '').toLowerCase().includes(lowerText) ||
+                (item.category || '').toLowerCase().includes(lowerText) ||
+                (item.shopCategories || []).some((c: string) => c.toLowerCase().includes(lowerText)) ||
+                (item.location || '').toLowerCase().includes(lowerText)
+            );
+        }
+
+        if (rating > 0) {
+            filtered = filtered.filter(item => (item.averageRating || 4.5) >= rating);
+        }
+
+        if (available && role === 'worker') {
+            filtered = filtered.filter(item => item.isAvailable !== false);
+        }
+
+        setFilteredResults(filtered);
+    };
+
     const handleSearch = (text: string) => {
         setSearchQuery(text);
-        if (!text) {
-            setFilteredResults(results);
-            return;
-        }
-        const lowerText = text.toLowerCase();
-        const filtered = results.filter(item =>
-            item.name?.toLowerCase().includes(lowerText) ||
-            item.category?.toLowerCase().includes(lowerText) ||
-            item.shopCategories?.some((c: string) => c.toLowerCase().includes(lowerText)) ||
-            item.location?.toLowerCase().includes(lowerText)
-        );
-        setFilteredResults(filtered);
+        applyFilters(results, text, minRating, onlyAvailable);
+    };
+
+    const handleApplyFilters = () => {
+        applyFilters(results, searchQuery, minRating, onlyAvailable);
+        setShowFilterModal(false);
     };
 
     const handleNavigate = (user: any) => {
@@ -121,20 +142,32 @@ export default function SearchResultsScreen() {
                     <View style={{ width: 40 }} />
                 </View>
 
-                <View style={styles.searchBar}>
-                    <MaterialCommunityIcons name="magnify" size={20} color={Colors.light.muted} />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder={`Search ${title?.toLowerCase()}...`}
-                        value={searchQuery}
-                        onChangeText={handleSearch}
-                        placeholderTextColor={Colors.light.muted}
-                    />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity onPress={() => handleSearch('')}>
-                            <MaterialCommunityIcons name="close-circle" size={18} color={Colors.light.muted} />
-                        </TouchableOpacity>
-                    )}
+                <View style={styles.searchBarContainer}>
+                    <View style={styles.searchBar}>
+                        <MaterialCommunityIcons name="magnify" size={20} color={Colors.light.muted} />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={`Search ${title?.toLowerCase()}...`}
+                            value={searchQuery}
+                            onChangeText={handleSearch}
+                            placeholderTextColor={Colors.light.muted}
+                        />
+                        {searchQuery.length > 0 && (
+                            <TouchableOpacity onPress={() => handleSearch('')}>
+                                <MaterialCommunityIcons name="close-circle" size={18} color={Colors.light.muted} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                    <TouchableOpacity
+                        style={[styles.filterBtn, (minRating > 0 || onlyAvailable) && styles.filterBtnActive]}
+                        onPress={() => setShowFilterModal(true)}
+                    >
+                        <MaterialCommunityIcons
+                            name="tune-variant"
+                            size={20}
+                            color={(minRating > 0 || onlyAvailable) ? 'white' : 'black'}
+                        />
+                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -273,6 +306,74 @@ export default function SearchResultsScreen() {
                     }
                 />
             )}
+
+            <Modal
+                visible={showFilterModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowFilterModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Filter Search</Text>
+                            <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                                <MaterialCommunityIcons name="close" size={24} color="black" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView style={styles.modalBody}>
+                            <Text style={styles.filterLabel}>Minimum Rating</Text>
+                            <View style={styles.ratingOptions}>
+                                {[0, 3, 4, 4.5].map((r) => (
+                                    <TouchableOpacity
+                                        key={r}
+                                        style={[styles.ratingOption, minRating === r && styles.ratingOptionActive]}
+                                        onPress={() => setMinRating(r)}
+                                    >
+                                        <Text style={[styles.ratingOptionText, minRating === r && styles.ratingOptionTextActive]}>
+                                            {r === 0 ? 'Any' : `${r}+ ⭐`}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {role === 'worker' && (
+                                <>
+                                    <Text style={styles.filterLabel}>Availability</Text>
+                                    <TouchableOpacity
+                                        style={styles.switchRow}
+                                        onPress={() => setOnlyAvailable(!onlyAvailable)}
+                                    >
+                                        <Text style={styles.switchLabel}>Only Show Available Workers</Text>
+                                        <View style={[styles.switch, onlyAvailable && styles.switchOn]}>
+                                            <View style={[styles.switchKnob, onlyAvailable && styles.switchKnobOn]} />
+                                        </View>
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </ScrollView>
+
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity
+                                style={styles.resetBtn}
+                                onPress={() => {
+                                    setMinRating(0);
+                                    setOnlyAvailable(false);
+                                }}
+                            >
+                                <Text style={styles.resetBtnText}>Reset</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.applyBtn}
+                                onPress={handleApplyFilters}
+                            >
+                                <Text style={styles.applyBtnText}>Apply Filters</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -301,11 +402,17 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '700',
     },
+    searchBarContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spacing.lg,
+        gap: 12,
+    },
     searchBar: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#f5f5f5',
-        marginHorizontal: Spacing.lg,
         padding: 12,
         borderRadius: 12,
         gap: 10,
@@ -315,6 +422,17 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: 'black',
         padding: 0,
+    },
+    filterBtn: {
+        width: 48,
+        height: 48,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    filterBtnActive: {
+        backgroundColor: 'black',
     },
     center: {
         flex: 1,
@@ -566,5 +684,125 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.light.muted,
         fontWeight: '500',
+    },
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        padding: 24,
+        maxHeight: '80%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: '#1e293b',
+    },
+    modalBody: {
+        marginBottom: 24,
+    },
+    filterLabel: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#1e293b',
+        marginBottom: 12,
+        marginTop: 12,
+    },
+    ratingOptions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+    },
+    ratingOption: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+        backgroundColor: '#f1f5f9',
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    ratingOptionActive: {
+        backgroundColor: 'black',
+        borderColor: 'black',
+    },
+    ratingOptionText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#475569',
+    },
+    ratingOptionTextActive: {
+        color: 'white',
+    },
+    switchRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    switchLabel: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#475569',
+    },
+    switch: {
+        width: 50,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#e2e8f0',
+        padding: 2,
+    },
+    switchOn: {
+        backgroundColor: '#10b981',
+    },
+    switchKnob: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        elevation: 2,
+    },
+    switchKnobOn: {
+        transform: [{ translateX: 22 }],
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    resetBtn: {
+        flex: 1,
+        height: 54,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9',
+    },
+    resetBtnText: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#475569',
+    },
+    applyBtn: {
+        flex: 2,
+        height: 54,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'black',
+    },
+    applyBtnText: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: 'white',
     },
 });

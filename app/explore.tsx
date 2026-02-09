@@ -11,6 +11,7 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -22,7 +23,11 @@ export default function ExploreScreen() {
     const [contractors, setContractors] = useState<any[]>([]);
     const [workers, setWorkers] = useState<any[]>([]);
     const [shops, setShops] = useState<any[]>([]);
+    const [filteredContractors, setFilteredContractors] = useState<any[]>([]);
+    const [filteredWorkers, setFilteredWorkers] = useState<any[]>([]);
+    const [filteredShops, setFilteredShops] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -35,6 +40,9 @@ export default function ExploreScreen() {
                 setContractors(cData);
                 setWorkers(wData);
                 setShops(sData);
+                setFilteredContractors(cData);
+                setFilteredWorkers(wData);
+                setFilteredShops(sData);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -43,6 +51,34 @@ export default function ExploreScreen() {
         };
         fetchAll();
     }, []);
+
+    const handleSearch = (text: string) => {
+        setSearchQuery(text);
+        const lowerText = text.toLowerCase();
+
+        if (!text) {
+            setFilteredContractors(contractors);
+            setFilteredWorkers(workers);
+            setFilteredShops(shops);
+            return;
+        }
+
+        setFilteredContractors(contractors.filter(item =>
+            (item.companyName || item.name || '').toLowerCase().includes(lowerText) ||
+            (item.contractorServices || []).some((s: string) => s.toLowerCase().includes(lowerText))
+        ));
+
+        setFilteredWorkers(workers.filter(item =>
+            (item.name || '').toLowerCase().includes(lowerText) ||
+            (item.skills || []).some((s: string) => s.toLowerCase().includes(lowerText)) ||
+            (item.category || '').toLowerCase().includes(lowerText)
+        ));
+
+        setFilteredShops(shops.filter(item =>
+            (item.shopName || '').toLowerCase().includes(lowerText) ||
+            (item.shopCategories || []).some((s: string) => s.toLowerCase().includes(lowerText))
+        ));
+    };
 
     const handleNavigate = (user: any) => {
         router.push({
@@ -221,6 +257,28 @@ export default function ExploreScreen() {
                 <Text style={styles.headerTitle}>Explore MAHTO</Text>
             </View>
 
+            {/* Search Bar */}
+            <View style={styles.searchSection}>
+                <View style={styles.searchBar}>
+                    <MaterialCommunityIcons name="magnify" size={20} color="#64748b" />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder={`Search ${['contractors', 'workers', 'shops'][activeTab]}...`}
+                        value={searchQuery}
+                        onChangeText={handleSearch}
+                        placeholderTextColor="#94a3b8"
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={() => handleSearch('')}>
+                            <MaterialCommunityIcons name="close-circle" size={18} color="#94a3b8" />
+                        </TouchableOpacity>
+                    )}
+                </View>
+                <TouchableOpacity style={styles.filterBtn}>
+                    <MaterialCommunityIcons name="tune-variant" size={20} color="black" />
+                </TouchableOpacity>
+            </View>
+
             {/* Tab Bar */}
             <View style={styles.tabBar}>
                 {['Contractors', 'Workers', 'Materials'].map((tab, index) => (
@@ -249,12 +307,17 @@ export default function ExploreScreen() {
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
                         {loading ? (
                             <ActivityIndicator style={{ marginTop: 100 }} color="#6366f1" />
-                        ) : (
-                            contractors.map((item, index) => (
+                        ) : filteredContractors.length > 0 ? (
+                            filteredContractors.map((item, index) => (
                                 <View key={item.id || item.uid || index} style={styles.verticalItem}>
                                     {renderContractorItem({ item })}
                                 </View>
                             ))
+                        ) : (
+                            <View style={styles.emptyState}>
+                                <MaterialCommunityIcons name="account-search-outline" size={64} color="#e2e8f0" />
+                                <Text style={styles.emptyText}>No contractors found</Text>
+                            </View>
                         )}
                     </ScrollView>
                 </View>
@@ -264,12 +327,17 @@ export default function ExploreScreen() {
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
                         {loading ? (
                             <ActivityIndicator style={{ marginTop: 100 }} color="#6366f1" />
-                        ) : (
-                            workers.map((item, index) => (
+                        ) : filteredWorkers.length > 0 ? (
+                            filteredWorkers.map((item, index) => (
                                 <View key={item.id || item.uid || index} style={styles.verticalItem}>
                                     {renderWorkerItem({ item })}
                                 </View>
                             ))
+                        ) : (
+                            <View style={styles.emptyState}>
+                                <MaterialCommunityIcons name="account-search-outline" size={64} color="#e2e8f0" />
+                                <Text style={styles.emptyText}>No workers found</Text>
+                            </View>
                         )}
                     </ScrollView>
                 </View>
@@ -279,12 +347,17 @@ export default function ExploreScreen() {
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
                         {loading ? (
                             <ActivityIndicator style={{ marginTop: 100 }} color="#6366f1" />
-                        ) : (
-                            shops.map((item, index) => (
+                        ) : filteredShops.length > 0 ? (
+                            filteredShops.map((item, index) => (
                                 <View key={item.id || item.uid || index} style={styles.verticalItem}>
                                     {renderShopItem({ item })}
                                 </View>
                             ))
+                        ) : (
+                            <View style={styles.emptyState}>
+                                <MaterialCommunityIcons name="store-search-outline" size={64} color="#e2e8f0" />
+                                <Text style={styles.emptyText}>No shops found</Text>
+                            </View>
                         )}
                     </ScrollView>
                 </View>
@@ -575,5 +648,49 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 10,
         fontWeight: '900',
+    },
+    searchSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: 12,
+        backgroundColor: 'white',
+        gap: 12,
+    },
+    searchBar: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9',
+        paddingHorizontal: 12,
+        height: 48,
+        borderRadius: 14,
+        gap: 8,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 15,
+        color: '#1e293b',
+        fontWeight: '500',
+        padding: 0,
+    },
+    filterBtn: {
+        width: 48,
+        height: 48,
+        backgroundColor: '#f1f5f9',
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyState: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 60,
+        gap: 16,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#94a3b8',
+        fontWeight: '600',
     },
 });

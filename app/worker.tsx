@@ -1,10 +1,12 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { getMyJobApplications, JobApplication } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Animated,
     SafeAreaView,
     ScrollView,
@@ -17,8 +19,22 @@ import {
 export default function WorkerDashboard() {
     const router = useRouter();
     const { profile } = useAuth();
+    const [applications, setApplications] = useState<JobApplication[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const heartScale = useRef(new Animated.Value(1)).current;
+
+    const fetchApplications = async () => {
+        if (!profile?.uid) return;
+        try {
+            const data = await getMyJobApplications(profile.uid);
+            setApplications(data.slice(0, 3)); // Only show last 3 on home
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         Animated.loop(
@@ -35,7 +51,9 @@ export default function WorkerDashboard() {
                 }),
             ])
         ).start();
-    }, []);
+
+        fetchApplications();
+    }, [profile?.uid]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -101,6 +119,52 @@ export default function WorkerDashboard() {
                     </View>
                 </View>
 
+                <View style={styles.recentAppsSection}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Recent Applications</Text>
+                        {applications.length > 0 && (
+                            <TouchableOpacity onPress={() => router.push('/applied-jobs')}>
+                                <Text style={styles.viewAllText}>View All</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    {loading ? (
+                        <ActivityIndicator color="black" style={{ marginTop: 20 }} />
+                    ) : applications.length > 0 ? (
+                        <View style={styles.appsList}>
+                            {applications.map((app) => (
+                                <View key={app.id} style={styles.miniAppCard}>
+                                    <View style={styles.appInfo}>
+                                        <Text style={styles.appTitle} numberOfLines={1}>{app.jobTitle}</Text>
+                                        <Text style={styles.appSubtitle}>{app.jobLocation}</Text>
+                                    </View>
+                                    <View style={[
+                                        styles.miniStatus,
+                                        app.status === 'accepted' ? styles.acceptedMini :
+                                            app.status === 'rejected' ? styles.rejectedMini : styles.pendingMini
+                                    ]}>
+                                        <Text style={[
+                                            styles.miniStatusText,
+                                            app.status === 'accepted' ? styles.acceptedText :
+                                                app.status === 'rejected' ? styles.rejectedText : styles.pendingText
+                                        ]}>
+                                            {app.status}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <View style={styles.emptyApps}>
+                            <MaterialCommunityIcons name="clipboard-text-outline" size={40} color="#cbd5e1" />
+                            <Text style={styles.emptyAppsText}>No recent applications</Text>
+                            <TouchableOpacity onPress={() => router.push('/browse-jobs')}>
+                                <Text style={styles.browseText}>Find jobs now</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
             </ScrollView>
 
             <View style={styles.footer}>
@@ -155,11 +219,12 @@ const styles = StyleSheet.create({
     },
     networkingGrid: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: 12,
         marginTop: 12,
     },
     networkCard: {
-        flex: 1,
+        width: '48%',
         padding: 16,
         borderRadius: 20,
         alignItems: 'center',
@@ -183,11 +248,100 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: 16,
         marginBottom: 80,
-        opacity: 1,
     },
     footerText: {
         fontSize: 14,
         fontWeight: '700',
         color: Colors.light.text,
+    },
+    recentAppsSection: {
+        marginTop: 24,
+        paddingBottom: 20,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    viewAllText: {
+        fontSize: 14,
+        color: '#6366f1',
+        fontWeight: '700',
+    },
+    appsList: {
+        gap: 12,
+    },
+    miniAppCard: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+    },
+    appInfo: {
+        flex: 1,
+    },
+    appTitle: {
+        fontSize: 15,
+        fontWeight: '800',
+        color: '#1e293b',
+    },
+    appSubtitle: {
+        fontSize: 12,
+        color: '#64748b',
+        marginTop: 2,
+    },
+    miniStatus: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 8,
+    },
+    miniStatusText: {
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    pendingMini: {
+        backgroundColor: '#fffbeb',
+    },
+    acceptedMini: {
+        backgroundColor: '#f0fdf4',
+    },
+    rejectedMini: {
+        backgroundColor: '#fef2f2',
+    },
+    pendingText: {
+        color: '#b45309',
+    },
+    acceptedText: {
+        color: '#16a34a',
+    },
+    rejectedText: {
+        color: '#dc2626',
+    },
+    emptyApps: {
+        backgroundColor: '#f8fafc',
+        borderRadius: 20,
+        padding: 32,
+        alignItems: 'center',
+        borderStyle: 'dashed',
+        borderWidth: 2,
+        borderColor: '#e2e8f0',
+    },
+    emptyAppsText: {
+        marginTop: 12,
+        fontSize: 14,
+        color: '#64748b',
+        fontWeight: '600',
+    },
+    browseText: {
+        marginTop: 8,
+        fontSize: 14,
+        color: '#6366f1',
+        fontWeight: '700',
     }
 });

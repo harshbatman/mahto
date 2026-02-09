@@ -123,38 +123,45 @@ export default function ProfileMenuScreen() {
                         <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.muted} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => {
-                            Alert.alert('Logout', 'Do you want to logout?', [
-                                { text: 'No', style: 'cancel' },
-                                {
-                                    text: 'Yes',
-                                    style: 'destructive',
-                                    onPress: async () => {
-                                        try {
-                                            await logout();
-                                            router.replace('/(auth)/select-role');
-                                        } catch (error) {
-                                            Alert.alert('Error', 'Logout failed.');
-                                        }
-                                    },
-                                },
-                            ]);
-                        }}
-                    >
-                        <View style={styles.menuItemLeft}>
-                            <MaterialCommunityIcons name="logout" size={24} color="#ef4444" />
-                            <Text style={[styles.menuItemText, { color: '#ef4444' }]}>Logout from Account</Text>
-                        </View>
-                    </TouchableOpacity>
+                    <View style={styles.dangerZone}>
+                        <Text style={styles.dangerTitle}>Account Actions</Text>
+                        <TouchableOpacity
+                            style={styles.logoutBtn}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Logout Confirmation',
+                                    'Are you sure you want to log out of your MAHTO account? You will need to sign in again to access your data.',
+                                    [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                            text: 'Yes, Logout',
+                                            style: 'destructive',
+                                            onPress: async () => {
+                                                try {
+                                                    await logout();
+                                                    router.replace('/(auth)/select-role');
+                                                } catch (error) {
+                                                    Alert.alert('Error', 'Logout failed. Please try again.');
+                                                }
+                                            },
+                                        },
+                                    ]
+                                );
+                            }}
+                        >
+                            <View style={styles.menuItemLeft}>
+                                <MaterialCommunityIcons name="logout" size={24} color="#ef4444" />
+                                <Text style={styles.logoutText}>Logout from Account</Text>
+                            </View>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.menuItem} onPress={() => setShowDeleteModal(true)}>
-                        <View style={styles.menuItemLeft}>
-                            <MaterialCommunityIcons name="delete-forever-outline" size={24} color="#ef4444" />
-                            <Text style={[styles.menuItemText, { color: '#ef4444' }]}>Permanently Delete Account</Text>
-                        </View>
-                    </TouchableOpacity>
+                        <TouchableOpacity style={styles.deleteInitBtn} onPress={() => setShowDeleteModal(true)}>
+                            <View style={styles.menuItemLeft}>
+                                <MaterialCommunityIcons name="delete-forever-outline" size={24} color="#999" />
+                                <Text style={styles.deleteInitText}>Permanently Delete Account</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -352,5 +359,46 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '700',
+    },
+    dangerZone: {
+        marginTop: 32,
+        gap: 16,
+    },
+    dangerTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#666',
+        textTransform: 'uppercase',
+        marginLeft: 4,
+        marginBottom: 8,
+    },
+    logoutBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#fff1f2',
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#fecaca',
+    },
+    logoutText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#ef4444',
+    },
+    deleteInitBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#f9fafb',
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    deleteInitText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#999',
+        textDecorationLine: 'underline',
     },
 });

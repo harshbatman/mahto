@@ -1,7 +1,7 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
-import { applyForJob, getAvailableJobs, Job } from '@/services/db/jobService';
+import { applyForJob, getAvailableJobs, getMyJobApplications, Job, JobApplication } from '@/services/db/jobService';
 import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -13,6 +13,7 @@ export default function BrowseJobsScreen() {
     const [activeTab, setActiveTab] = useState<'jobs' | 'contracts'>('jobs');
     const [jobs, setJobs] = useState<Job[]>([]);
     const [contracts, setContracts] = useState<Contract[]>([]);
+    const [myApplications, setMyApplications] = useState<JobApplication[]>([]);
     const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
     const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,6 +27,13 @@ export default function BrowseJobsScreen() {
                 getAvailableJobs(),
                 getAvailableContracts()
             ]);
+
+            let applications: JobApplication[] = [];
+            if (profile?.uid) {
+                applications = await getMyJobApplications(profile.uid);
+                setMyApplications(applications);
+            }
+
             setJobs(jobsData);
             setFilteredJobs(jobsData);
             setContracts(contractsData);
@@ -181,10 +189,26 @@ export default function BrowseJobsScreen() {
                             <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
 
                             <TouchableOpacity
-                                style={[styles.applyBtn, activeTab === 'contracts' && styles.contractBtn]}
-                                onPress={() => activeTab === 'jobs' ? handleApplyJob(item.id!, item.title) : handleApplyContract(item.id!, item.title)}
+                                style={[
+                                    styles.applyBtn,
+                                    activeTab === 'contracts' && styles.contractBtn,
+                                    activeTab === 'jobs' && myApplications.some(a => a.jobId === item.id) && styles.appliedBtn
+                                ]}
+                                onPress={() => {
+                                    if (activeTab === 'jobs') {
+                                        if (myApplications.some(a => a.jobId === item.id)) return;
+                                        handleApplyJob(item.id!, item.title);
+                                    } else {
+                                        handleApplyContract(item.id!, item.title);
+                                    }
+                                }}
+                                disabled={activeTab === 'jobs' && myApplications.some(a => a.jobId === item.id)}
                             >
-                                <Text style={styles.applyBtnText}>{activeTab === 'jobs' ? 'Apply Now' : 'Bid on Project'}</Text>
+                                <Text style={styles.applyBtnText}>
+                                    {activeTab === 'jobs'
+                                        ? (myApplications.some(a => a.jobId === item.id) ? 'Applied' : 'Apply Now')
+                                        : 'Bid on Project'}
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -348,6 +372,9 @@ const styles = StyleSheet.create({
         padding: 14,
         borderRadius: 14,
         alignItems: 'center',
+    },
+    appliedBtn: {
+        backgroundColor: '#cbd5e1',
     },
     contractBtn: {
         backgroundColor: '#6366f1',

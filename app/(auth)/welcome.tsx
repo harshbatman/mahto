@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -5,6 +6,7 @@ import { Animated, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from
 
 export default function WelcomeScreen() {
     const router = useRouter();
+    const { user, profile, loading } = useAuth();
     const pulseValue = useRef(new Animated.Value(1)).current;
     const [logoText, setLogoText] = useState('');
     const [taglineText, setTaglineText] = useState('');
@@ -12,6 +14,13 @@ export default function WelcomeScreen() {
     const [footerText2, setFooterText2] = useState('');
     const [showFlag, setShowFlag] = useState(false);
     const [showHeart, setShowHeart] = useState(false);
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!loading && user && profile) {
+            router.replace(`/${profile.role}` as any);
+        }
+    }, [user, profile, loading]);
 
     const fullLogo = 'MAHTO';
     const fullTagline = 'Connect.Build.Work.Sell';

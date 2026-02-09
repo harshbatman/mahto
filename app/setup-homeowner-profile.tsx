@@ -6,7 +6,7 @@ import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -17,40 +17,20 @@ import {
     SafeAreaView,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
-// ...
-export default function SetupWorkerProfile() {
+
+export default function SetupHomeownerProfileScreen() {
     const { user, profile } = useAuth();
     const router = useRouter();
-    const params = useLocalSearchParams();
 
     const [name, setName] = useState(profile?.name || '');
     const [phone, setPhone] = useState(profile?.phoneNumber || '');
-    const [address, setAddress] = useState('');
+    const [address, setAddress] = useState(profile?.address || '');
     const [photo, setPhoto] = useState<string | null>(null);
-    const [experience, setExperience] = useState('');
-    const [about, setAbout] = useState('');
-    const [dailyRate, setDailyRate] = useState('');
-    const [isAvailable, setIsAvailable] = useState(true);
-    const [newSkill, setNewSkill] = useState('');
-
-    // Initialize skills from params if available
-    const [skills, setSkills] = useState<string[]>(() => {
-        if (params.skills) {
-            try {
-                return JSON.parse(params.skills as string);
-            } catch (e) {
-                return [];
-            }
-        }
-        return [];
-    });
-
     const [loading, setLoading] = useState(false);
     const [locLoading, setLocLoading] = useState(false);
 
@@ -58,13 +38,14 @@ export default function SetupWorkerProfile() {
         if (profile) {
             if (!name && profile.name) setName(profile.name);
             if (!phone && profile.phoneNumber) setPhone(profile.phoneNumber);
+            if (!address && profile.address) setAddress(profile.address);
         }
     }, [profile]);
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to upload your photo!');
             return;
         }
 
@@ -82,9 +63,10 @@ export default function SetupWorkerProfile() {
     const detectLocation = async () => {
         setLocLoading(true);
         try {
+            // Specific request with reason is handled by the OS using the message in app.json
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Permission denied', 'Allow location access to detect your address.');
+                Alert.alert('Permission Denied', 'MAHTO use your location to show nearby worekr, contractor and shops. Please enable it in settings.');
                 return;
             }
 
@@ -111,7 +93,7 @@ export default function SetupWorkerProfile() {
                 setAddress(parts);
             }
         } catch (error: any) {
-            Alert.alert('Error', 'Could not detect location. Please type manually.');
+            Alert.alert('Error', 'Could not detect location. Please type your address manually.');
         } finally {
             setLocLoading(false);
         }
@@ -119,14 +101,14 @@ export default function SetupWorkerProfile() {
 
     const handleSave = async () => {
         if (!user) return;
-        if (!address || !experience || skills.length === 0) {
-            Alert.alert('Missing Info', 'Please provide your address, experience, and at least one skill.');
+        if (!name || !address) {
+            Alert.alert('Missing Info', 'Please provide your name and address.');
             return;
         }
 
         setLoading(true);
         try {
-            let photoURL = "";
+            let photoURL = profile?.photoURL || "";
             if (photo) {
                 photoURL = await uploadImage(photo, `profiles/${user.uid}.jpg`);
             }
@@ -137,20 +119,15 @@ export default function SetupWorkerProfile() {
                 name: name,
                 phoneNumber: phone,
                 address: address,
-                photoURL: photoURL || profile?.photoURL || "",
+                photoURL: photoURL,
                 email: user.email || '',
-                role: 'worker',
+                role: 'homeowner',
                 createdAt: profile?.createdAt || Date.now(),
-                skills: skills,
-                experienceYears: parseInt(experience) || 0,
-                dailyRate: parseInt(dailyRate) || 0,
-                isAvailable: isAvailable,
-                about: about,
                 isProfileSetup: true
             } as any);
 
-            Alert.alert('All Set!', 'Your worker profile is ready.', [
-                { text: 'Let\'s Go', onPress: () => router.replace('/worker') }
+            Alert.alert('Profile Setup', 'Your profile has been created successfully!', [
+                { text: 'Great', onPress: () => router.replace('/homeowner') }
             ]);
         } catch (error: any) {
             Alert.alert('Error', sanitizeError(error));
@@ -165,16 +142,18 @@ export default function SetupWorkerProfile() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Setup Your Profile</Text>
-                        <Text style={styles.headerSubtitle}>Complete these details to start getting work</Text>
+                        <Text style={styles.headerSubtitle}>Complete your profile to start exploring MAHTO</Text>
                     </View>
 
                     <View style={styles.photoSection}>
                         <TouchableOpacity onPress={pickImage} style={styles.photoUpload}>
                             {photo ? (
                                 <Image source={{ uri: photo }} style={styles.photo} />
+                            ) : profile?.photoURL ? (
+                                <Image source={{ uri: profile.photoURL }} style={styles.photo} />
                             ) : (
                                 <View style={styles.photoPlaceholder}>
                                     <MaterialCommunityIcons name="camera-plus" size={40} color={Colors.light.muted} />
@@ -191,27 +170,26 @@ export default function SetupWorkerProfile() {
                                 style={styles.input}
                                 value={name}
                                 onChangeText={setName}
-                                placeholder="Confirmed name"
+                                placeholder="Enter your full name"
                             />
                         </View>
 
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Phone Number</Text>
-                            <TextInput
-                                style={[styles.input, { backgroundColor: '#f5f5f5' }]}
-                                value={phone}
-                                editable={false}
-                            />
+                            <View style={styles.readOnlyInput}>
+                                <MaterialCommunityIcons name="phone" size={20} color="#9ca3af" />
+                                <Text style={styles.readOnlyText}>{phone}</Text>
+                            </View>
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Work Address (Current Location)</Text>
+                            <Text style={styles.label}>Your Address</Text>
                             <View style={styles.addressContainer}>
                                 <TextInput
                                     style={[styles.input, styles.addressInput]}
                                     value={address}
                                     onChangeText={setAddress}
-                                    placeholder="Click GPS icon to detect address"
+                                    placeholder="Enter your property address"
                                     multiline
                                 />
                                 <TouchableOpacity
@@ -226,88 +204,7 @@ export default function SetupWorkerProfile() {
                                     )}
                                 </TouchableOpacity>
                             </View>
-                        </View>
-
-                        <View style={styles.row}>
-                            <View style={[styles.inputGroup, { flex: 1 }]}>
-                                <Text style={styles.label}>Years of Experience</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={experience}
-                                    onChangeText={setExperience}
-                                    placeholder="e.g. 8"
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                            <View style={[styles.inputGroup, { flex: 1 }]}>
-                                <Text style={styles.label}>Daily Rate (₹)</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={dailyRate}
-                                    onChangeText={setDailyRate}
-                                    placeholder="e.g. 500"
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                        </View>
-
-
-                        <View style={styles.switchContainer}>
-                            <View>
-                                <Text style={styles.label}>Available for work</Text>
-                                <Text style={styles.helperText}>Switch off if you are not looking for work</Text>
-                            </View>
-                            <Switch
-                                value={isAvailable}
-                                onValueChange={setIsAvailable}
-                                trackColor={{ false: '#767577', true: '#4ade80' }}
-                                thumbColor={isAvailable ? '#f4f3f4' : '#f4f3f4'}
-                            />
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Add Your Skills</Text>
-                            <View style={styles.skillInputRow}>
-                                <TextInput
-                                    style={[styles.input, { flex: 1 }]}
-                                    value={newSkill}
-                                    onChangeText={setNewSkill}
-                                    placeholder="e.g. Plastering"
-                                />
-                                <TouchableOpacity
-                                    style={styles.addSkillBtn}
-                                    onPress={() => {
-                                        if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-                                            setSkills([...skills, newSkill.trim()]);
-                                            setNewSkill('');
-                                        }
-                                    }}
-                                >
-                                    <MaterialCommunityIcons name="plus" size={24} color="white" />
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.skillsList}>
-                                {skills.map((skill, index) => (
-                                    <View key={index} style={styles.skillBadge}>
-                                        <Text style={styles.skillText}>{skill}</Text>
-                                        <TouchableOpacity onPress={() => setSkills(skills.filter((_, i) => i !== index))}>
-                                            <MaterialCommunityIcons name="close-circle" size={16} color="#666" />
-                                        </TouchableOpacity>
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>About Me</Text>
-                            <TextInput
-                                style={[styles.input, styles.aboutInput]}
-                                value={about}
-                                onChangeText={setAbout}
-                                placeholder="Tell us about yourself and your work experience..."
-                                multiline
-                                numberOfLines={4}
-                            />
+                            <Text style={styles.helperText}>knowing your location helps us show you nearby worker, contractor & shops</Text>
                         </View>
 
                         <TouchableOpacity
@@ -318,13 +215,13 @@ export default function SetupWorkerProfile() {
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text style={styles.saveBtnText}>Save & Continue</Text>
+                                <Text style={styles.saveBtnText}>Complete Setup</Text>
                             )}
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView >
+        </SafeAreaView>
     );
 }
 
@@ -335,10 +232,12 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: Spacing.lg,
+        paddingBottom: 40,
     },
     header: {
         marginTop: 20,
         marginBottom: 30,
+        alignItems: 'center',
     },
     headerTitle: {
         fontSize: 28,
@@ -349,15 +248,16 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: Colors.light.muted,
         marginTop: 4,
+        textAlign: 'center',
     },
     photoSection: {
         alignItems: 'center',
         marginBottom: 30,
     },
     photoUpload: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
+        width: 140,
+        height: 140,
+        borderRadius: 70,
         backgroundColor: '#f8f9fa',
         justifyContent: 'center',
         alignItems: 'center',
@@ -393,23 +293,33 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1.5,
         borderColor: '#eee',
-        borderRadius: 14,
-        padding: 14,
+        borderRadius: 16,
+        padding: 16,
         fontSize: 16,
         backgroundColor: '#fcfcfc',
         color: 'black',
     },
-    helperText: {
-        fontSize: 12,
-        color: Colors.light.muted,
-        marginTop: 2,
+    readOnlyInput: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f3f4f6',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1.5,
+        borderColor: '#eee',
+        gap: 12,
+    },
+    readOnlyText: {
+        fontSize: 16,
+        color: '#6b7280',
+        fontWeight: '600',
     },
     addressContainer: {
         position: 'relative',
     },
     addressInput: {
-        paddingRight: 45,
-        minHeight: 80,
+        paddingRight: 50,
+        minHeight: 100,
         textAlignVertical: 'top',
     },
     locationBtn: {
@@ -418,71 +328,23 @@ const styles = StyleSheet.create({
         top: 12,
         padding: 4,
     },
-    row: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    skillInputRow: {
-        flexDirection: 'row',
-        gap: 10,
-    },
-    addSkillBtn: {
-        backgroundColor: 'black',
-        width: 54,
-        height: 54,
-        borderRadius: 14,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    skillsList: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
+    helperText: {
+        fontSize: 12,
+        color: Colors.light.muted,
         marginTop: 4,
-    },
-    skillBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f3f4ff',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 12,
-        gap: 6,
-        borderWidth: 1,
-        borderColor: '#e0e4ff',
-    },
-    skillText: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#6366f1',
-    },
-    aboutInput: {
-        minHeight: 120,
-        textAlignVertical: 'top',
-    },
-    switchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        backgroundColor: '#f9fafb',
-        paddingHorizontal: 16,
-        borderRadius: 14,
-        borderWidth: 1.5,
-        borderColor: '#eee',
+        fontStyle: 'italic',
     },
     saveBtn: {
         backgroundColor: 'black',
         padding: 18,
-        borderRadius: 16,
+        borderRadius: 20,
         alignItems: 'center',
         marginTop: 20,
-        marginBottom: 40,
-        elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
+        elevation: 4,
     },
     saveBtnText: {
         color: 'white',

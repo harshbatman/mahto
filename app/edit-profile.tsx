@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 
 import { saveUserProfile } from '@/services/db/userProfile';
 import { uploadImage } from '@/services/storage/imageService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -44,14 +45,19 @@ export default function EditProfileScreen() {
 
 
     const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true, // Allow editing to get square crops if desired
-            quality: 0.5,
-            aspect: [1, 1],
+            mediaTypes: 'images',
+            allowsEditing: false,
+            quality: 0.8,
         });
 
-        if (!result.canceled && result.assets[0].uri) {
+        if (!result.canceled && result.assets && result.assets.length > 0) {
             const localUri = result.assets[0].uri;
             setPhoto(localUri); // Show immediately for feedback
 
@@ -165,7 +171,7 @@ export default function EditProfileScreen() {
             Alert.alert('Success', 'Profile updated successfully!');
             router.back();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', sanitizeError(error));
         } finally {
             setLoading(false);
         }

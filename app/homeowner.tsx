@@ -6,7 +6,7 @@ import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, Easing, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +19,7 @@ export default function HomeownerDashboard() {
     const [resultsTitle, setResultsTitle] = useState('');
     const heartScale = useRef(new Animated.Value(1)).current;
     const floatingAnim = useRef(new Animated.Value(0)).current;
+    const textTranslateX = useRef(new Animated.Value(-300)).current;
 
     const categories = [
         { id: 'contractor', title: t.contractors, icon: 'briefcase-check', color: '#6366f1' },
@@ -55,6 +56,15 @@ export default function HomeownerDashboard() {
                     useNativeDriver: true,
                 }),
             ])
+        ).start();
+
+        Animated.loop(
+            Animated.timing(textTranslateX, {
+                toValue: width,
+                duration: 7000,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
         ).start();
     }, []);
 
@@ -171,13 +181,15 @@ export default function HomeownerDashboard() {
                         <View style={{ gap: 16 }}>
                             {searchResults.map((user, i) => {
                                 if (user.role === 'contractor') {
-                                    const bannerUri = isValidUri(user.companyBanner) ? user.companyBanner : 'https://images.unsplash.com/photo-1541963463532-d68292c34b19';
                                     return (
                                         <TouchableOpacity key={i} style={styles.contractorCard} onPress={() => handleNavigate(user)}>
-                                            <Image
-                                                source={{ uri: bannerUri }}
-                                                style={styles.cardCover}
-                                            />
+                                            {isValidUri(user.companyBanner) ? (
+                                                <Image source={{ uri: user.companyBanner }} style={styles.cardCover} />
+                                            ) : (
+                                                <View style={[styles.cardCover, { justifyContent: 'center', alignItems: 'center' }]}>
+                                                    <MaterialCommunityIcons name="briefcase-outline" size={40} color="#cbd5e1" />
+                                                </View>
+                                            )}
                                             <View style={styles.cardContent}>
                                                 <View style={styles.cardAvatarContainer}>
                                                     {isValidUri(user.companyLogo) ? (
@@ -235,13 +247,15 @@ export default function HomeownerDashboard() {
                                     );
                                 } else if (user.role === 'shop') {
                                     const isOpen = isShopOpen(user.openingTime, user.closingTime);
-                                    const shopBannerUri = isValidUri(user.shopBanner) ? user.shopBanner : 'https://images.unsplash.com/photo-1578575437130-527eed3abbec';
                                     return (
                                         <TouchableOpacity key={i} style={styles.premiumShopCard} onPress={() => handleNavigate(user)}>
-                                            <Image
-                                                source={{ uri: shopBannerUri }}
-                                                style={styles.shopCover}
-                                            />
+                                            {isValidUri(user.shopBanner) ? (
+                                                <Image source={{ uri: user.shopBanner }} style={styles.shopCover} />
+                                            ) : (
+                                                <View style={[styles.shopCover, { backgroundColor: '#f1f5f9', justifyContent: 'center', alignItems: 'center' }]}>
+                                                    <MaterialCommunityIcons name="storefront-outline" size={40} color="#cbd5e1" />
+                                                </View>
+                                            )}
                                             <View style={[
                                                 styles.shopStatusBadge,
                                                 { backgroundColor: isOpen ? '#10b981' : '#ef4444' }
@@ -299,12 +313,27 @@ export default function HomeownerDashboard() {
                     }
                 ]}>
                     <Image
-                        source={require('@/assets/images/happy_family_home_banner.png')}
+                        source={require('@/assets/images/family_banner.png')}
                         style={styles.familyHeroImage}
                         resizeMode="cover"
                     />
                     <View style={styles.familyHeroOverlay}>
-                        <Text style={styles.familyHeroTitle}>Build Your Dream Home</Text>
+                        <View style={{ height: 50, width: '100%', overflow: 'hidden' }}>
+                            <Animated.Text
+                                style={[
+                                    styles.familyHeroTitle,
+                                    {
+                                        transform: [{ translateX: textTranslateX }],
+                                        position: 'absolute',
+                                        width: 800, // Significantly wider to prevent any wrapping
+                                        textAlign: 'left',
+                                    }
+                                ]}
+                                numberOfLines={1}
+                            >
+                                Build Your Dream Home
+                            </Animated.Text>
+                        </View>
                         <Text style={styles.familyHeroSub}>For your family</Text>
                     </View>
                 </Animated.View>
@@ -377,7 +406,7 @@ export default function HomeownerDashboard() {
                     </Animated.View>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -463,21 +492,24 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        padding: 20,
-        backgroundColor: 'rgba(0,0,0,0.3)',
+        paddingVertical: 15,
+        backgroundColor: 'rgba(0,0,0,0.4)',
     },
     familyHeroTitle: {
         color: 'white',
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: '900',
         textShadowColor: 'rgba(0,0,0,0.5)',
         textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 5,
+        textShadowRadius: 10,
+        letterSpacing: 1,
     },
     familyHeroSub: {
         color: 'rgba(255,255,255,0.9)',
         fontSize: 14,
         fontWeight: '700',
+        paddingHorizontal: 20,
+        marginTop: 4,
     },
     actionBox: {
         width: '48%',

@@ -105,18 +105,14 @@ export default function MyShopViewScreen() {
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Shop Banner */}
-                <View style={styles.bannerContainer}>
-                    {profile?.shopBanner ? (
+                {profile?.shopBanner && (
+                    <View style={styles.bannerContainer}>
                         <Image source={{ uri: profile.shopBanner }} style={styles.banner} />
-                    ) : (
-                        <View style={[styles.banner, styles.bannerPlaceholder]}>
-                            <MaterialCommunityIcons name="image" size={40} color="#cbd5e1" />
-                        </View>
-                    )}
-                </View>
+                    </View>
+                )}
 
                 {/* Profile Hero Section - Matching user-profile.tsx */}
-                <View style={styles.profileHero}>
+                <View style={[styles.profileHero, !profile?.shopBanner && { marginTop: 20 }]}>
                     <View style={styles.avatarContainer}>
                         {profile?.shopLogo ? (
                             <Image source={{ uri: profile.shopLogo }} style={styles.avatarImage} />

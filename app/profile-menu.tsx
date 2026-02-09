@@ -2,6 +2,7 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { deleteUserAccount } from '@/services/auth/authService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -42,7 +43,7 @@ export default function ProfileMenuScreen() {
             Alert.alert('Account Deleted', 'Your account and data have been permanently removed.');
             router.replace('/(auth)/select-role');
         } catch (error: any) {
-            Alert.alert('Deletion Failed', error.message || 'Verification failed. Please check credentials.');
+            Alert.alert('Deletion Failed', sanitizeError(error));
         } finally {
             setDeleteLoading(false);
         }

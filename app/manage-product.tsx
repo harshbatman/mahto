@@ -1,6 +1,7 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { addProduct, updateProduct } from '@/services/db/productService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -47,14 +48,19 @@ export default function ManageProductScreen() {
             return;
         }
 
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: 'images',
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.7,
+            allowsEditing: false,
+            quality: 0.8,
         });
 
-        if (!result.canceled) {
+        if (!result.canceled && result.assets && result.assets.length > 0) {
             setImages([...images, result.assets[0].uri]);
         }
     };
@@ -106,7 +112,7 @@ export default function ManageProductScreen() {
             router.back();
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Failed to save product');
+            Alert.alert('Error', sanitizeError(error));
         } finally {
             setLoading(false);
         }

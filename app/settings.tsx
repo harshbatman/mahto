@@ -1,5 +1,5 @@
 import { Spacing } from '@/constants/theme';
-import { LANGUAGES } from '@/constants/translations';
+import { LANGUAGES, LanguageCode } from '@/constants/translations';
 import { useLanguage } from '@/context/LanguageContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -25,6 +25,7 @@ export default function SettingsScreen() {
     const selectedLang = LANGUAGES.find(l => l.id === language) || LANGUAGES[0];
 
     const menuItems = [
+        { id: 'help', title: t.helpSupport, icon: 'help-circle-outline' },
         { id: 'about', title: t.aboutUs, icon: 'information-outline' },
         { id: 'terms', title: t.termsConditions, icon: 'file-document-outline' },
         { id: 'privacy', title: t.privacyPolicy, icon: 'shield-check-outline' },
@@ -81,6 +82,12 @@ export default function SettingsScreen() {
                                     styles.row,
                                     index > 0 && { borderTopWidth: 1, borderTopColor: '#f0f0f0' }
                                 ]}
+                                onPress={() => {
+                                    if (item.id === 'help') router.push('/help-support' as any);
+                                    if (item.id === 'privacy') router.push('/privacy-policy' as any);
+                                    if (item.id === 'terms') router.push('/terms-conditions' as any);
+                                    if (item.id === 'about') router.push('/about-us' as any);
+                                }}
                             >
                                 <View style={styles.rowLeft}>
                                     <MaterialCommunityIcons name={item.icon as any} size={22} color="black" />

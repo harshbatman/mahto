@@ -2,6 +2,7 @@ import { SKILLS_DATA } from '@/constants/skills';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { postJob } from '@/services/db/jobService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -89,7 +90,7 @@ export default function PostJobScreen() {
             Alert.alert('Success', 'Job posted successfully! Workers can now apply.');
             router.back();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', sanitizeError(error));
         } finally {
             setLoading(false);
         }

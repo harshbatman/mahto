@@ -149,13 +149,18 @@ export default function SearchResultsScreen() {
                     contentContainerStyle={styles.listContent}
                     renderItem={({ item }) => {
                         if (item.role === 'contractor') {
-                            const bannerUri = isValidUri(item.companyBanner) ? item.companyBanner : 'https://images.unsplash.com/photo-1541963463532-d68292c34b19';
                             return (
                                 <TouchableOpacity style={styles.contractorCard} onPress={() => handleNavigate(item)}>
-                                    <Image
-                                        source={{ uri: bannerUri }}
-                                        style={styles.cardCover}
-                                    />
+                                    {isValidUri(item.companyBanner) ? (
+                                        <Image
+                                            source={{ uri: item.companyBanner }}
+                                            style={styles.cardCover}
+                                        />
+                                    ) : (
+                                        <View style={[styles.cardCover, { justifyContent: 'center', alignItems: 'center' }]}>
+                                            <MaterialCommunityIcons name="briefcase-outline" size={40} color="#cbd5e1" />
+                                        </View>
+                                    )}
                                     <View style={styles.contractorCardContent}>
                                         <View style={styles.cardAvatarContainer}>
                                             {isValidUri(item.companyLogo) ? (
@@ -213,13 +218,18 @@ export default function SearchResultsScreen() {
                             );
                         } else if (item.role === 'shop') {
                             const isOpen = isShopOpen(item.openingTime, item.closingTime);
-                            const shopBannerUri = isValidUri(item.shopBanner) ? item.shopBanner : 'https://images.unsplash.com/photo-1578575437130-527eed3abbec';
                             return (
                                 <TouchableOpacity style={styles.premiumShopCard} onPress={() => handleNavigate(item)}>
-                                    <Image
-                                        source={{ uri: shopBannerUri }}
-                                        style={styles.shopCover}
-                                    />
+                                    {isValidUri(item.shopBanner) ? (
+                                        <Image
+                                            source={{ uri: item.shopBanner }}
+                                            style={styles.shopCover}
+                                        />
+                                    ) : (
+                                        <View style={[styles.shopCover, { backgroundColor: '#f1f5f9', justifyContent: 'center', alignItems: 'center' }]}>
+                                            <MaterialCommunityIcons name="storefront-outline" size={40} color="#cbd5e1" />
+                                        </View>
+                                    )}
                                     <View style={[
                                         styles.shopStatusBadge,
                                         { backgroundColor: isOpen ? '#10b981' : '#ef4444' }

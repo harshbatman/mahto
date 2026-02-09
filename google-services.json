@@ -1,0 +1,39 @@
+{
+    "project_info": {
+        "project_number": "94425344059",
+        "project_id": "mahto-b8626",
+        "storage_bucket": "mahto-b8626.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:94425344059:android:c3c1bd1f8c30e708f0d41e",
+                "android_client_info": {
+                    "package_name": "com.harsh.mahto"
+                }
+            },
+            "oauth_client": [
+                {
+                    "client_id": "94425344059-bkb1nnbp3a5tpf65uggohvlqhov7kt4q.apps.googleusercontent.com",
+                    "client_type": 3
+                }
+            ],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyBLI43RC_QN8LthWpN0Fe6yEg62pSIfsPo"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": [
+                        {
+                            "client_id": "94425344059-bkb1nnbp3a5tpf65uggohvlqhov7kt4q.apps.googleusercontent.com",
+                            "client_type": 3
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

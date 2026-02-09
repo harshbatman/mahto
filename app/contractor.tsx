@@ -3,6 +3,7 @@ import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
 import { searchUsers } from '@/services/db/searchService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -49,7 +50,7 @@ export default function ContractorDashboard() {
             Alert.alert('Application Sent', `You have successfully applied for: ${title}`);
             fetchContracts(); // Refresh to update count
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', sanitizeError(error));
         }
     };
 

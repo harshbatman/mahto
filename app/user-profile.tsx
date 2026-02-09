@@ -157,19 +157,17 @@ export default function UserProfileScreen() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-                {(role === 'shop' || role === 'contractor') && (
+                {(role === 'shop' || role === 'contractor') && displayBanner && (
                     <View style={styles.profileBannerContainer}>
-                        {displayBanner ? (
-                            <Image source={{ uri: displayBanner }} style={styles.profileBanner} />
-                        ) : (
-                            <View style={[styles.profileBanner, styles.bannerPlaceholder]}>
-                                <MaterialCommunityIcons name="image" size={40} color="#cbd5e1" />
-                            </View>
-                        )}
+                        <Image source={{ uri: displayBanner }} style={styles.profileBanner} />
                     </View>
                 )}
 
-                <View style={[styles.profileHero, (role === 'shop' || role === 'contractor') && styles.shopProfileHero]}>
+                <View style={[
+                    styles.profileHero,
+                    ((role === 'shop' || role === 'contractor') && displayBanner) && styles.shopProfileHero,
+                    ((role === 'shop' || role === 'contractor') && !displayBanner) && { paddingVertical: 40 }
+                ]}>
                     <View style={[styles.avatarContainer, (role === 'shop' || role === 'contractor') && styles.shopAvatarContainer]}>
                         {displayPhoto ? (
                             <Image source={{ uri: displayPhoto }} style={styles.avatarImage} />

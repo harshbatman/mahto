@@ -1,6 +1,7 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
 import { applyForJob, getAvailableJobs, Job } from '@/services/db/jobService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -64,7 +65,7 @@ export default function BrowseJobsScreen() {
             Alert.alert('Applied!', `Application sent for: ${title}`);
             fetchData();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', sanitizeError(error));
         }
     };
 
@@ -74,7 +75,7 @@ export default function BrowseJobsScreen() {
             Alert.alert('Applied!', `Bid submitted for: ${title}`);
             fetchData();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', sanitizeError(error));
         }
     };
 

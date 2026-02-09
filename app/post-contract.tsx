@@ -2,6 +2,7 @@ import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { postContract } from '@/services/db/contractService';
 import { uploadImage } from '@/services/storage/imageService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -77,7 +78,7 @@ export default function PostContractScreen() {
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: 'images',
             allowsMultipleSelection: true,
             selectionLimit: 7 - images.length,
             quality: 0.8,
@@ -142,7 +143,7 @@ export default function PostContractScreen() {
             Alert.alert('Success', 'Your contract has been posted and is now visible to contractors!');
             router.back();
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', sanitizeError(error));
         } finally {
             setLoading(false);
         }

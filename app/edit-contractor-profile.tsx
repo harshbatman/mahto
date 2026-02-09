@@ -2,6 +2,7 @@ import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { saveUserProfile } from '@/services/db/userProfile';
 import { uploadImage } from '@/services/storage/imageService';
+import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -45,14 +46,19 @@ export default function EditContractorProfileScreen() {
     }, [profile]);
 
     const pickImage = async (type: 'banner' | 'logo') => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: 'images',
-            allowsEditing: true,
-            aspect: type === 'banner' ? [16, 9] : [1, 1],
-            quality: 0.7,
+            allowsEditing: false,
+            quality: 0.8,
         });
 
-        if (!result.canceled) {
+        if (!result.canceled && result.assets && result.assets.length > 0) {
             if (type === 'banner') setCompanyBanner(result.assets[0].uri);
             else setCompanyLogo(result.assets[0].uri);
         }
@@ -133,7 +139,7 @@ export default function EditContractorProfileScreen() {
             router.back();
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Failed to save profile');
+            Alert.alert('Error', sanitizeError(error));
         } finally {
             setLoading(false);
         }

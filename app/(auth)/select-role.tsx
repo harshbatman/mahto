@@ -86,6 +86,13 @@ export default function SelectRoleScreen() {
         <SafeAreaView style={styles.container}>
             <View style={styles.topActions}>
                 <TouchableOpacity
+                    style={styles.backBtn}
+                    onPress={() => router.back()}
+                >
+                    <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
                     style={styles.langBtn}
                     onPress={() => setShowLangModal(true)}
                 >
@@ -254,9 +261,18 @@ const styles = StyleSheet.create({
     },
     topActions: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingHorizontal: Spacing.lg,
         paddingTop: 50,
+    },
+    backBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#f5f5f5',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     langBtn: {
         flexDirection: 'row',

@@ -136,7 +136,9 @@ export default function BrowseJobsScreen() {
                         <View style={styles.jobCard}>
                             <View style={styles.jobHeader}>
                                 <View style={[styles.badge, activeTab === 'contracts' && styles.contractBadge]}>
-                                    <Text style={[styles.badgeText, activeTab === 'contracts' && styles.contractBadgeText]}>{item.category}</Text>
+                                    <Text style={[styles.badgeText, activeTab === 'contracts' && styles.contractBadgeText]}>
+                                        {activeTab === 'contracts' ? item.category : (item as Job).selectedWorkers?.map(sw => `${sw.count} ${sw.skillName}`).join(', ') || item.category}
+                                    </Text>
                                 </View>
                                 <Text style={styles.applicants}>{item.applicantCount} applied</Text>
                             </View>
@@ -151,10 +153,18 @@ export default function BrowseJobsScreen() {
                                 <View style={styles.infoItem}>
                                     <MaterialCommunityIcons name="currency-inr" size={16} color="#10b981" />
                                     <Text style={styles.payText}>
-                                        {activeTab === 'jobs' ? (item as Job).wage + '/day' : (item as Contract).budget}
+                                        {activeTab === 'jobs' ? `₹${(item as Job).wage}/${(item as Job).paymentType === 'Monthly' ? 'mo' : 'day'}` : (item as Contract).budget}
                                     </Text>
                                 </View>
                             </View>
+
+                            {activeTab === 'jobs' && (
+                                <View style={styles.facilitiesRow}>
+                                    {(item as Job).foodProvided && <View style={styles.facilityItem}><MaterialCommunityIcons name="food" size={14} color="#666" /><Text style={styles.facilityText}>Food</Text></View>}
+                                    {(item as Job).stayProvided && <View style={styles.facilityItem}><MaterialCommunityIcons name="home-city" size={14} color="#666" /><Text style={styles.facilityText}>Stay</Text></View>}
+                                    {(item as Job).toolsProvided && <View style={styles.facilityItem}><MaterialCommunityIcons name="tools" size={14} color="#666" /><Text style={styles.facilityText}>Tools</Text></View>}
+                                </View>
+                            )}
 
                             <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
 
@@ -344,5 +354,25 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.light.muted,
         fontWeight: '600',
-    }
+    },
+    facilitiesRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 12,
+    },
+    facilityItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: '#f3f4f6',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+    },
+    facilityText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#4b5563',
+    },
 });

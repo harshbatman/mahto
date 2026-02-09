@@ -34,8 +34,10 @@ export default function RegisterScreen() {
                 router.replace('/select-skills');
             } else if (role === 'shop') {
                 router.replace('/select-shop-category');
+            } else if (role === 'contractor') {
+                router.replace('/setup-contractor-profile');
             } else {
-                router.replace(`/(tabs)` as any);
+                router.replace(`/${role}` as any);
             }
         } catch (error: any) {
             Alert.alert('Registration Failed', error.message);

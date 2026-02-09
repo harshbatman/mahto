@@ -80,6 +80,36 @@ export default function SearchResultsScreen() {
         });
     };
 
+    const isShopOpen = (openingTime: string, closingTime: string) => {
+        if (!openingTime || !closingTime) return false;
+
+        const parseTime = (timeStr: string) => {
+            const parts = timeStr.split(' ');
+            if (parts.length < 2) return 0;
+            const [time, modifier] = parts;
+            let [hours, minutes] = time.split(':').map(Number);
+            if (modifier === 'PM' && hours < 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+            return hours * 60 + minutes;
+        };
+
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = parseTime(openingTime);
+        const endMinutes = parseTime(closingTime);
+
+        if (endMinutes < startMinutes) {
+            return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+        }
+        return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+    };
+
+    const isValidUri = (uri: string | undefined) => {
+        if (!uri) return false;
+        if (uri.startsWith('file://')) return false;
+        return true;
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -117,66 +147,114 @@ export default function SearchResultsScreen() {
                     data={filteredResults}
                     keyExtractor={(item) => item.uid || item.id}
                     contentContainerStyle={styles.listContent}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity style={[styles.resultCard, (item.role === 'shop' || item.role === 'contractor') && styles.shopCard]} onPress={() => handleNavigate(item)}>
-                            {(item.role === 'shop' || item.role === 'contractor') && (
-                                <View style={styles.cardBannerContainer}>
-                                    {(item.shopBanner || item.companyBanner) ? (
-                                        <Image source={{ uri: item.shopBanner || item.companyBanner }} style={styles.cardBanner} />
-                                    ) : (
-                                        <View style={[styles.cardBanner, styles.bannerPlaceholder]}>
-                                            <MaterialCommunityIcons name="image" size={32} color="#cbd5e1" />
+                    renderItem={({ item }) => {
+                        if (item.role === 'contractor') {
+                            const bannerUri = isValidUri(item.companyBanner) ? item.companyBanner : 'https://images.unsplash.com/photo-1541963463532-d68292c34b19';
+                            return (
+                                <TouchableOpacity style={styles.contractorCard} onPress={() => handleNavigate(item)}>
+                                    <Image
+                                        source={{ uri: bannerUri }}
+                                        style={styles.cardCover}
+                                    />
+                                    <View style={styles.contractorCardContent}>
+                                        <View style={styles.cardAvatarContainer}>
+                                            {isValidUri(item.companyLogo) ? (
+                                                <Image source={{ uri: item.companyLogo }} style={styles.cardAvatar} />
+                                            ) : (
+                                                <View style={styles.avatarPlaceholder}>
+                                                    <MaterialCommunityIcons name="briefcase" size={20} color="black" />
+                                                </View>
+                                            )}
                                         </View>
-                                    )}
-                                </View>
-                            )}
-                            <View style={styles.cardContent}>
-                                <View style={styles.avatar}>
-                                    {(item.role === 'shop' && item.shopLogo) || (item.role === 'contractor' && item.companyLogo) ? (
-                                        <Image
-                                            source={{ uri: item.shopLogo || item.companyLogo }}
-                                            style={styles.avatarImage}
-                                            resizeMode="cover"
-                                        />
-                                    ) : item.photoURL ? (
-                                        <Image
-                                            source={{ uri: item.photoURL }}
-                                            style={styles.avatarImage}
-                                            resizeMode="cover"
-                                            onError={(e) => console.log('List Image Error:', e.nativeEvent.error, 'for URL:', item.photoURL)}
-                                        />
-                                    ) : (
-                                        <MaterialCommunityIcons
-                                            name={item.role === 'shop' ? 'store' : 'account'}
-                                            size={24}
-                                            color="black"
-                                        />
-                                    )}
-                                    {item.role === 'worker' && item.isAvailable !== false && (
-                                        <View style={styles.availableDot} />
-                                    )}
-                                </View>
-                                <View style={styles.info}>
-                                    <View style={styles.nameRow}>
-                                        <Text style={styles.name}>{item.companyName || item.shopName || item.name}</Text>
-                                        <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.border} />
+                                        <View style={styles.contractorHeaderRow}>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.cardName} numberOfLines={1}>{item.companyName || item.name}</Text>
+                                                <View style={styles.ratingRow}>
+                                                    <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
+                                                    <Text style={styles.ratingText}>{item.averageRating || '4.5'} ({item.ratingCount || 0})</Text>
+                                                </View>
+                                            </View>
+                                            <View style={styles.viewProfileBtn}>
+                                                <Text style={styles.viewProfileText}>View Profile</Text>
+                                            </View>
+                                        </View>
+                                        <Text style={styles.cardSub} numberOfLines={1}>{item.contractorServices?.join(', ') || 'General Construction'}</Text>
                                     </View>
-                                    <Text style={styles.sub} numberOfLines={1}>
-                                        {(item.contractorServices?.join(', ') || item.shopCategories?.join(', ') || item.category)} • {item.location || 'Nearby'}
-                                    </Text>
-                                    <View style={styles.ratingRow}>
-                                        <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
-                                        <Text style={styles.ratingText}>
-                                            {item.averageRating || item.rating || '0'} ({item.ratingCount || 0}) • {item.distance || '0.5 km'}
-                                        </Text>
-                                        {item.dailyRate > 0 && (
-                                            <Text style={styles.priceTag}>₹{item.dailyRate}/day</Text>
+                                </TouchableOpacity>
+                            );
+                        } else if (item.role === 'worker') {
+                            return (
+                                <TouchableOpacity style={styles.premiumWorkerCard} onPress={() => handleNavigate(item)}>
+                                    <View style={styles.workerAvatarContainer}>
+                                        {isValidUri(item.photoURL) ? (
+                                            <Image source={{ uri: item.photoURL }} style={styles.workerAvatar} />
+                                        ) : (
+                                            <View style={[styles.workerAvatar, styles.avatarPlaceholder]}>
+                                                <MaterialCommunityIcons name="account" size={40} color="black" />
+                                            </View>
                                         )}
+                                        {item.isAvailable !== false && <View style={styles.availableBadge} />}
                                     </View>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    )}
+                                    <View style={styles.workerInfo}>
+                                        <View style={styles.workerHeaderRow}>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.premiumWorkerName} numberOfLines={1}>{item.name}</Text>
+                                                <Text style={styles.workerSkill} numberOfLines={1}>{item.skills?.[0] || 'Worker'}</Text>
+                                            </View>
+                                            <View style={styles.viewProfileBtn}>
+                                                <Text style={styles.viewProfileText}>View Profile</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.workerBottom}>
+                                            <Text style={styles.workerRate}>₹{item.dailyRate || '500'}/day</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        } else if (item.role === 'shop') {
+                            const isOpen = isShopOpen(item.openingTime, item.closingTime);
+                            const shopBannerUri = isValidUri(item.shopBanner) ? item.shopBanner : 'https://images.unsplash.com/photo-1578575437130-527eed3abbec';
+                            return (
+                                <TouchableOpacity style={styles.premiumShopCard} onPress={() => handleNavigate(item)}>
+                                    <Image
+                                        source={{ uri: shopBannerUri }}
+                                        style={styles.shopCover}
+                                    />
+                                    <View style={[
+                                        styles.shopStatusBadge,
+                                        { backgroundColor: isOpen ? '#10b981' : '#ef4444' }
+                                    ]}>
+                                        <Text style={styles.shopStatusText}>{isOpen ? 'OPEN' : 'CLOSED'}</Text>
+                                    </View>
+                                    <View style={styles.shopContent}>
+                                        <View style={styles.shopLogoContainer}>
+                                            {isValidUri(item.shopLogo) ? (
+                                                <Image source={{ uri: item.shopLogo }} style={styles.shopLogo} />
+                                            ) : (
+                                                <View style={styles.avatarPlaceholder}>
+                                                    <MaterialCommunityIcons name="store" size={24} color="black" />
+                                                </View>
+                                            )}
+                                        </View>
+                                        <View style={styles.shopHeaderRow}>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.premiumShopName} numberOfLines={1}>{item.shopName}</Text>
+                                                <Text style={styles.shopCat} numberOfLines={1}>{item.shopCategories?.join(', ') || 'Materials'}</Text>
+                                            </View>
+                                            <View style={styles.viewProfileBtn}>
+                                                <Text style={styles.viewProfileText}>View Shop</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.shopFooter}>
+                                            <MaterialCommunityIcons name="map-marker" size={12} color="#64748b" />
+                                            <Text style={styles.shopDist}>{item.location || 'Nearby'}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        }
+                        return null;
+                    }}
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
                             <MaterialCommunityIcons name="account-search-outline" size={64} color={Colors.light.border} />
@@ -235,88 +313,239 @@ const styles = StyleSheet.create({
     },
     listContent: {
         padding: Spacing.lg,
+        paddingBottom: 40,
     },
-    resultCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
+    // Premium Contractor Card
+    contractorCard: {
+        width: '100%',
         backgroundColor: 'white',
-        borderRadius: 20,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-    },
-    shopCard: {
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        padding: 0,
+        borderRadius: 24,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        marginBottom: 20,
     },
-    cardBannerContainer: {
+    cardCover: {
         width: '100%',
         height: 120,
-    },
-    cardBanner: {
-        width: '100%',
-        height: '100%',
         backgroundColor: '#f1f5f9',
     },
-    bannerPlaceholder: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    cardContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    contractorCardContent: {
         padding: 16,
+        paddingTop: 36,
     },
-    avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: '#f5f5f5',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-        overflow: 'hidden',
+    cardAvatarContainer: {
+        position: 'absolute',
+        top: -30,
+        left: 16,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'white',
+        padding: 4,
+        elevation: 6,
     },
-    avatarImage: {
+    cardAvatar: {
         width: '100%',
         height: '100%',
+        borderRadius: 26,
     },
-    info: {
-        flex: 1,
-    },
-    nameRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    avatarPlaceholder: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 26,
+        backgroundColor: '#f1f5f9',
+        justifyContent: 'center',
         alignItems: 'center',
     },
-    name: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: 'black',
+    contractorHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
     },
-    sub: {
-        fontSize: 13,
-        color: Colors.light.muted,
-        marginTop: 2,
+    viewProfileBtn: {
+        backgroundColor: '#6366f1',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+    },
+    viewProfileText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '800',
+    },
+    cardName: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: '#1e293b',
     },
     ratingRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 4,
-        gap: 4,
+        gap: 6,
+        marginTop: 6,
     },
     ratingText: {
-        fontSize: 12,
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#64748b',
+    },
+    cardSub: {
+        fontSize: 14,
+        color: '#94a3b8',
+        marginTop: 6,
+        fontWeight: '500',
+    },
+    // Premium Worker Card
+    premiumWorkerCard: {
+        width: '100%',
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        borderRadius: 24,
+        padding: 16,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+        elevation: 4,
+        marginBottom: 20,
+    },
+    workerAvatarContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        position: 'relative',
+        marginRight: 16,
+    },
+    workerAvatar: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 40,
+    },
+    availableBadge: {
+        position: 'absolute',
+        bottom: 4,
+        right: 4,
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: '#10b981',
+        borderWidth: 2,
+        borderColor: 'white',
+    },
+    workerInfo: {
+        flex: 1,
+    },
+    workerHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
+    },
+    premiumWorkerName: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: '#1e293b',
+    },
+    workerSkill: {
+        fontSize: 14,
+        color: '#64748b',
+        marginTop: 4,
         fontWeight: '600',
-        color: Colors.light.muted,
+    },
+    workerBottom: {
+        marginTop: 10,
+        backgroundColor: '#f0fdf4',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
+    },
+    workerRate: {
+        fontSize: 13,
+        fontWeight: '900',
+        color: '#10b981',
+    },
+    // Premium Shop Card
+    premiumShopCard: {
+        width: '100%',
+        backgroundColor: 'white',
+        borderRadius: 24,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+        elevation: 4,
+        marginBottom: 20,
+    },
+    shopCover: {
+        width: '100%',
+        height: 110,
+    },
+    shopLogoContainer: {
+        position: 'absolute',
+        top: -30,
+        left: 16,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'white',
+        padding: 4,
+        elevation: 6,
+    },
+    shopLogo: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 26,
+    },
+    shopContent: {
+        padding: 16,
+        paddingTop: 36,
+    },
+    shopHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+    },
+    premiumShopName: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: '#1e293b',
+    },
+    shopCat: {
+        fontSize: 14,
+        color: '#64748b',
+        marginTop: 4,
+        fontWeight: '500',
+    },
+    shopFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginTop: 10,
+    },
+    shopDist: {
+        fontSize: 13,
+        color: '#94a3b8',
+    },
+    shopStatusBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 10,
+        zIndex: 10,
+    },
+    shopStatusText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: '900',
     },
     emptyState: {
         marginTop: 100,
@@ -327,26 +556,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: Colors.light.muted,
         fontWeight: '500',
-    },
-    availableDot: {
-        position: 'absolute',
-        bottom: 2,
-        right: 2,
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: '#4ade80',
-        borderWidth: 2,
-        borderColor: 'white',
-    },
-    priceTag: {
-        marginLeft: 8,
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#10b981',
-        backgroundColor: '#f0fdf4',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 6,
     },
 });

@@ -2,13 +2,17 @@ import DashboardHeader from '@/components/DashboardHeader';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
+import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Image, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ContractorDashboard() {
+    const router = useRouter();
     const { profile } = useAuth();
     const [contracts, setContracts] = useState<Contract[]>([]);
+    const [otherContractors, setOtherContractors] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -16,6 +20,12 @@ export default function ContractorDashboard() {
         try {
             const data = await getAvailableContracts();
             setContracts(data);
+
+
+            const contractorsData = await searchUsers('contractor');
+            // Filter out self
+            const filteredContractors = contractorsData.filter(c => c.id !== profile?.uid && c.uid !== profile?.uid);
+            setOtherContractors(filteredContractors.slice(0, 5));
         } catch (error) {
             console.error(error);
         } finally {
@@ -67,57 +77,94 @@ export default function ContractorDashboard() {
     return (
         <SafeAreaView style={styles.container}>
             <DashboardHeader title={profile?.companyName || profile?.name || "Contractor"} showSearch={false} />
-
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
                 <View style={styles.actionGrid}>
-                    <TouchableOpacity style={styles.actionCard}>
-                        <View style={styles.actionIcon}><MaterialCommunityIcons name="plus-box" size={24} color="white" /></View>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/post-job')}>
+                        <View style={[styles.actionIcon, { backgroundColor: '#2563eb' }]}><MaterialCommunityIcons name="briefcase-plus" size={24} color="white" /></View>
                         <Text style={styles.actionLabel}>Post Job</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionCard}>
-                        <View style={[styles.actionIcon, { backgroundColor: '#333' }]}><MaterialCommunityIcons name="file-document-plus" size={24} color="white" /></View>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/my-posted-jobs')}>
+                        <View style={[styles.actionIcon, { backgroundColor: '#f59e0b' }]}><MaterialCommunityIcons name="briefcase-check" size={24} color="white" /></View>
+                        <Text style={styles.actionLabel}>Posted Jobs</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'worker', title: 'Find Workers' } })}>
+                        <View style={[styles.actionIcon, { backgroundColor: '#db2777' }]}><MaterialCommunityIcons name="account-hard-hat" size={24} color="white" /></View>
+                        <Text style={styles.actionLabel}>Find Workers</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'contractor', title: 'Find Contractors' } })}>
+                        <View style={[styles.actionIcon, { backgroundColor: '#6366f1' }]}><MaterialCommunityIcons name="briefcase-search" size={24} color="white" /></View>
+                        <Text style={styles.actionLabel}>Contractors</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/browse-contracts')}>
+                        <View style={[styles.actionIcon, { backgroundColor: '#8b5cf6' }]}><MaterialCommunityIcons name="text-box-search" size={24} color="white" /></View>
+                        <Text style={styles.actionLabel}>Contracts</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/my-bids')}>
+                        <View style={[styles.actionIcon, { backgroundColor: '#10b981' }]}><MaterialCommunityIcons name="file-document-edit" size={24} color="white" /></View>
                         <Text style={styles.actionLabel}>My Bids</Text>
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>New Contracts</Text>
-                    <TouchableOpacity onPress={onRefresh}><Text style={styles.seeAll}>Refresh</Text></TouchableOpacity>
-                </View>
 
-                {loading ? (
-                    <ActivityIndicator color="black" style={{ marginTop: 20 }} />
-                ) : contracts.length === 0 ? (
-                    <View style={styles.emptyState}>
-                        <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={Colors.light.border} />
-                        <Text style={styles.emptyText}>No new contracts available</Text>
-                    </View>
-                ) : (
-                    contracts.map((item) => (
-                        <View key={item.id} style={styles.contractListCard}>
-                            <View style={styles.cardHeader}>
-                                <Text style={styles.categoryBadge}>{item.category}</Text>
-                                <Text style={styles.applicantText}>{item.applicantCount} Applicants</Text>
-                            </View>
-                            <Text style={styles.contractTitle}>{item.title}</Text>
-                            <Text style={styles.contractBudget}>₹{item.budget}</Text>
-                            <Text style={styles.contractLocation}>
-                                <MaterialCommunityIcons name="map-marker" size={12} color={Colors.light.muted} /> {item.location}
-                            </Text>
-                            <Text style={styles.contractDescription} numberOfLines={2}>{item.description}</Text>
-
-                            <TouchableOpacity
-                                style={styles.applyBtn}
-                                onPress={() => handleApply(item.id!, item.title)}
-                            >
-                                <Text style={styles.applyBtnText}>Apply Now</Text>
+                {otherContractors.length > 0 && (
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Other Contractors</Text>
+                            <TouchableOpacity onPress={() => router.push({ pathname: '/search-results', params: { role: 'contractor', title: 'All Contractors' } })}>
+                                <Text style={styles.seeAll}>See All</Text>
                             </TouchableOpacity>
                         </View>
-                    ))
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
+                            {otherContractors.map((contractor) => (
+                                <TouchableOpacity
+                                    key={contractor.id || contractor.uid}
+                                    style={styles.workerCard}
+                                    onPress={() => router.push({
+                                        pathname: '/user-profile',
+                                        params: {
+                                            id: contractor.uid || contractor.id,
+                                            name: contractor.name,
+                                            role: contractor.role,
+                                            category: contractor.category,
+                                            averageRating: contractor.averageRating?.toString() || contractor.rating || '0',
+                                            ratingCount: contractor.ratingCount?.toString() || '0',
+                                            distance: contractor.distance,
+                                            phoneNumber: contractor.phoneNumber,
+                                            location: contractor.location,
+                                            photoURL: contractor.photoURL,
+                                            companyName: contractor.companyName,
+                                            companyLogo: contractor.companyLogo,
+                                            companyBanner: contractor.companyBanner,
+                                            ownerName: contractor.ownerName,
+                                            contractorServices: JSON.stringify(contractor.contractorServices || []),
+                                            about: contractor.about || "",
+                                            address: contractor.address,
+                                            yearsInBusiness: contractor.yearsInBusiness?.toString()
+                                        }
+                                    })}
+                                >
+                                    <View style={styles.workerAvatar}>
+                                        {(contractor.companyLogo || contractor.photoURL) ? (
+                                            <Image source={{ uri: contractor.companyLogo || contractor.photoURL }} style={styles.avatarImage} />
+                                        ) : (
+                                            <MaterialCommunityIcons name="briefcase" size={30} color="#9ca3af" />
+                                        )}
+                                    </View>
+                                    <Text style={styles.workerName} numberOfLines={1}>{contractor.companyName || contractor.name}</Text>
+                                    <Text style={styles.workerRole} numberOfLines={1}>{(contractor.contractorServices && contractor.contractorServices.length > 0) ? contractor.contractorServices[0] : 'Contractor'}</Text>
+                                    <View style={styles.workerRating}>
+                                        <MaterialCommunityIcons name="star" size={12} color="#f59e0b" />
+                                        <Text style={styles.ratingText}>{contractor.averageRating || '0'} ({contractor.ratingCount || 0})</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
                 )}
+
 
             </ScrollView>
 
@@ -146,11 +193,12 @@ const styles = StyleSheet.create({
     },
     actionGrid: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: Spacing.md,
         marginBottom: Spacing.xl,
     },
     actionCard: {
-        flex: 1,
+        width: '47%',
         backgroundColor: Colors.light.surface,
         padding: Spacing.lg,
         borderRadius: BorderRadius.md,
@@ -267,5 +315,63 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         color: Colors.light.text,
-    }
+    },
+    section: {
+        marginBottom: Spacing.xl,
+    },
+    horizontalList: {
+        paddingRight: Spacing.lg,
+    },
+    workerCard: {
+        width: 140,
+        padding: 12,
+        backgroundColor: 'white',
+        borderRadius: 16,
+        marginRight: 12,
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    workerAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#f3f4f6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+        overflow: 'hidden',
+    },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+    },
+    workerName: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#111827',
+        textAlign: 'center',
+    },
+    workerRole: {
+        fontSize: 12,
+        color: '#6b7280',
+        textAlign: 'center',
+        marginTop: 2,
+    },
+    workerRating: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+        gap: 4,
+    },
+    ratingText: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: '#4b5563',
+    },
 });

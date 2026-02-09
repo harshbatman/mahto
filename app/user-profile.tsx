@@ -15,7 +15,7 @@ export default function UserProfileScreen() {
     const router = useRouter();
     const { user: currentUser, profile: currentProfile } = useAuth();
     const params = useLocalSearchParams();
-    const { id: profileUid, name, shopOwnerName, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable, shopCategories: shopCategoriesStr, shopLogo: paramShopLogo, shopBanner: paramShopBanner, openingTime: paramOpeningTime, closingTime: paramClosingTime, address: paramAddress, companyName, companyLogo, companyBanner, ownerName, contractorServices: contractorServicesStr } = params;
+    const { id: profileUid, name, shopOwnerName, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable, shopCategories: shopCategoriesStr, shopLogo: paramShopLogo, shopBanner: paramShopBanner, openingTime: paramOpeningTime, closingTime: paramClosingTime, address: paramAddress, companyName, companyLogo, companyBanner, ownerName, contractorServices: contractorServicesStr, yearsInBusiness: paramYearsInBusiness } = params;
     const isActuallyAvailable = isAvailable === 'true';
     const skills = skillsStr ? JSON.parse(skillsStr as string) : [];
     const shopCategories = shopCategoriesStr ? JSON.parse(shopCategoriesStr as string) : [];
@@ -40,18 +40,24 @@ export default function UserProfileScreen() {
         const uid = Array.isArray(params.id) ? params.id[0] : params.id;
         if (!uid) return;
 
+        const sanitizeUri = (uri: string | undefined): string | undefined => {
+            if (!uri) return undefined;
+            if (uri.startsWith('file://')) return undefined; // Don't try to render local URIs
+            return uri;
+        };
+
         const fetchData = async () => {
             try {
                 // Fetch Profile
                 const userProfile = await getUserProfile(uid);
                 if (userProfile) {
                     setFreshProfile(userProfile);
-                    if (userProfile.shopLogo) setDisplayPhoto(userProfile.shopLogo);
-                    else if (userProfile.companyLogo) setDisplayPhoto(userProfile.companyLogo);
-                    else if (userProfile.photoURL) setDisplayPhoto(userProfile.photoURL);
 
-                    if (userProfile.shopBanner) setDisplayBanner(userProfile.shopBanner);
-                    else if (userProfile.companyBanner) setDisplayBanner(userProfile.companyBanner);
+                    const photo = sanitizeUri(userProfile.shopLogo || userProfile.companyLogo || userProfile.photoURL);
+                    if (photo) setDisplayPhoto(photo);
+
+                    const banner = sanitizeUri(userProfile.shopBanner || userProfile.companyBanner);
+                    if (banner) setDisplayBanner(banner);
                 }
 
                 // Fetch Products if it's a shop
@@ -64,22 +70,21 @@ export default function UserProfileScreen() {
                 const data = await getWorkerReviews(uid);
                 setReviews(data.sort((a: any, b: any) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)));
             } catch (error) {
-                console.error(error);
+                console.error("Profile Fetch Error:", error);
             } finally {
                 setLoadingReviews(false);
             }
         };
 
         // Initialize with params if available
-        if (paramShopLogo) setDisplayPhoto(paramShopLogo as string);
-        else if (companyLogo) setDisplayPhoto(companyLogo as string);
-        else if (params.photoURL) setDisplayPhoto(params.photoURL as string);
+        const paramPhoto = sanitizeUri((paramShopLogo || companyLogo || params.photoURL) as string);
+        if (paramPhoto) setDisplayPhoto(paramPhoto);
 
-        if (paramShopBanner) setDisplayBanner(paramShopBanner as string);
-        else if (companyBanner) setDisplayBanner(companyBanner as string);
+        const paramBanner = sanitizeUri((paramShopBanner || companyBanner) as string);
+        if (paramBanner) setDisplayBanner(paramBanner);
 
         fetchData();
-    }, [params.id, paramShopLogo, paramShopBanner, params.photoURL]);
+    }, [params.id, paramShopLogo, paramShopBanner, params.photoURL, companyLogo, companyBanner]);
 
     const handleCall = () => {
         if (phoneNumber) Linking.openURL(`tel:${phoneNumber}`);
@@ -196,7 +201,7 @@ export default function UserProfileScreen() {
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{freshProfile?.experienceYears || experienceYears || '0'}yr</Text>
+                            <Text style={styles.statValue}>{freshProfile?.yearsInBusiness || paramYearsInBusiness || freshProfile?.experienceYears || experienceYears || '0'}yr</Text>
                             <Text style={styles.statLabel}>{role === 'shop' || role === 'contractor' ? 'In Business' : 'Experience'}</Text>
                         </View>
                         <View style={styles.statDivider} />
@@ -214,7 +219,7 @@ export default function UserProfileScreen() {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{role === 'shop' ? 'Shop Information' : 'Contact & Location'}</Text>
                         <View style={styles.infoCard}>
-                            {role === 'shop' && (
+                            {role === 'shop' ? (
                                 <>
                                     <View style={styles.infoRow}>
                                         <MaterialCommunityIcons name="clock-outline" size={20} color={Colors.light.muted} />
@@ -227,11 +232,10 @@ export default function UserProfileScreen() {
                                         <Text style={styles.infoText}>{freshProfile?.address || paramAddress || location || 'Address not provided'}</Text>
                                     </View>
                                 </>
-                            )}
-                            {role !== 'shop' && (
+                            ) : (
                                 <View style={styles.infoRow}>
                                     <MaterialCommunityIcons name="map-marker-radius" size={20} color={Colors.light.muted} />
-                                    <Text style={styles.infoText}>{location || 'Address not provided'}</Text>
+                                    <Text style={styles.infoText}>{freshProfile?.address || paramAddress || location || 'Address not provided'}</Text>
                                 </View>
                             )}
                         </View>
@@ -395,7 +399,7 @@ export default function UserProfileScreen() {
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 {/* Horizontal Image Slider */}
                                 <FlatList
-                                    data={selectedProduct.images}
+                                    data={selectedProduct?.images || []}
                                     keyExtractor={(img, index) => index.toString()}
                                     horizontal
                                     pagingEnabled
@@ -406,19 +410,19 @@ export default function UserProfileScreen() {
                                 />
 
                                 <View style={styles.productDetailInfo}>
-                                    <Text style={styles.productDetailTitle}>{selectedProduct.title}</Text>
+                                    <Text style={styles.productDetailTitle}>{selectedProduct?.title}</Text>
                                     <View style={styles.priceContainer}>
-                                        {selectedProduct.contactForPrice ? (
+                                        {selectedProduct?.contactForPrice ? (
                                             <View style={styles.contactBadge}>
                                                 <Text style={styles.contactBadgeText}>Contact for Price</Text>
                                             </View>
                                         ) : (
-                                            <Text style={styles.productDetailPrice}>₹{selectedProduct.price}</Text>
+                                            <Text style={styles.productDetailPrice}>₹{selectedProduct?.price}</Text>
                                         )}
                                     </View>
 
                                     <Text style={styles.productDetailDescLabel}>Description</Text>
-                                    <Text style={styles.productDetailDesc}>{selectedProduct.description || 'No description provided.'}</Text>
+                                    <Text style={styles.productDetailDesc}>{selectedProduct?.description || 'No description provided.'}</Text>
 
                                     <TouchableOpacity style={styles.inquiryBtn} onPress={handleCall}>
                                         <MaterialCommunityIcons name="phone" size={20} color="white" />

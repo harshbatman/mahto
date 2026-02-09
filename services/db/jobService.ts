@@ -1,13 +1,24 @@
 import { db } from '@/lib/firebase';
-import { addDoc, collection, doc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+
+export interface JobSkill {
+    skillId: string;
+    skillName: string;
+    count: number;
+}
 
 export interface Job {
     id?: string;
     homeownerId: string;
     homeownerName: string;
     title: string;
-    category: string; // Mason, Painter, Electrician, etc.
-    wage: string; // Daily wage in ₹
+    category: string; // Maintain for backward compatibility or primary category
+    selectedWorkers: JobSkill[];
+    paymentType: 'Daily' | 'Monthly';
+    wage: string;
+    toolsProvided: boolean;
+    foodProvided: boolean;
+    stayProvided: boolean;
     description: string;
     location: string;
     status: 'open' | 'active' | 'completed';
@@ -34,11 +45,27 @@ export const postJob = async (job: Omit<Job, 'id' | 'createdAt' | 'status' | 'ap
 export const getAvailableJobs = async () => {
     try {
         const jobsRef = collection(db, 'jobs');
-        const q = query(jobsRef, where('status', '==', 'open'), orderBy('createdAt', 'desc'));
+        const q = query(jobsRef, where('status', '==', 'open'));
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+        return querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Job))
+            .sort((a, b) => b.createdAt - a.createdAt);
     } catch (error) {
         console.error("Error fetching jobs:", error);
+        throw error;
+    }
+};
+
+export const getPostedJobs = async (userId: string) => {
+    try {
+        const jobsRef = collection(db, 'jobs');
+        const q = query(jobsRef, where('homeownerId', '==', userId));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Job))
+            .sort((a, b) => b.createdAt - a.createdAt);
+    } catch (error) {
+        console.error("Error fetching posted jobs:", error);
         throw error;
     }
 };

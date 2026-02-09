@@ -4,7 +4,7 @@ import { deleteProduct, getShopProducts, Product } from '@/services/db/productSe
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -13,6 +13,8 @@ export default function MyShopViewScreen() {
     const router = useRouter();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [productModalVisible, setProductModalVisible] = useState(false);
 
     const fetchProducts = async () => {
         if (!user) return;
@@ -48,9 +50,16 @@ export default function MyShopViewScreen() {
         ]);
     };
 
+    const openProduct = (product: Product) => {
+        setSelectedProduct(product);
+        setProductModalVisible(true);
+    };
+
     const renderProductItem = (item: Product) => (
         <View key={item.id} style={styles.productCard}>
-            <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+            <TouchableOpacity onPress={() => openProduct(item)}>
+                <Image source={{ uri: item.images[0] }} style={styles.productImage} />
+            </TouchableOpacity>
             <View style={styles.productInfo}>
                 <Text style={styles.productTitle} numberOfLines={1}>{item.title}</Text>
                 <Text style={styles.productPrice}>
@@ -194,6 +203,80 @@ export default function MyShopViewScreen() {
                     </View>
                 </View>
             </ScrollView>
+
+            {/* Product Detail Modal - Matching user-profile.tsx */}
+            <Modal
+                visible={productModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setProductModalVisible(false)}
+            >
+                <View style={styles.productModalOverlay}>
+                    <View style={styles.productModalContent}>
+                        <TouchableOpacity
+                            style={styles.closeModalBtn}
+                            onPress={() => setProductModalVisible(false)}
+                        >
+                            <MaterialCommunityIcons name="close" size={28} color="black" />
+                        </TouchableOpacity>
+
+                        {selectedProduct && (
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                {/* Horizontal Image Slider */}
+                                <FlatList
+                                    data={selectedProduct?.images || []}
+                                    keyExtractor={(img, index) => index.toString()}
+                                    horizontal
+                                    pagingEnabled
+                                    showsHorizontalScrollIndicator={false}
+                                    renderItem={({ item }) => (
+                                        <Image source={{ uri: item }} style={styles.fullProductImage} />
+                                    )}
+                                />
+
+                                <View style={styles.productDetailInfo}>
+                                    <Text style={styles.productDetailTitle}>{selectedProduct?.title}</Text>
+                                    <View style={styles.priceContainer}>
+                                        {selectedProduct?.contactForPrice ? (
+                                            <View style={styles.contactBadge}>
+                                                <Text style={styles.contactBadgeText}>Contact for Price</Text>
+                                            </View>
+                                        ) : (
+                                            <Text style={styles.productDetailPrice}>₹{selectedProduct?.price}</Text>
+                                        )}
+                                    </View>
+
+                                    <Text style={styles.productDetailDescLabel}>Description</Text>
+                                    <Text style={styles.productDetailDesc}>{selectedProduct?.description || 'No description provided.'}</Text>
+
+                                    <View style={styles.modalActionRow}>
+                                        <TouchableOpacity
+                                            style={styles.modalEditBtn}
+                                            onPress={() => {
+                                                setProductModalVisible(false);
+                                                router.push({
+                                                    pathname: '/manage-product',
+                                                    params: {
+                                                        id: selectedProduct.id,
+                                                        title: selectedProduct.title,
+                                                        description: selectedProduct.description,
+                                                        price: selectedProduct.price?.toString(),
+                                                        contactForPrice: selectedProduct.contactForPrice.toString(),
+                                                        images: JSON.stringify(selectedProduct.images)
+                                                    }
+                                                });
+                                            }}
+                                        >
+                                            <MaterialCommunityIcons name="pencil" size={20} color="white" />
+                                            <Text style={styles.modalBtnText}>Edit Product</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </ScrollView>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -238,5 +321,21 @@ const styles = StyleSheet.create({
     infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     infoText: { fontSize: 14, color: '#1e293b', flex: 1 },
     editProfileFullBtn: { backgroundColor: 'black', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 20, gap: 10, marginTop: 8, marginBottom: 40 },
-    editBtnFullText: { color: 'white', fontSize: 16, fontWeight: '800' }
+    editBtnFullText: { color: 'white', fontSize: 16, fontWeight: '800' },
+    // Modal Styles
+    productModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+    productModalContent: { width: width * 0.9, maxHeight: '85%', backgroundColor: 'white', borderRadius: 32, overflow: 'hidden', position: 'relative' },
+    closeModalBtn: { position: 'absolute', top: 20, right: 20, zIndex: 10, backgroundColor: 'white', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', elevation: 5 },
+    fullProductImage: { width: width * 0.9, aspectRatio: 1 },
+    productDetailInfo: { padding: 24 },
+    productDetailTitle: { fontSize: 24, fontWeight: '900', color: '#1e293b' },
+    priceContainer: { marginTop: 12, marginBottom: 20 },
+    productDetailPrice: { fontSize: 22, fontWeight: '800', color: '#10b981' },
+    contactBadge: { backgroundColor: '#f0fdf4', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, alignSelf: 'flex-start', borderWidth: 1, borderColor: '#bbf7d0' },
+    contactBadgeText: { color: '#166534', fontWeight: '800', fontSize: 14 },
+    productDetailDescLabel: { fontSize: 16, fontWeight: '800', color: '#1e293b', marginBottom: 8 },
+    productDetailDesc: { fontSize: 15, color: '#64748b', lineHeight: 22, marginBottom: 24 },
+    modalActionRow: { marginTop: 8 },
+    modalEditBtn: { backgroundColor: '#6366f1', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 20, gap: 10 },
+    modalBtnText: { color: 'white', fontWeight: '800', fontSize: 16 }
 });

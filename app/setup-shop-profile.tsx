@@ -1,6 +1,7 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { saveUserProfile } from '@/services/db/userProfile';
+import { uploadImage } from '@/services/storage/imageService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -86,13 +87,24 @@ export default function SetupShopProfileScreen() {
         try {
             if (!user) return;
 
+            let bannerUrl = shopBanner || undefined;
+            if (shopBanner && shopBanner.startsWith('file://')) {
+                bannerUrl = await uploadImage(shopBanner, `shops/banners/${user.uid}_${Date.now()}.jpg`);
+            }
+
+            let logoUrl = shopLogo || undefined;
+            if (shopLogo && shopLogo.startsWith('file://')) {
+                logoUrl = await uploadImage(shopLogo, `shops/logos/${user.uid}_${Date.now()}.jpg`);
+            }
+
             await saveUserProfile({
                 ...profile!,
                 shopName,
                 shopOwnerName,
                 address,
-                shopBanner: shopBanner || undefined,
-                shopLogo: shopLogo || undefined,
+                shopBanner: bannerUrl,
+                shopLogo: logoUrl,
+                photoURL: logoUrl,
                 shopCategories: categories,
                 openingTime,
                 closingTime,

@@ -1,6 +1,7 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { saveUserProfile } from '@/services/db/userProfile';
+import { uploadImage } from '@/services/storage/imageService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -100,6 +101,16 @@ export default function SetupContractorProfileScreen() {
         try {
             if (!user || !profile) return;
 
+            let bannerUrl = companyBanner || undefined;
+            if (companyBanner && companyBanner.startsWith('file://')) {
+                bannerUrl = await uploadImage(companyBanner, `contractors/banners/${user.uid}_${Date.now()}.jpg`);
+            }
+
+            let logoUrl = companyLogo || undefined;
+            if (companyLogo && companyLogo.startsWith('file://')) {
+                logoUrl = await uploadImage(companyLogo, `contractors/logos/${user.uid}_${Date.now()}.jpg`);
+            }
+
             // Process services string into array
             const servicesArray = services.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
@@ -108,8 +119,9 @@ export default function SetupContractorProfileScreen() {
                 companyName,
                 ownerName,
                 address,
-                companyBanner: companyBanner || undefined,
-                companyLogo: companyLogo || undefined,
+                companyBanner: bannerUrl,
+                companyLogo: logoUrl,
+                photoURL: logoUrl,
                 contractorServices: servicesArray,
                 yearsInBusiness: parseInt(yearsInBusiness) || 0,
                 about,

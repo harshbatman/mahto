@@ -16,14 +16,15 @@ export default function UserProfileScreen() {
     const { user: currentUser, profile: currentProfile } = useAuth();
     const params = useLocalSearchParams();
     const { id: profileUid, name, shopOwnerName, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable, shopCategories: shopCategoriesStr, shopLogo: paramShopLogo, shopBanner: paramShopBanner, openingTime: paramOpeningTime, closingTime: paramClosingTime, address: paramAddress, companyName, companyLogo, companyBanner, ownerName, contractorServices: contractorServicesStr, yearsInBusiness: paramYearsInBusiness } = params;
-    const isActuallyAvailable = isAvailable === 'true';
-    const skills = skillsStr ? JSON.parse(skillsStr as string) : [];
-    const shopCategories = shopCategoriesStr ? JSON.parse(shopCategoriesStr as string) : [];
-    const contractorServices = contractorServicesStr ? JSON.parse(contractorServicesStr as string) : [];
-
+    const [freshProfile, setFreshProfile] = useState<UserProfile | null>(null);
     const [displayPhoto, setDisplayPhoto] = useState<string | undefined>(undefined);
     const [displayBanner, setDisplayBanner] = useState<string | undefined>(undefined);
-    const [freshProfile, setFreshProfile] = useState<UserProfile | null>(null);
+
+    const isActuallyAvailable = isAvailable === 'true' || freshProfile?.isAvailable;
+    const skills = freshProfile?.skills || (skillsStr ? JSON.parse(skillsStr as string) : []);
+    const shopCategories = freshProfile?.shopCategories || (shopCategoriesStr ? JSON.parse(shopCategoriesStr as string) : []);
+    const contractorServices = freshProfile?.contractorServices || (contractorServicesStr ? JSON.parse(contractorServicesStr as string) : []);
+    const displayAbout = freshProfile?.about || about;
     const [ratingModalVisible, setRatingModalVisible] = useState(false);
     const [selectedRating, setSelectedRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -152,7 +153,7 @@ export default function UserProfileScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{name}</Text>
+                <Text style={styles.headerTitle}>{freshProfile?.name || name || 'Profile'}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -176,17 +177,17 @@ export default function UserProfileScreen() {
                         )}
                     </View>
                     <Text style={styles.userName}>
-                        {role === 'shop' ? (freshProfile?.shopName || name) : role === 'contractor' ? (freshProfile?.companyName || companyName || name) : name}
+                        {role === 'shop' || freshProfile?.role === 'shop' ? (freshProfile?.shopName || freshProfile?.name || name) : role === 'contractor' || freshProfile?.role === 'contractor' ? (freshProfile?.companyName || companyName || freshProfile?.name || name) : (freshProfile?.name || name)}
                     </Text>
                     <Text style={styles.userRole}>
-                        {role === 'shop' ? (freshProfile?.shopCategories?.join(', ') || category) : role === 'contractor' ? (freshProfile?.contractorServices?.join(', ') || contractorServices?.join(', ') || category) : (role === 'worker' ? category : role)}
+                        {role === 'shop' || freshProfile?.role === 'shop' ? (freshProfile?.shopCategories?.join(', ') || category) : role === 'contractor' || freshProfile?.role === 'contractor' ? (freshProfile?.contractorServices?.join(', ') || contractorServices?.join(', ') || category) : (freshProfile?.category || category)}
                     </Text>
-                    {role === 'shop' && (freshProfile?.shopOwnerName || shopOwnerName) && (
+                    {(role === 'shop' || freshProfile?.role === 'shop') && (freshProfile?.shopOwnerName || shopOwnerName) && (
                         <Text style={[styles.userRole, { marginTop: 2, fontSize: 13, fontWeight: '600' }]}>
                             Owner: {freshProfile?.shopOwnerName || shopOwnerName}
                         </Text>
                     )}
-                    {role === 'contractor' && (freshProfile?.ownerName || ownerName) && (
+                    {(role === 'contractor' || freshProfile?.role === 'contractor') && (freshProfile?.ownerName || ownerName) && (
                         <Text style={[styles.userRole, { marginTop: 2, fontSize: 13, fontWeight: '600' }]}>
                             Owner: {freshProfile?.ownerName || ownerName}
                         </Text>
@@ -215,9 +216,9 @@ export default function UserProfileScreen() {
 
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{role === 'shop' ? 'Shop Information' : 'Contact & Location'}</Text>
+                        <Text style={styles.sectionTitle}>{role === 'shop' || freshProfile?.role === 'shop' ? 'Shop Information' : 'Contact & Location'}</Text>
                         <View style={styles.infoCard}>
-                            {role === 'shop' ? (
+                            {role === 'shop' || freshProfile?.role === 'shop' ? (
                                 <>
                                     <View style={styles.infoRow}>
                                         <MaterialCommunityIcons name="clock-outline" size={20} color={Colors.light.muted} />
@@ -227,17 +228,52 @@ export default function UserProfileScreen() {
                                     </View>
                                     <View style={[styles.infoRow, { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f1f5f9' }]}>
                                         <MaterialCommunityIcons name="map-marker-outline" size={20} color={Colors.light.muted} />
-                                        <Text style={styles.infoText}>{freshProfile?.address || paramAddress || location || 'Address not provided'}</Text>
+                                        <Text style={styles.infoText}>{freshProfile?.address || paramAddress || freshProfile?.location || location || 'Address not provided'}</Text>
                                     </View>
                                 </>
                             ) : (
                                 <View style={styles.infoRow}>
                                     <MaterialCommunityIcons name="map-marker-radius" size={20} color={Colors.light.muted} />
-                                    <Text style={styles.infoText}>{freshProfile?.address || paramAddress || location || 'Address not provided'}</Text>
+                                    <Text style={styles.infoText}>{freshProfile?.address || paramAddress || freshProfile?.location || location || 'Address not provided'}</Text>
                                 </View>
                             )}
                         </View>
                     </View>
+
+                    {displayAbout && (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>About</Text>
+                            <View style={styles.infoCard}>
+                                <Text style={styles.aboutText}>{displayAbout}</Text>
+                            </View>
+                        </View>
+                    )}
+
+                    {((role === 'worker' || freshProfile?.role === 'worker') && skills.length > 0) && (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Skills & Expertise</Text>
+                            <View style={styles.skillsContainer}>
+                                {skills.map((skill: string, index: number) => (
+                                    <View key={index} style={styles.skillBadge}>
+                                        <Text style={styles.skillBadgeText}>{skill}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
+                    {((role === 'contractor' || freshProfile?.role === 'contractor') && contractorServices.length > 0) && (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Services Offered</Text>
+                            <View style={styles.skillsContainer}>
+                                {contractorServices.map((service: string, index: number) => (
+                                    <View key={index} style={styles.skillBadge}>
+                                        <Text style={styles.skillBadgeText}>{service}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
 
 
 
@@ -654,5 +690,23 @@ const styles = StyleSheet.create({
     productDetailDescLabel: { fontSize: 16, fontWeight: '800', color: '#1e293b', marginBottom: 8 },
     productDetailDesc: { fontSize: 15, color: '#64748b', lineHeight: 22, marginBottom: 24 },
     inquiryBtn: { backgroundColor: 'black', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 20, borderRadius: 20, gap: 10 },
-    inquiryBtnText: { color: 'white', fontWeight: '800', fontSize: 16 }
+    inquiryBtnText: { color: 'white', fontWeight: '800', fontSize: 16 },
+    skillsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    skillBadge: {
+        backgroundColor: '#eff6ff',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#dbeafe',
+    },
+    skillBadgeText: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#1d4ed8',
+    },
 });

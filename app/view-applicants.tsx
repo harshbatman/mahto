@@ -48,7 +48,7 @@ export default function ViewApplicantsScreen() {
                     style={styles.viewProfileBtn}
                     onPress={() => router.push({
                         pathname: '/user-profile',
-                        params: { uid: item.workerId }
+                        params: { id: item.workerId }
                     })}
                 >
                     <Text style={styles.viewProfileText}>View Profile</Text>

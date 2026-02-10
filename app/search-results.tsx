@@ -1,3 +1,6 @@
+import { CONTRACTOR_SERVICES } from '@/constants/contractorServices';
+import { SHOP_CATEGORIES } from '@/constants/shopCategories';
+import { SKILLS_DATA } from '@/constants/skills';
 import { Colors, Spacing } from '@/constants/theme';
 import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -15,13 +18,16 @@ export default function SearchResultsScreen() {
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [minRating, setMinRating] = useState(0);
     const [onlyAvailable, setOnlyAvailable] = useState(false);
+    const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+    const [selectedShopCategories, setSelectedShopCategories] = useState<string[]>([]);
+    const [selectedContractorServices, setSelectedContractorServices] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchResults = async () => {
             try {
                 const data = await searchUsers(role);
                 setResults(data);
-                applyFilters(data, searchQuery, minRating, onlyAvailable);
+                applyFilters(data, searchQuery, minRating, onlyAvailable, selectedSkills, selectedShopCategories, selectedContractorServices);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -31,7 +37,7 @@ export default function SearchResultsScreen() {
         fetchResults();
     }, [role]);
 
-    const applyFilters = (data: any[], query: string, rating: number, available: boolean) => {
+    const applyFilters = (data: any[], query: string, rating: number, available: boolean, skills: string[], shopCats: string[], contractorServices: string[]) => {
         let filtered = [...data];
 
         if (query) {
@@ -52,16 +58,58 @@ export default function SearchResultsScreen() {
             filtered = filtered.filter(item => item.isAvailable !== false);
         }
 
+        if (skills.length > 0 && role === 'worker') {
+            filtered = filtered.filter(item =>
+                (item.skills || []).some((s: string) => skills.includes(s))
+            );
+        }
+
+        if (shopCats.length > 0 && role === 'shop') {
+            filtered = filtered.filter(item =>
+                (item.shopCategories || []).some((c: string) => shopCats.includes(c))
+            );
+        }
+
+        if (contractorServices.length > 0 && role === 'contractor') {
+            filtered = filtered.filter(item =>
+                (item.contractorServices || []).some((s: string) => contractorServices.includes(s))
+            );
+        }
+
         setFilteredResults(filtered);
+    };
+
+    const toggleSkill = (skillName: string) => {
+        if (selectedSkills.includes(skillName)) {
+            setSelectedSkills((prev: string[]) => prev.filter((s: string) => s !== skillName));
+        } else {
+            setSelectedSkills((prev: string[]) => [...prev, skillName]);
+        }
+    };
+
+    const toggleShopCategory = (catName: string) => {
+        if (selectedShopCategories.includes(catName)) {
+            setSelectedShopCategories((prev: string[]) => prev.filter((c: string) => c !== catName));
+        } else {
+            setSelectedShopCategories((prev: string[]) => [...prev, catName]);
+        }
+    };
+
+    const toggleContractorService = (serviceName: string) => {
+        if (selectedContractorServices.includes(serviceName)) {
+            setSelectedContractorServices((prev: string[]) => prev.filter((s: string) => s !== serviceName));
+        } else {
+            setSelectedContractorServices((prev: string[]) => [...prev, serviceName]);
+        }
     };
 
     const handleSearch = (text: string) => {
         setSearchQuery(text);
-        applyFilters(results, text, minRating, onlyAvailable);
+        applyFilters(results, text, minRating, onlyAvailable, selectedSkills, selectedShopCategories, selectedContractorServices);
     };
 
     const handleApplyFilters = () => {
-        applyFilters(results, searchQuery, minRating, onlyAvailable);
+        applyFilters(results, searchQuery, minRating, onlyAvailable, selectedSkills, selectedShopCategories, selectedContractorServices);
         setShowFilterModal(false);
     };
 
@@ -350,6 +398,94 @@ export default function SearchResultsScreen() {
                                             <View style={[styles.switchKnob, onlyAvailable && styles.switchKnobOn]} />
                                         </View>
                                     </TouchableOpacity>
+                                    <Text style={styles.filterLabel}>Worker Skills</Text>
+                                    <View style={styles.skillsGrid}>
+                                        {SKILLS_DATA.map((item) => {
+                                            const isSelected = selectedSkills.includes(item.name);
+                                            return (
+                                                <TouchableOpacity
+                                                    key={item.id}
+                                                    style={[styles.smallSkillCard, isSelected && styles.smallSelectedCard]}
+                                                    onPress={() => toggleSkill(item.name)}
+                                                    activeOpacity={0.7}
+                                                >
+                                                    <Image source={item.image} style={styles.smallSkillImage} resizeMode="cover" />
+                                                    <View style={[styles.smallOverlay, isSelected && styles.smallSelectedOverlay]}>
+                                                        <Text style={[styles.smallSkillName, isSelected && styles.smallSelectedText]} numberOfLines={1}>{item.name}</Text>
+                                                    </View>
+                                                    {isSelected && (
+                                                        <View style={styles.smallCheckIcon}>
+                                                            <MaterialCommunityIcons name="check-circle" size={16} color="#10b981" />
+                                                        </View>
+                                                    )}
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </View>
+                                </>
+                            )}
+
+                            {role === 'shop' && (
+                                <>
+                                    <Text style={styles.filterLabel}>Shop Categories</Text>
+                                    <View style={styles.skillsGrid}>
+                                        {SHOP_CATEGORIES.map((item) => {
+                                            const isSelected = selectedShopCategories.includes(item.name);
+                                            return (
+                                                <TouchableOpacity
+                                                    key={item.id}
+                                                    style={[styles.smallSkillCard, isSelected && styles.smallSelectedCard]}
+                                                    onPress={() => toggleShopCategory(item.name)}
+                                                    activeOpacity={0.7}
+                                                >
+                                                    <Image source={item.image} style={styles.smallSkillImage} resizeMode="cover" />
+                                                    <View style={[styles.smallOverlay, isSelected && styles.smallSelectedOverlay]}>
+                                                        <Text style={[styles.smallSkillName, isSelected && styles.smallSelectedText]} numberOfLines={1}>{item.name}</Text>
+                                                    </View>
+                                                    {isSelected && (
+                                                        <View style={styles.smallCheckIcon}>
+                                                            <MaterialCommunityIcons name="check-circle" size={16} color="#10b981" />
+                                                        </View>
+                                                    )}
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </View>
+                                </>
+                            )}
+
+                            {role === 'contractor' && (
+                                <>
+                                    <Text style={styles.filterLabel}>Contractor Services</Text>
+                                    <View style={styles.skillsGrid}>
+                                        {CONTRACTOR_SERVICES.map((item) => {
+                                            const isSelected = selectedContractorServices.includes(item.name);
+                                            return (
+                                                <TouchableOpacity
+                                                    key={item.id}
+                                                    style={[styles.smallSkillCard, isSelected && styles.smallSelectedCard, styles.iconCard]}
+                                                    onPress={() => toggleContractorService(item.name)}
+                                                    activeOpacity={0.7}
+                                                >
+                                                    <View style={styles.iconContainer}>
+                                                        <MaterialCommunityIcons
+                                                            name={item.icon as any}
+                                                            size={32}
+                                                            color={isSelected ? Colors.light.tint || 'black' : '#64748b'}
+                                                        />
+                                                    </View>
+                                                    <View style={[styles.smallOverlay, isSelected && styles.smallSelectedOverlay]}>
+                                                        <Text style={[styles.smallSkillName, isSelected && styles.smallSelectedText]} numberOfLines={1}>{item.name}</Text>
+                                                    </View>
+                                                    {isSelected && (
+                                                        <View style={styles.smallCheckIcon}>
+                                                            <MaterialCommunityIcons name="check-circle" size={16} color="#10b981" />
+                                                        </View>
+                                                    )}
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </View>
                                 </>
                             )}
                         </ScrollView>
@@ -360,6 +496,9 @@ export default function SearchResultsScreen() {
                                 onPress={() => {
                                     setMinRating(0);
                                     setOnlyAvailable(false);
+                                    setSelectedSkills([]);
+                                    setSelectedShopCategories([]);
+                                    setSelectedContractorServices([]);
                                 }}
                             >
                                 <Text style={styles.resetBtnText}>Reset</Text>
@@ -374,7 +513,7 @@ export default function SearchResultsScreen() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -804,5 +943,75 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '800',
         color: 'white',
+    },
+    // New Skill Filter Styles
+    skillsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        justifyContent: 'flex-start',
+        marginTop: 10,
+    },
+    smallSkillCard: {
+        width: '31%',
+        aspectRatio: 1,
+        borderRadius: 12,
+        overflow: 'hidden',
+        backgroundColor: '#f3f4f6',
+        position: 'relative',
+        marginBottom: 4,
+    },
+    smallSelectedCard: {
+        borderWidth: 2,
+        borderColor: 'black',
+    },
+    smallSkillImage: {
+        width: '100%',
+        height: '100%',
+        zIndex: 1,
+    },
+    smallSelectedOverlay: {
+        backgroundColor: 'rgba(255,255,255,0.7)',
+        zIndex: 2,
+    },
+    smallOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 4,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        zIndex: 2,
+    },
+    smallSkillName: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: '800',
+        textAlign: 'center',
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: { width: -1, height: 1 },
+        textShadowRadius: 10
+    },
+    smallSelectedText: {
+        color: 'black',
+    },
+    smallCheckIcon: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        zIndex: 10,
+    },
+    iconCard: {
+        backgroundColor: '#f8fafc',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    iconContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingBottom: 20, // Space for label overlay
     },
 });

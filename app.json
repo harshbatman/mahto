@@ -3,7 +3,7 @@
     "name": "Harsh MAHTO",
     "slug": "mahto",
     "owner": "mahtobuild",
-    "version": "1.1.15",
+    "version": "1.1.16",
     "orientation": "portrait",
     "icon": "./assets/images/mahto-icon.png",
     "scheme": "ionizedvoid",
@@ -15,8 +15,8 @@
     },
     "android": {
       "package": "com.harsh.mahto",
-      "versionCode": 15,
-      "versionName": "1.1.15",
+      "versionCode": 16,
+      "versionName": "1.1.16",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#000000",

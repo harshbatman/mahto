@@ -1,6 +1,8 @@
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const roles = [
@@ -32,6 +34,14 @@ const roles = [
 
 export default function RoleSelection() {
     const router = useRouter();
+    const { user, profile, loading } = useAuth();
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!loading && user && profile) {
+            router.replace(`/${profile.role}` as any);
+        }
+    }, [user, profile, loading]);
 
     const handleRoleSelect = (roleId: string) => {
         // Navigate to registration with the selected role

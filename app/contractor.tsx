@@ -7,7 +7,7 @@ import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Image, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, BackHandler, Image, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ContractorDashboard() {
     const router = useRouter();
@@ -16,6 +16,24 @@ export default function ContractorDashboard() {
     const [otherContractors, setOtherContractors] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        const backAction = () => {
+            if (router.canGoBack()) {
+                router.back();
+            } else {
+                BackHandler.exitApp();
+            }
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
 
     const fetchContracts = async () => {
         try {

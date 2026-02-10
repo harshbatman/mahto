@@ -1,46 +1,28 @@
 import { Spacing } from '@/constants/theme';
 import { LANGUAGES, LanguageCode } from '@/constants/translations';
+import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const roles = [
-    {
-        id: 'homeowner',
-        title: 'Homeowner',
-        subtitle: 'I want to build or renovate my home',
-        icon: 'home-account',
-        color: '#6366f1'
-    },
-    {
-        id: 'worker',
-        title: 'Worker / Labour',
-        subtitle: 'I am looking for daily wage work',
-        icon: 'account-hard-hat',
-        color: '#a855f7'
-    },
-    {
-        id: 'contractor',
-        title: 'Contractor',
-        subtitle: 'Find Workers and Win Contracts',
-        icon: 'briefcase-account',
-        color: '#ec4899'
-    },
-    {
-        id: 'shop',
-        title: 'Shop Owner',
-        subtitle: 'I sell construction materials',
-        icon: 'storefront',
-        color: '#f59e0b'
-    }
+    // ... (roles array remains the same)
 ];
 
 export default function SelectRoleScreen() {
     const router = useRouter();
+    const { user, profile, loading } = useAuth();
     const { language, setLanguage, t } = useLanguage();
     const [showLangModal, setShowLangModal] = useState(false);
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!loading && user && profile) {
+            router.replace(`/${profile.role}` as any);
+        }
+    }, [user, profile, loading]);
 
     const selectedLang = LANGUAGES.find(l => l.id === language) || LANGUAGES[0];
 

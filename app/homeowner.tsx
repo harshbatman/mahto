@@ -6,7 +6,7 @@ import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Easing, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Animated, BackHandler, Dimensions, Easing, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -14,6 +14,24 @@ export default function HomeownerDashboard() {
     const { profile } = useAuth();
     const { t } = useLanguage();
     const router = useRouter();
+
+    useEffect(() => {
+        const backAction = () => {
+            if (router.canGoBack()) {
+                router.back();
+            } else {
+                BackHandler.exitApp();
+            }
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [resultsTitle, setResultsTitle] = useState('');

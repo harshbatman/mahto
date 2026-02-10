@@ -1,20 +1,29 @@
 import { COUNTRIES, Country } from '@/constants/countries';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 import { loginUser } from '@/services/auth/authService';
 import { getUserProfile } from '@/services/db/userProfile';
 import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function PhoneLoginScreen() {
     const router = useRouter();
+    const { user, profile, loading: authLoading } = useAuth();
 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!authLoading && user && profile) {
+            router.replace(`/${profile.role}` as any);
+        }
+    }, [user, profile, authLoading]);
     const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES.find(c => c.code === 'IN') || COUNTRIES[0]);
     const [showCountryModal, setShowCountryModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');

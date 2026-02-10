@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Animated,
+    BackHandler,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -35,6 +36,24 @@ export default function WorkerDashboard() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const backAction = () => {
+            if (router.canGoBack()) {
+                router.back();
+            } else {
+                BackHandler.exitApp();
+            }
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
 
     useEffect(() => {
         Animated.loop(

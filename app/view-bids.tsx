@@ -48,7 +48,11 @@ export default function ViewBidsScreen() {
                     style={styles.viewProfileBtn}
                     onPress={() => router.push({
                         pathname: '/user-profile',
-                        params: { id: item.contractorId }
+                        params: {
+                            id: item.contractorId,
+                            role: 'contractor',
+                            name: item.contractorName
+                        }
                     })}
                 >
                     <Text style={styles.viewProfileText}>View Profile</Text>

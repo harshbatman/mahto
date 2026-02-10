@@ -166,14 +166,14 @@ export default function UserProfileScreen() {
 
                 <View style={[
                     styles.profileHero,
-                    ((role === 'shop' || role === 'contractor') && displayBanner) && styles.shopProfileHero,
-                    ((role === 'shop' || role === 'contractor') && !displayBanner) && { paddingVertical: 40 }
+                    ((role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor') && displayBanner) && styles.shopProfileHero,
+                    ((role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor') && !displayBanner) && { paddingVertical: 40 }
                 ]}>
-                    <View style={[styles.avatarContainer, (role === 'shop' || role === 'contractor') && styles.shopAvatarContainer]}>
+                    <View style={[styles.avatarContainer, (role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor') && styles.shopAvatarContainer]}>
                         {displayPhoto ? (
                             <Image source={{ uri: displayPhoto }} style={styles.avatarImage} />
                         ) : (
-                            <MaterialCommunityIcons name={role === 'shop' ? "store" : role === 'contractor' ? "briefcase" : "account"} size={60} color="#9ca3af" />
+                            <MaterialCommunityIcons name={role === 'shop' || freshProfile?.role === 'shop' ? "store" : role === 'contractor' || freshProfile?.role === 'contractor' ? "briefcase" : "account"} size={60} color="#9ca3af" />
                         )}
                     </View>
                     <Text style={styles.userName}>
@@ -201,7 +201,7 @@ export default function UserProfileScreen() {
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>
                             <Text style={styles.statValue}>{freshProfile?.yearsInBusiness || paramYearsInBusiness || freshProfile?.experienceYears || experienceYears || '0'}yr</Text>
-                            <Text style={styles.statLabel}>{role === 'shop' || role === 'contractor' ? 'In Business' : 'Experience'}</Text>
+                            <Text style={styles.statLabel}>{role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor' ? 'In Business' : 'Experience'}</Text>
                         </View>
                         <View style={styles.statDivider} />
                         <View style={styles.statItem}>

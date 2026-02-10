@@ -2,12 +2,33 @@ import DashboardHeader from '@/components/DashboardHeader';
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect } from 'react';
+import { BackHandler, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ShopDashboard() {
     const { profile } = useAuth();
     const router = useRouter();
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if (!isFocused) return;
+
+        const backAction = () => {
+            // When on the dashboard and focused, the back button should exit the app
+            // rather than going back to auth or index screens.
+            BackHandler.exitApp();
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, [isFocused]);
 
     const menuItems = [
         {

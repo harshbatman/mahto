@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, BackHandler, Dimensions, Easing, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -15,13 +16,15 @@ export default function HomeownerDashboard() {
     const { t } = useLanguage();
     const router = useRouter();
 
+    const isFocused = useIsFocused();
+
     useEffect(() => {
+        if (!isFocused) return;
+
         const backAction = () => {
-            if (router.canGoBack()) {
-                router.back();
-            } else {
-                BackHandler.exitApp();
-            }
+            // When on the dashboard and focused, the back button should exit the app
+            // rather than going back to auth or index screens.
+            BackHandler.exitApp();
             return true;
         };
 
@@ -31,7 +34,7 @@ export default function HomeownerDashboard() {
         );
 
         return () => backHandler.remove();
-    }, []);
+    }, [isFocused]);
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [resultsTitle, setResultsTitle] = useState('');

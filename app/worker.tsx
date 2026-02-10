@@ -3,6 +3,7 @@ import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getMyJobApplications, JobApplication } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -37,13 +38,15 @@ export default function WorkerDashboard() {
         }
     };
 
+    const isFocused = useIsFocused();
+
     useEffect(() => {
+        if (!isFocused) return;
+
         const backAction = () => {
-            if (router.canGoBack()) {
-                router.back();
-            } else {
-                BackHandler.exitApp();
-            }
+            // When on the dashboard and focused, the back button should exit the app
+            // rather than going back to auth or index screens.
+            BackHandler.exitApp();
             return true;
         };
 
@@ -53,7 +56,7 @@ export default function WorkerDashboard() {
         );
 
         return () => backHandler.remove();
-    }, []);
+    }, [isFocused]);
 
     useEffect(() => {
         Animated.loop(

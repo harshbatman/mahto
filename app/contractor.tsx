@@ -5,6 +5,7 @@ import { applyForContract, Contract, getAvailableContracts } from '@/services/db
 import { searchUsers } from '@/services/db/searchService';
 import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, BackHandler, Image, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -17,13 +18,15 @@ export default function ContractorDashboard() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
+    const isFocused = useIsFocused();
+
     useEffect(() => {
+        if (!isFocused) return;
+
         const backAction = () => {
-            if (router.canGoBack()) {
-                router.back();
-            } else {
-                BackHandler.exitApp();
-            }
+            // When on the dashboard and focused, the back button should exit the app
+            // rather than going back to auth or index screens.
+            BackHandler.exitApp();
             return true;
         };
 
@@ -33,7 +36,7 @@ export default function ContractorDashboard() {
         );
 
         return () => backHandler.remove();
-    }, []);
+    }, [isFocused]);
 
     const fetchContracts = async () => {
         try {

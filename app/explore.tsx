@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     Dimensions,
     Image,
+    Modal,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -28,6 +29,9 @@ export default function ExploreScreen() {
     const [filteredShops, setFilteredShops] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const [minRating, setMinRating] = useState(0);
+    const [onlyAvailable, setOnlyAvailable] = useState(false);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -52,32 +56,61 @@ export default function ExploreScreen() {
         fetchAll();
     }, []);
 
-    const handleSearch = (text: string) => {
-        setSearchQuery(text);
+    const applyFilters = (text: string, rating: number, available: boolean) => {
         const lowerText = text.toLowerCase();
 
-        if (!text) {
-            setFilteredContractors(contractors);
-            setFilteredWorkers(workers);
-            setFilteredShops(shops);
-            return;
+        // Contractor filtering
+        let cRes = contractors;
+        if (text) {
+            cRes = cRes.filter(item =>
+                (item.companyName || item.name || '').toLowerCase().includes(lowerText) ||
+                (item.contractorServices || []).some((s: string) => s.toLowerCase().includes(lowerText))
+            );
         }
+        if (rating > 0) {
+            cRes = cRes.filter(item => (item.averageRating || 4.5) >= rating);
+        }
+        setFilteredContractors(cRes);
 
-        setFilteredContractors(contractors.filter(item =>
-            (item.companyName || item.name || '').toLowerCase().includes(lowerText) ||
-            (item.contractorServices || []).some((s: string) => s.toLowerCase().includes(lowerText))
-        ));
+        // Worker filtering
+        let wRes = workers;
+        if (text) {
+            wRes = wRes.filter(item =>
+                (item.name || '').toLowerCase().includes(lowerText) ||
+                (item.skills || []).some((s: string) => s.toLowerCase().includes(lowerText)) ||
+                (item.category || '').toLowerCase().includes(lowerText)
+            );
+        }
+        if (rating > 0) {
+            wRes = wRes.filter(item => (item.averageRating || 4.5) >= rating);
+        }
+        if (available) {
+            wRes = wRes.filter(item => item.isAvailable !== false);
+        }
+        setFilteredWorkers(wRes);
 
-        setFilteredWorkers(workers.filter(item =>
-            (item.name || '').toLowerCase().includes(lowerText) ||
-            (item.skills || []).some((s: string) => s.toLowerCase().includes(lowerText)) ||
-            (item.category || '').toLowerCase().includes(lowerText)
-        ));
+        // Shop filtering
+        let sRes = shops;
+        if (text) {
+            sRes = sRes.filter(item =>
+                (item.shopName || '').toLowerCase().includes(lowerText) ||
+                (item.shopCategories || []).some((s: string) => s.toLowerCase().includes(lowerText))
+            );
+        }
+        if (rating > 0) {
+            sRes = sRes.filter(item => (item.averageRating || 4.5) >= rating);
+        }
+        setFilteredShops(sRes);
+    };
 
-        setFilteredShops(shops.filter(item =>
-            (item.shopName || '').toLowerCase().includes(lowerText) ||
-            (item.shopCategories || []).some((s: string) => s.toLowerCase().includes(lowerText))
-        ));
+    const handleSearch = (text: string) => {
+        setSearchQuery(text);
+        applyFilters(text, minRating, onlyAvailable);
+    };
+
+    const handleApplyFilters = () => {
+        applyFilters(searchQuery, minRating, onlyAvailable);
+        setShowFilterModal(false);
     };
 
     const handleNavigate = (user: any) => {
@@ -274,8 +307,15 @@ export default function ExploreScreen() {
                         </TouchableOpacity>
                     )}
                 </View>
-                <TouchableOpacity style={styles.filterBtn}>
-                    <MaterialCommunityIcons name="tune-variant" size={20} color="black" />
+                <TouchableOpacity
+                    style={[styles.filterBtn, (minRating > 0 || onlyAvailable) && styles.filterBtnActive]}
+                    onPress={() => setShowFilterModal(true)}
+                >
+                    <MaterialCommunityIcons
+                        name="tune-variant"
+                        size={20}
+                        color={(minRating > 0 || onlyAvailable) ? "white" : "black"}
+                    />
                 </TouchableOpacity>
             </View>
 
@@ -362,6 +402,78 @@ export default function ExploreScreen() {
                     </ScrollView>
                 </View>
             </ScrollView>
+            <Modal
+                visible={showFilterModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowFilterModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Filters</Text>
+                            <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                                <MaterialCommunityIcons name="close" size={24} color="black" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView contentContainerStyle={styles.modalBody}>
+                            <Text style={styles.filterLabel}>Minimum Rating</Text>
+                            <View style={styles.ratingRow}>
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <TouchableOpacity
+                                        key={star}
+                                        style={[styles.starBtn, minRating >= star && styles.starBtnActive]}
+                                        onPress={() => setMinRating(star === minRating ? 0 : star)}
+                                    >
+                                        <MaterialCommunityIcons
+                                            name={minRating >= star ? "star" : "star-outline"}
+                                            size={24}
+                                            color={minRating >= star ? "white" : "#64748b"}
+                                        />
+                                        <Text style={[styles.starText, minRating >= star && styles.starTextActive]}>{star}+</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {activeTab === 1 && (
+                                <>
+                                    <Text style={[styles.filterLabel, { marginTop: 24 }]}>Availability</Text>
+                                    <TouchableOpacity
+                                        style={styles.switchRow}
+                                        onPress={() => setOnlyAvailable(!onlyAvailable)}
+                                    >
+                                        <Text style={styles.switchLabel}>Available Workers Only</Text>
+                                        <View style={[styles.switch, onlyAvailable && styles.switchActive]}>
+                                            <View style={[styles.switchKnob, onlyAvailable && styles.switchKnobActive]} />
+                                        </View>
+                                    </TouchableOpacity>
+                                </>
+                            )}
+                        </ScrollView>
+
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity
+                                style={styles.resetBtn}
+                                onPress={() => {
+                                    setMinRating(0);
+                                    setOnlyAvailable(false);
+                                    applyFilters(searchQuery, 0, false);
+                                    setShowFilterModal(false);
+                                }}
+                            >
+                                <Text style={styles.resetBtnText}>Reset</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.applyBtn}
+                                onPress={handleApplyFilters}
+                            >
+                                <Text style={styles.applyBtnText}>Apply Filters</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -682,6 +794,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    filterBtnActive: {
+        backgroundColor: '#6366f1',
+    },
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -692,5 +807,125 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#94a3b8',
         fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        maxHeight: '80%',
+        paddingBottom: 40,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: '#1e293b',
+    },
+    modalBody: {
+        padding: 24,
+    },
+    filterLabel: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#1e293b',
+        marginBottom: 16,
+    },
+    starBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 12,
+        gap: 4,
+    },
+    starBtnActive: {
+        backgroundColor: '#6366f1',
+    },
+    starText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#64748b',
+    },
+    starTextActive: {
+        color: 'white',
+    },
+    switchRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#f8fafc',
+        padding: 16,
+        borderRadius: 16,
+    },
+    switchLabel: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#334155',
+    },
+    switch: {
+        width: 50,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#e2e8f0',
+        padding: 2,
+    },
+    switchActive: {
+        backgroundColor: '#10b981',
+    },
+    switchKnob: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        elevation: 2,
+    },
+    switchKnobActive: {
+        transform: [{ translateX: 22 }],
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        padding: 24,
+        gap: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#f1f5f9',
+    },
+    resetBtn: {
+        flex: 1,
+        height: 56,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        backgroundColor: '#f1f5f9',
+    },
+    resetBtnText: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: '#64748b',
+    },
+    applyBtn: {
+        flex: 2,
+        height: 56,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+        backgroundColor: '#6366f1',
+    },
+    applyBtnText: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: 'white',
     },
 });

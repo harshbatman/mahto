@@ -319,7 +319,12 @@ export default function UserProfileScreen() {
                                 <View key={rev.id || idx} style={styles.reviewCard}>
                                     <View style={styles.reviewHeader}>
                                         <View style={styles.reviewerInfo}>
-                                            <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
+                                            <TouchableOpacity onPress={() => router.push({
+                                                pathname: '/user-profile',
+                                                params: { id: rev.reviewerId, name: rev.reviewerName }
+                                            })}>
+                                                <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
+                                            </TouchableOpacity>
                                             <View style={styles.reviewStars}>
                                                 {[1, 2, 3, 4, 5].map(s => (
                                                     <MaterialCommunityIcons

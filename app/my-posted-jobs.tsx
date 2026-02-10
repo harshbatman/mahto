@@ -30,7 +30,13 @@ export default function MyPostedJobsScreen() {
     };
 
     const renderJob = ({ item }: { item: Job }) => (
-        <View style={styles.card}>
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push({
+                pathname: '/view-applicants',
+                params: { jobId: item.id, title: item.title }
+            })}
+        >
             <View style={styles.cardHeader}>
                 <View style={styles.headerLeft}>
                     <Text style={styles.title}>{item.title}</Text>
@@ -57,22 +63,16 @@ export default function MyPostedJobsScreen() {
             <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
 
             <View style={styles.footer}>
-                <TouchableOpacity
-                    style={styles.applicantInfo}
-                    onPress={() => router.push({
-                        pathname: '/view-applicants',
-                        params: { jobId: item.id, title: item.title }
-                    })}
-                >
+                <View style={styles.applicantInfo}>
                     <MaterialCommunityIcons name="account-group" size={18} color="#6366f1" />
                     <Text style={styles.applicantCount}>
                         {item.applicantCount} {item.applicantCount === 1 ? 'Applicant' : 'Applicants'}
                     </Text>
                     <MaterialCommunityIcons name="chevron-right" size={18} color="#6366f1" />
-                </TouchableOpacity>
+                </View>
                 <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     return (

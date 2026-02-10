@@ -40,7 +40,13 @@ export default function MyPostingsScreen() {
     };
 
     const renderJob = ({ item }: { item: Job }) => (
-        <TouchableOpacity style={styles.card} onPress={() => { }}>
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push({
+                pathname: '/view-applicants',
+                params: { jobId: item.id, title: item.title }
+            })}
+        >
             <View style={styles.cardHeader}>
                 <View style={styles.headerLeft}>
                     <Text style={styles.title}>{item.title}</Text>

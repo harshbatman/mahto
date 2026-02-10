@@ -57,12 +57,19 @@ export default function MyPostedJobsScreen() {
             <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
 
             <View style={styles.footer}>
-                <View style={styles.applicantInfo}>
+                <TouchableOpacity
+                    style={styles.applicantInfo}
+                    onPress={() => router.push({
+                        pathname: '/view-applicants',
+                        params: { jobId: item.id, title: item.title }
+                    })}
+                >
                     <MaterialCommunityIcons name="account-group" size={18} color="#6366f1" />
                     <Text style={styles.applicantCount}>
                         {item.applicantCount} {item.applicantCount === 1 ? 'Applicant' : 'Applicants'}
                     </Text>
-                </View>
+                    <MaterialCommunityIcons name="chevron-right" size={18} color="#6366f1" />
+                </TouchableOpacity>
                 <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
             </View>
         </View>

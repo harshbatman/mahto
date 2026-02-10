@@ -147,3 +147,17 @@ export const getMyJobApplications = async (workerId: string) => {
         throw error;
     }
 };
+export const getJobApplicationsForJob = async (jobId: string) => {
+    try {
+        const applicationsRef = collection(db, 'jobApplications');
+        const q = query(applicationsRef, where('jobId', '==', jobId));
+        const querySnapshot = await getDocs(q);
+
+        return querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as JobApplication))
+            .sort((a, b) => b.createdAt - a.createdAt);
+    } catch (error) {
+        console.error("Error fetching job applications for job:", error);
+        throw error;
+    }
+};

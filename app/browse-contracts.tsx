@@ -1,6 +1,6 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { Contract, getAvailableContracts, placeBid } from '@/services/db/contractService';
+import { Contract, getAvailableContracts, getBiddedContractIds, placeBid } from '@/services/db/contractService';
 import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -24,6 +24,7 @@ export default function BrowseContractsScreen() {
     const router = useRouter();
     const { profile } = useAuth();
     const [contracts, setContracts] = useState<Contract[]>([]);
+    const [biddedContractIds, setBiddedContractIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -38,6 +39,11 @@ export default function BrowseContractsScreen() {
         try {
             const data = await getAvailableContracts();
             setContracts(data);
+
+            if (profile?.uid) {
+                const biddedIds = await getBiddedContractIds(profile.uid);
+                setBiddedContractIds(biddedIds);
+            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -80,6 +86,9 @@ export default function BrowseContractsScreen() {
             });
             Alert.alert('Success', 'Your bid has been placed!');
             setBidModalVisible(false);
+            if (selectedContract.id) {
+                setBiddedContractIds([...biddedContractIds, selectedContract.id]);
+            }
             fetchContracts(); // Refresh to update applicant count
         } catch (error: any) {
             Alert.alert('Error', sanitizeError(error));
@@ -111,9 +120,16 @@ export default function BrowseContractsScreen() {
                 <Text style={styles.applicants}>
                     <MaterialCommunityIcons name="account-group-outline" size={16} color="#6366f1" /> {item.applicantCount} Bids
                 </Text>
-                <TouchableOpacity style={styles.bidBtn} onPress={() => openBidModal(item)}>
-                    <Text style={styles.bidBtnText}>Place Bid</Text>
-                </TouchableOpacity>
+                {biddedContractIds.includes(item.id!) ? (
+                    <View style={styles.appliedBadge}>
+                        <MaterialCommunityIcons name="check-decagram" size={16} color="#059669" />
+                        <Text style={styles.appliedBadgeText}>Already Bidded</Text>
+                    </View>
+                ) : (
+                    <TouchableOpacity style={styles.bidBtn} onPress={() => openBidModal(item)}>
+                        <Text style={styles.bidBtnText}>Place Bid</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );
@@ -324,6 +340,20 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: '700',
         fontSize: 14,
+    },
+    appliedBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: '#ecfdf5',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+    },
+    appliedBadgeText: {
+        color: '#059669',
+        fontSize: 13,
+        fontWeight: '700',
     },
     emptyText: {
         marginTop: 16,

@@ -121,6 +121,18 @@ export const placeBid = async (bid: Omit<Bid, 'id' | 'createdAt' | 'status'>) =>
     }
 };
 
+export const getBiddedContractIds = async (contractorId: string) => {
+    try {
+        const bidsRef = collection(db, 'bids');
+        const q = query(bidsRef, where('contractorId', '==', contractorId));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => doc.data().contractId as string);
+    } catch (error) {
+        console.error("Error getting bidded contract IDs:", error);
+        throw error;
+    }
+};
+
 export const getMyBids = async (contractorId: string) => {
     try {
         const bidsRef = collection(db, 'bids');

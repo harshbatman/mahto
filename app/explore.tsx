@@ -202,70 +202,85 @@ export default function ExploreScreen() {
         return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
     };
 
-    const renderContractorItem = ({ item }: { item: any }) => (
-        <TouchableOpacity style={styles.contractorCard} onPress={() => handleNavigate(item)}>
-            <Image
-                source={{ uri: item.companyBanner || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19' }}
-                style={styles.cardCover}
-            />
-            <View style={styles.cardContent}>
-                <View style={styles.cardAvatarContainer}>
-                    {item.companyLogo ? (
-                        <Image source={{ uri: item.companyLogo }} style={styles.cardAvatar} />
+    const renderContractorItem = ({ item }: { item: any }) => {
+        const firstService = item.contractorServices?.[0];
+        const serviceIcon = CONTRACTOR_SERVICES.find(s => s.name === firstService)?.icon || 'briefcase';
+
+        return (
+            <TouchableOpacity style={styles.contractorCard} onPress={() => handleNavigate(item)}>
+                <Image
+                    source={{ uri: item.companyBanner || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19' }}
+                    style={styles.cardCover}
+                />
+                <View style={styles.cardContent}>
+                    <View style={styles.cardAvatarContainer}>
+                        {item.companyLogo ? (
+                            <Image source={{ uri: item.companyLogo }} style={styles.cardAvatar} />
+                        ) : (
+                            <View style={styles.avatarPlaceholder}>
+                                <MaterialCommunityIcons name={serviceIcon as any} size={24} color="#6366f1" />
+                            </View>
+                        )}
+                    </View>
+                    <View style={styles.contractorHeaderRow}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.cardName} numberOfLines={1}>{item.companyName || item.name}</Text>
+                            <View style={styles.ratingRow}>
+                                <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
+                                <Text style={styles.ratingText}>{item.averageRating || '4.5'} ({item.ratingCount || 0})</Text>
+                            </View>
+                        </View>
+                        <View style={styles.viewProfileBtn}>
+                            <Text style={styles.viewProfileText}>View Profile</Text>
+                        </View>
+                    </View>
+                    <Text style={styles.cardSub} numberOfLines={1}>{item.contractorServices?.join(', ') || 'General Construction'}</Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderWorkerItem = ({ item }: { item: any }) => {
+        const firstSkill = item.skills?.[0];
+        const skillImage = SKILLS_DATA.find(s => s.name === firstSkill)?.image;
+
+        return (
+            <TouchableOpacity style={styles.workerCard} onPress={() => handleNavigate(item)}>
+                <View style={styles.workerAvatarContainer}>
+                    {item.photoURL ? (
+                        <Image source={{ uri: item.photoURL }} style={styles.workerAvatar} />
+                    ) : skillImage ? (
+                        <Image source={skillImage} style={styles.workerAvatar} />
                     ) : (
-                        <View style={styles.avatarPlaceholder}>
-                            <MaterialCommunityIcons name="briefcase" size={20} color="black" />
+                        <View style={[styles.workerAvatar, styles.avatarPlaceholder]}>
+                            <MaterialCommunityIcons name="account" size={40} color="#cbd5e1" />
                         </View>
                     )}
+                    {item.isAvailable !== false && <View style={styles.availableBadge} />}
                 </View>
-                <View style={styles.contractorHeaderRow}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.cardName} numberOfLines={1}>{item.companyName || item.name}</Text>
-                        <View style={styles.ratingRow}>
-                            <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
-                            <Text style={styles.ratingText}>{item.averageRating || '4.5'} ({item.ratingCount || 0})</Text>
+                <View style={styles.workerInfo}>
+                    <View style={styles.workerHeaderRow}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.workerName} numberOfLines={1}>{item.name}</Text>
+                            <Text style={styles.workerSkill} numberOfLines={1}>{item.skills?.[0] || 'Worker'}</Text>
+                        </View>
+                        <View style={styles.viewProfileBtn}>
+                            <Text style={styles.viewProfileText}>View Profile</Text>
                         </View>
                     </View>
-                    <View style={styles.viewProfileBtn}>
-                        <Text style={styles.viewProfileText}>View Profile</Text>
+                    <View style={styles.workerBottom}>
+                        <Text style={styles.workerRate}>₹{item.dailyRate || '500'}/day</Text>
                     </View>
                 </View>
-                <Text style={styles.cardSub} numberOfLines={1}>{item.contractorServices?.join(', ') || 'General Construction'}</Text>
-            </View>
-        </TouchableOpacity>
-    );
-
-    const renderWorkerItem = ({ item }: { item: any }) => (
-        <TouchableOpacity style={styles.workerCard} onPress={() => handleNavigate(item)}>
-            <View style={styles.workerAvatarContainer}>
-                {item.photoURL ? (
-                    <Image source={{ uri: item.photoURL }} style={styles.workerAvatar} />
-                ) : (
-                    <View style={[styles.workerAvatar, styles.avatarPlaceholder]}>
-                        <MaterialCommunityIcons name="account" size={40} color="black" />
-                    </View>
-                )}
-                {item.isAvailable !== false && <View style={styles.availableBadge} />}
-            </View>
-            <View style={styles.workerInfo}>
-                <View style={styles.workerHeaderRow}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.workerName} numberOfLines={1}>{item.name}</Text>
-                        <Text style={styles.workerSkill} numberOfLines={1}>{item.skills?.[0] || 'Worker'}</Text>
-                    </View>
-                    <View style={styles.viewProfileBtn}>
-                        <Text style={styles.viewProfileText}>View Profile</Text>
-                    </View>
-                </View>
-                <View style={styles.workerBottom}>
-                    <Text style={styles.workerRate}>₹{item.dailyRate || '500'}/day</Text>
-                </View>
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     const renderShopItem = ({ item }: { item: any }) => {
         const isOpen = isShopOpen(item.openingTime, item.closingTime);
+        const firstCat = item.shopCategories?.[0];
+        const catImage = SHOP_CATEGORIES.find(c => c.name === firstCat)?.image;
+
         return (
             <TouchableOpacity style={styles.shopCard} onPress={() => handleNavigate(item)}>
                 <Image
@@ -282,9 +297,11 @@ export default function ExploreScreen() {
                     <View style={styles.shopLogoContainer}>
                         {item.shopLogo ? (
                             <Image source={{ uri: item.shopLogo }} style={styles.shopLogo} />
+                        ) : catImage ? (
+                            <Image source={catImage} style={styles.shopLogo} />
                         ) : (
                             <View style={styles.avatarPlaceholder}>
-                                <MaterialCommunityIcons name="store" size={24} color="black" />
+                                <MaterialCommunityIcons name="store" size={24} color="#6366f1" />
                             </View>
                         )}
                     </View>
@@ -486,6 +503,11 @@ export default function ExploreScreen() {
                                                 style={[styles.chip, selectedContractorServices.includes(service.name) && styles.chipActive]}
                                                 onPress={() => toggleContractorService(service.name)}
                                             >
+                                                <MaterialCommunityIcons
+                                                    name={service.icon as any}
+                                                    size={18}
+                                                    color={selectedContractorServices.includes(service.name) ? "white" : "#6366f1"}
+                                                />
                                                 <Text style={[styles.chipText, selectedContractorServices.includes(service.name) && styles.chipTextActive]}>
                                                     {service.name}
                                                 </Text>
@@ -506,6 +528,7 @@ export default function ExploreScreen() {
                                                 style={[styles.chip, selectedSkills.includes(skill.name) && styles.chipActive]}
                                                 onPress={() => toggleSkill(skill.name)}
                                             >
+                                                <Image source={skill.image} style={styles.chipImage} />
                                                 <Text style={[styles.chipText, selectedSkills.includes(skill.name) && styles.chipTextActive]}>
                                                     {skill.name}
                                                 </Text>
@@ -538,6 +561,7 @@ export default function ExploreScreen() {
                                                 style={[styles.chip, selectedShopCategories.includes(cat.name) && styles.chipActive]}
                                                 onPress={() => toggleShopCategory(cat.name)}
                                             >
+                                                <Image source={cat.image} style={styles.chipImage} />
                                                 <Text style={[styles.chipText, selectedShopCategories.includes(cat.name) && styles.chipTextActive]}>
                                                     {cat.name}
                                                 </Text>
@@ -1038,16 +1062,24 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     chip: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#f1f5f9',
-        paddingHorizontal: 16,
+        paddingHorizontal: 12,
         paddingVertical: 10,
         borderRadius: 14,
         borderWidth: 1,
         borderColor: '#e2e8f0',
+        gap: 8,
     },
     chipActive: {
         backgroundColor: '#6366f1',
         borderColor: '#6366f1',
+    },
+    chipImage: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
     },
     chipText: {
         fontSize: 14,

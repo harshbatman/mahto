@@ -38,6 +38,8 @@ export default function RootLayout() {
             <Stack.Screen name="post-contract" options={{ presentation: 'modal' }} />
             <Stack.Screen name="post-job" options={{ presentation: 'modal' }} />
             <Stack.Screen name="search-results" options={{ animation: 'slide_from_right', headerTitle: 'Search Results' }} />
+            <Stack.Screen name="view-applicants" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="view-bids" options={{ animation: 'slide_from_right' }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

@@ -1,3 +1,6 @@
+import { CONTRACTOR_SERVICES } from '@/constants/contractorServices';
+import { SHOP_CATEGORIES } from '@/constants/shopCategories';
+import { SKILLS_DATA } from '@/constants/skills';
 import { Spacing } from '@/constants/theme';
 import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -32,6 +35,9 @@ export default function ExploreScreen() {
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [minRating, setMinRating] = useState(0);
     const [onlyAvailable, setOnlyAvailable] = useState(false);
+    const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+    const [selectedShopCategories, setSelectedShopCategories] = useState<string[]>([]);
+    const [selectedContractorServices, setSelectedContractorServices] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -56,7 +62,7 @@ export default function ExploreScreen() {
         fetchAll();
     }, []);
 
-    const applyFilters = (text: string, rating: number, available: boolean) => {
+    const applyFilters = (text: string, rating: number, available: boolean, skills: string[], shopCats: string[], contractorServices: string[]) => {
         const lowerText = text.toLowerCase();
 
         // Contractor filtering
@@ -69,6 +75,11 @@ export default function ExploreScreen() {
         }
         if (rating > 0) {
             cRes = cRes.filter(item => (item.averageRating || 4.5) >= rating);
+        }
+        if (contractorServices.length > 0) {
+            cRes = cRes.filter(item =>
+                (item.contractorServices || []).some((s: string) => contractorServices.includes(s))
+            );
         }
         setFilteredContractors(cRes);
 
@@ -87,6 +98,11 @@ export default function ExploreScreen() {
         if (available) {
             wRes = wRes.filter(item => item.isAvailable !== false);
         }
+        if (skills.length > 0) {
+            wRes = wRes.filter(item =>
+                (item.skills || []).some((s: string) => skills.includes(s))
+            );
+        }
         setFilteredWorkers(wRes);
 
         // Shop filtering
@@ -100,17 +116,40 @@ export default function ExploreScreen() {
         if (rating > 0) {
             sRes = sRes.filter(item => (item.averageRating || 4.5) >= rating);
         }
+        if (shopCats.length > 0) {
+            sRes = sRes.filter(item =>
+                (item.shopCategories || []).some((c: string) => shopCats.includes(c))
+            );
+        }
         setFilteredShops(sRes);
     };
 
     const handleSearch = (text: string) => {
         setSearchQuery(text);
-        applyFilters(text, minRating, onlyAvailable);
+        applyFilters(text, minRating, onlyAvailable, selectedSkills, selectedShopCategories, selectedContractorServices);
     };
 
     const handleApplyFilters = () => {
-        applyFilters(searchQuery, minRating, onlyAvailable);
+        applyFilters(searchQuery, minRating, onlyAvailable, selectedSkills, selectedShopCategories, selectedContractorServices);
         setShowFilterModal(false);
+    };
+
+    const toggleSkill = (skillName: string) => {
+        setSelectedSkills(prev =>
+            prev.includes(skillName) ? prev.filter(s => s !== skillName) : [...prev, skillName]
+        );
+    };
+
+    const toggleShopCategory = (catName: string) => {
+        setSelectedShopCategories(prev =>
+            prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
+        );
+    };
+
+    const toggleContractorService = (serviceName: string) => {
+        setSelectedContractorServices(prev =>
+            prev.includes(serviceName) ? prev.filter(s => s !== serviceName) : [...prev, serviceName]
+        );
     };
 
     const handleNavigate = (user: any) => {
@@ -308,13 +347,13 @@ export default function ExploreScreen() {
                     )}
                 </View>
                 <TouchableOpacity
-                    style={[styles.filterBtn, (minRating > 0 || onlyAvailable) && styles.filterBtnActive]}
+                    style={[styles.filterBtn, (minRating > 0 || onlyAvailable || selectedSkills.length > 0 || selectedShopCategories.length > 0 || selectedContractorServices.length > 0) && styles.filterBtnActive]}
                     onPress={() => setShowFilterModal(true)}
                 >
                     <MaterialCommunityIcons
                         name="tune-variant"
                         size={20}
-                        color={(minRating > 0 || onlyAvailable) ? "white" : "black"}
+                        color={(minRating > 0 || onlyAvailable || selectedSkills.length > 0 || selectedShopCategories.length > 0 || selectedContractorServices.length > 0) ? "white" : "black"}
                     />
                 </TouchableOpacity>
             </View>
@@ -436,9 +475,46 @@ export default function ExploreScreen() {
                                 ))}
                             </View>
 
+                            {activeTab === 0 && (
+                                <>
+                                    <View style={styles.filterDivider} />
+                                    <Text style={styles.filterLabel}>Contractor Services</Text>
+                                    <View style={styles.chipContainer}>
+                                        {CONTRACTOR_SERVICES.map(service => (
+                                            <TouchableOpacity
+                                                key={service.id}
+                                                style={[styles.chip, selectedContractorServices.includes(service.name) && styles.chipActive]}
+                                                onPress={() => toggleContractorService(service.name)}
+                                            >
+                                                <Text style={[styles.chipText, selectedContractorServices.includes(service.name) && styles.chipTextActive]}>
+                                                    {service.name}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </>
+                            )}
+
                             {activeTab === 1 && (
                                 <>
-                                    <Text style={[styles.filterLabel, { marginTop: 24 }]}>Availability</Text>
+                                    <View style={styles.filterDivider} />
+                                    <Text style={styles.filterLabel}>Worker Skills</Text>
+                                    <View style={styles.chipContainer}>
+                                        {SKILLS_DATA.map(skill => (
+                                            <TouchableOpacity
+                                                key={skill.id}
+                                                style={[styles.chip, selectedSkills.includes(skill.name) && styles.chipActive]}
+                                                onPress={() => toggleSkill(skill.name)}
+                                            >
+                                                <Text style={[styles.chipText, selectedSkills.includes(skill.name) && styles.chipTextActive]}>
+                                                    {skill.name}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+
+                                    <View style={styles.filterDivider} />
+                                    <Text style={styles.filterLabel}>Availability</Text>
                                     <TouchableOpacity
                                         style={styles.switchRow}
                                         onPress={() => setOnlyAvailable(!onlyAvailable)}
@@ -450,6 +526,26 @@ export default function ExploreScreen() {
                                     </TouchableOpacity>
                                 </>
                             )}
+
+                            {activeTab === 2 && (
+                                <>
+                                    <View style={styles.filterDivider} />
+                                    <Text style={styles.filterLabel}>Shop Categories</Text>
+                                    <View style={styles.chipContainer}>
+                                        {SHOP_CATEGORIES.map(cat => (
+                                            <TouchableOpacity
+                                                key={cat.id}
+                                                style={[styles.chip, selectedShopCategories.includes(cat.name) && styles.chipActive]}
+                                                onPress={() => toggleShopCategory(cat.name)}
+                                            >
+                                                <Text style={[styles.chipText, selectedShopCategories.includes(cat.name) && styles.chipTextActive]}>
+                                                    {cat.name}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </>
+                            )}
                         </ScrollView>
 
                         <View style={styles.modalFooter}>
@@ -458,7 +554,10 @@ export default function ExploreScreen() {
                                 onPress={() => {
                                     setMinRating(0);
                                     setOnlyAvailable(false);
-                                    applyFilters(searchQuery, 0, false);
+                                    setSelectedSkills([]);
+                                    setSelectedShopCategories([]);
+                                    setSelectedContractorServices([]);
+                                    applyFilters(searchQuery, 0, false, [], [], []);
                                     setShowFilterModal(false);
                                 }}
                             >
@@ -926,6 +1025,36 @@ const styles = StyleSheet.create({
     applyBtnText: {
         fontSize: 16,
         fontWeight: '800',
+        color: 'white',
+    },
+    filterDivider: {
+        height: 1,
+        backgroundColor: '#f1f5f9',
+        marginVertical: 24,
+    },
+    chipContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    chip: {
+        backgroundColor: '#f1f5f9',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    chipActive: {
+        backgroundColor: '#6366f1',
+        borderColor: '#6366f1',
+    },
+    chipText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#64748b',
+    },
+    chipTextActive: {
         color: 'white',
     },
 });

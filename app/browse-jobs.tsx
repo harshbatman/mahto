@@ -1,7 +1,7 @@
 import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { applyForContract, Contract, getAvailableContracts } from '@/services/db/contractService';
-import { applyForJob, getAvailableJobs, getMyJobApplications, Job, JobApplication } from '@/services/db/jobService';
+import { applyForContract, Contract, getAvailableContracts, getBiddedContractIds } from '@/services/db/contractService';
+import { applyForJob, getAppliedJobIds, getAvailableJobs, getMyJobApplications, Job, JobApplication } from '@/services/db/jobService';
 import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -16,6 +16,8 @@ export default function BrowseJobsScreen() {
     const [myApplications, setMyApplications] = useState<JobApplication[]>([]);
     const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
     const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
+    const [biddedContractIds, setBiddedContractIds] = useState<string[]>([]);
+    const [appliedJobIds, setAppliedJobIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -30,6 +32,14 @@ export default function BrowseJobsScreen() {
 
             let applications: JobApplication[] = [];
             if (profile?.uid) {
+                const [appliedIds, biddedIds] = await Promise.all([
+                    getAppliedJobIds(profile.uid),
+                    profile.role === 'contractor' ? getBiddedContractIds(profile.uid) : Promise.resolve([])
+                ]);
+                setAppliedJobIds(appliedIds);
+                setBiddedContractIds(biddedIds);
+
+                // Keep for other parts if needed
                 applications = await getMyJobApplications(profile.uid);
                 setMyApplications(applications);
             }
@@ -78,6 +88,7 @@ export default function BrowseJobsScreen() {
         try {
             await applyForJob(id, profile.uid, profile);
             Alert.alert('Applied!', `Application sent for: ${title}`);
+            if (id) setAppliedJobIds(prev => [...prev, id]);
             fetchData();
         } catch (error: any) {
             Alert.alert('Error', sanitizeError(error));
@@ -92,6 +103,7 @@ export default function BrowseJobsScreen() {
         try {
             await applyForContract(id);
             Alert.alert('Applied!', `Bid submitted for: ${title}`);
+            if (id) setBiddedContractIds(prev => [...prev, id]);
             fetchData();
         } catch (error: any) {
             Alert.alert('Error', sanitizeError(error));
@@ -192,22 +204,23 @@ export default function BrowseJobsScreen() {
                                 style={[
                                     styles.applyBtn,
                                     activeTab === 'contracts' && styles.contractBtn,
-                                    activeTab === 'jobs' && myApplications.some(a => a.jobId === item.id) && styles.appliedBtn
+                                    (activeTab === 'jobs' ? appliedJobIds.includes(item.id!) : biddedContractIds.includes(item.id!)) && styles.appliedBtn
                                 ]}
                                 onPress={() => {
                                     if (activeTab === 'jobs') {
-                                        if (myApplications.some(a => a.jobId === item.id)) return;
+                                        if (appliedJobIds.includes(item.id!)) return;
                                         handleApplyJob(item.id!, item.title);
                                     } else {
+                                        if (biddedContractIds.includes(item.id!)) return;
                                         handleApplyContract(item.id!, item.title);
                                     }
                                 }}
-                                disabled={activeTab === 'jobs' && myApplications.some(a => a.jobId === item.id)}
+                                disabled={activeTab === 'jobs' ? appliedJobIds.includes(item.id!) : biddedContractIds.includes(item.id!)}
                             >
                                 <Text style={styles.applyBtnText}>
                                     {activeTab === 'jobs'
-                                        ? (myApplications.some(a => a.jobId === item.id) ? 'Applied' : 'Apply Now')
-                                        : 'Bid on Project'}
+                                        ? (appliedJobIds.includes(item.id!) ? 'Applied' : 'Apply Now')
+                                        : (biddedContractIds.includes(item.id!) ? 'Already Bidded' : 'Bid on Project')}
                                 </Text>
                             </TouchableOpacity>
                         </View>

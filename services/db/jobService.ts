@@ -121,6 +121,18 @@ export const applyForJob = async (jobId: string, workerId: string, workerProfile
     }
 };
 
+export const getAppliedJobIds = async (workerId: string) => {
+    try {
+        const applicationsRef = collection(db, 'jobApplications');
+        const q = query(applicationsRef, where('workerId', '==', workerId));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => doc.data().jobId as string);
+    } catch (error) {
+        console.error("Error getting applied job IDs:", error);
+        throw error;
+    }
+};
+
 export const getMyJobApplications = async (workerId: string) => {
     try {
         const applicationsRef = collection(db, 'jobApplications');

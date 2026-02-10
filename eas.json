@@ -13,7 +13,9 @@
         },
         "production": {
             "android": {
-                "buildType": "app-bundle"
+                "buildType": "app-bundle",
+                "versionCode": 9,
+                "versionName": "1.0.9"
             }
         }
     },

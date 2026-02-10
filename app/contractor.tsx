@@ -167,18 +167,17 @@ export default function ContractorDashboard() {
                 )}
 
 
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>Made in India </Text>
+                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                        <Text style={styles.footerText}>🇮🇳</Text>
+                    </Animated.View>
+                    <Text style={styles.footerText}> with </Text>
+                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                        <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
+                    </Animated.View>
+                </View>
             </ScrollView>
-
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Made in India </Text>
-                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                    <Text style={styles.footerText}>🇮🇳</Text>
-                </Animated.View>
-                <Text style={styles.footerText}> with </Text>
-                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                    <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
-                </Animated.View>
-            </View>
         </SafeAreaView>
     );
 }
@@ -308,9 +307,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
-        marginBottom: 80,
-        opacity: 1,
+        paddingVertical: 32,
+        marginTop: 20,
     },
     footerText: {
         fontSize: 14,

@@ -90,6 +90,7 @@ export default function MyPostingsScreen() {
                 <View style={styles.applicantInfo}>
                     <MaterialCommunityIcons name="briefcase-outline" size={18} color="#6366f1" />
                     <Text style={styles.applicantCount}>{item.applicantCount} Bids</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={18} color="#6366f1" />
                 </View>
                 <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
             </View>

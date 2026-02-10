@@ -44,6 +44,19 @@ export default function ViewBidsScreen() {
                         <Text style={styles.bidTime}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                     </View>
                 </View>
+                <TouchableOpacity
+                    style={styles.viewProfileBtn}
+                    onPress={() => router.push({
+                        pathname: '/user-profile',
+                        params: { uid: item.contractorId }
+                    })}
+                >
+                    <Text style={styles.viewProfileText}>View Profile</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.bidAmountRow}>
+                <Text style={styles.bidAmountLabel}>Bid Amount:</Text>
                 <Text style={styles.bidAmount}>₹{item.amount}</Text>
             </View>
 
@@ -185,10 +198,35 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#9ca3af',
     },
+    bidAmountRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        backgroundColor: '#f0fdf4',
+        padding: 12,
+        borderRadius: 12,
+    },
+    bidAmountLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#166534',
+    },
     bidAmount: {
         fontSize: 18,
         fontWeight: '800',
         color: '#10b981',
+    },
+    viewProfileBtn: {
+        backgroundColor: '#f3f4f6',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    viewProfileText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#4b5563',
     },
     proposalBox: {
         backgroundColor: '#f9fafb',

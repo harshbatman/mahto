@@ -11,6 +11,7 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.harsh.mahto",
+      "buildNumber": "16",
       "supportsTablet": true
     },
     "android": {

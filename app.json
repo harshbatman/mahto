@@ -41,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/mahto-splash.png",
+          "image": "./assets/images/mahto-splash-drive.png",
           "resizeMode": "contain",
           "backgroundColor": "#000000",
           "dark": {

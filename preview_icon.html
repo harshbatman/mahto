@@ -1,98 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAHTO Icon Preview</title>
+    <title>MAHTO Icon Preview (Fixed)</title>
     <style>
         body {
             background-color: #f0f0f0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
             font-family: sans-serif;
         }
-        .phone-mockup {
-            width: 300px;
-            height: 600px;
-            background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop') no-repeat center center;
-            background-size: cover;
-            border-radius: 30px;
-            border: 10px solid #333;
-            position: relative;
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .row {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 50px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            gap: 40px;
+            margin-bottom: 40px;
         }
-        .app-icon {
-            width: 60px;
-            height: 60px;
-            background-color: #000;
-            border-radius: 50%; /* Circular Crop */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .app-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        .app-name {
-            color: white;
-            font-size: 13px;
-            margin-top: 5px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+
         .icon-container {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #000;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #ddd;
+        }
+
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Ensure full coverage */
+        }
+
+        .circle {
+            border-radius: 50%;
+        }
+
+        .squircle {
+            border-radius: 22%;
+        }
+
+        .square {
+            border-radius: 10px;
+        }
+
+        .label {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="phone-mockup">
-        <div class="grid">
-            <!-- Simulated other apps -->
-            <div class="icon-container">
-                <div class="app-icon" style="background: #4285F4"><span style="color:white; font-size:20px">G</span></div>
-                <div class="app-name">Google</div>
-            </div>
-            
-            <!-- MAHTO App -->
-            <div class="icon-container">
-                <div class="app-icon">
-                    <img src="./assets/images/mahto-launcher-icon.png" alt="MAHTO">
-                </div>
-                <div class="app-name">MAHTO</div>
-            </div>
+    <h2>Android Icon Preview (Safe Area Check)</h2>
 
-             <div class="icon-container">
-                <div class="app-icon" style="background: #34A853"></div>
-                <div class="app-name">Phone</div>
+    <div class="row">
+        <div class="icon-container">
+            <div class="app-icon circle">
+                <img src="./assets/images/mahto-launcher-icon.png?v=3" alt="MAHTO">
             </div>
-             <div class="icon-container">
-                <div class="app-icon" style="background: #EA4335"></div>
-                <div class="app-name">Mail</div>
+            <div class="label">Circle (Pixel/Standard)</div>
+        </div>
+
+        <div class="icon-container">
+            <div class="app-icon squircle">
+                <img src="./assets/images/mahto-launcher-icon.png?v=3" alt="MAHTO">
             </div>
+            <div class="label">Squircle (Samsung)</div>
+        </div>
+
+        <div class="icon-container">
+            <div class="app-icon square">
+                <img src="./assets/images/mahto-launcher-icon.png?v=3" alt="MAHTO">
+            </div>
+            <div class="label">Rounded Square</div>
         </div>
     </div>
 
+    <p style="color: #666; max-width: 400px; text-align: center;">
+        The white text should remain fully visible within all shapes. <br>
+        If it touches the edges, it is too big.
+    </p>
+
 </body>
+
 </html>

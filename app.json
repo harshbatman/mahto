@@ -3,25 +3,25 @@
     "name": "MAHTO",
     "slug": "mahto",
     "owner": "mahtobuild",
-    "version": "1.1.26",
+    "version": "1.1.27",
     "orientation": "portrait",
-    "icon": "./assets/images/mahto-launcher-icon.png",
+    "icon": "./assets/images/mahto-launcher-icon-padded.png",
     "scheme": "ionizedvoid",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.harsh.mahto",
-      "buildNumber": "26",
+      "buildNumber": "27",
       "supportsTablet": true
     },
     "android": {
       "package": "com.harsh.mahto",
-      "versionCode": 26,
-      "versionName": "1.1.26",
+      "versionCode": 27,
+      "versionName": "1.1.27",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#000000",
-        "foregroundImage": "./assets/images/mahto-launcher-icon.png"
+        "foregroundImage": "./assets/images/mahto-launcher-icon-padded.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,

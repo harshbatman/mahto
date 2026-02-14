@@ -41,12 +41,11 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/mahto-logo.png",
-          "imageWidth": 180,
+          "image": "./assets/images/mahto-splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#FFFFFF",
+          "backgroundColor": "#000000",
           "dark": {
-            "backgroundColor": "#FFFFFF"
+            "backgroundColor": "#000000"
           }
         }
       ],

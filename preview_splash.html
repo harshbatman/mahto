@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAHTO Splash Screen Preview</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        .phone-mockup {
+            width: 360px;
+            /* Typical Android width */
+            height: 740px;
+            /* Typical Android height */
+            background-color: #000000;
+            /* Splash Background Color */
+            border-radius: 30px;
+            border: 10px solid #333;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Status Bar Simulation */
+        .status-bar {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .splash-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Expo resizeMode="contain" */
+            padding: 20px;
+            /* Simulate safe area padding slightly */
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="phone-mockup">
+        <div class="status-bar">10:00 &nbsp; 🔋</div>
+        <!-- Using the actual splash image asset -->
+        <img src="./assets/images/mahto-splash.png" alt="MAHTO Splash" class="splash-image">
+    </div>
+
+</body>
+
+</html>

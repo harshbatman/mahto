@@ -132,8 +132,17 @@ export default function PhoneLoginScreen() {
                         {loading ? (
                             <ActivityIndicator color="white" />
                         ) : (
-                            <Text style={styles.submitBtnText}>Log In</Text>
+                            <Text style={styles.submitBtnText}>Continue with MAHTO ID</Text>
                         )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.registerLink}
+                        onPress={() => router.push('/(auth)/select-role')}
+                    >
+                        <Text style={styles.registerText}>
+                            Don't have an account? <Text style={styles.registerBold}>Create account</Text>
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -345,5 +354,17 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '700',
+    },
+    registerLink: {
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    registerText: {
+        fontSize: 14,
+        color: Colors.light.muted,
+    },
+    registerBold: {
+        fontWeight: '700',
+        color: 'black',
     },
 });

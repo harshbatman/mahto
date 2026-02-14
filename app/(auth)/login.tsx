@@ -80,15 +80,22 @@ export default function RoleSelection() {
                     ))}
                 </View>
 
-                <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/(auth)/phone-login')}>
-                    <Text style={styles.loginText}>Already have an account? <Text style={styles.bold}>Log in</Text></Text>
+                <View style={styles.footerLink}>
+                    <Text style={styles.loginText}>Already have an account?</Text>
+                </View>
+
+                <TouchableOpacity
+                    style={styles.mahtoIdButton}
+                    onPress={() => router.push('/(auth)/phone-login')}
+                >
+                    <Text style={styles.mahtoIdButtonText}>Continue with MAHTO ID</Text>
                 </TouchableOpacity>
             </View>
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>By continuing, you agree to our Terms & Privacy Policy.</Text>
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -161,17 +168,29 @@ const styles = StyleSheet.create({
         color: Colors.light.muted,
         marginTop: 2,
     },
-    loginLink: {
+    mahtoIdButton: {
+        backgroundColor: '#000', // Black background
+        borderRadius: 30, // Rounded full pill
+        paddingVertical: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: Spacing.xl,
+        borderWidth: 1,
+        borderColor: '#000',
+    },
+    mahtoIdButtonText: {
+        color: '#fff', // White text
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    footerLink: { // Replacing loginLink as it's not used 
         marginTop: Spacing.lg,
         alignItems: 'center',
     },
     loginText: {
         fontSize: 15,
         color: Colors.light.muted,
-    },
-    bold: {
-        fontWeight: '800',
-        color: 'black',
+        textAlign: 'center',
     },
     footer: {
         padding: Spacing.lg,

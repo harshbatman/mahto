@@ -155,6 +155,17 @@ export default function RegisterScreen() {
                             </TouchableOpacity>
                         </View>
                     </View>
+
+                    <View style={styles.loginLink}>
+                        <Text style={styles.loginText}>Already have an account?</Text>
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.mahtoIdButton}
+                        onPress={() => router.push('/(auth)/phone-login')}
+                    >
+                        <Text style={styles.mahtoIdButtonText}>Continue with MAHTO ID</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -388,5 +399,30 @@ const styles = StyleSheet.create({
         color: 'black',
         fontWeight: '700',
         textDecorationLine: 'underline',
+    },
+    loginLink: {
+        marginTop: 5, // Reduced further
+        marginBottom: 5,
+        alignItems: 'center',
+    },
+    loginText: {
+        fontSize: 14,
+        color: Colors.light.muted,
+    },
+    mahtoIdButton: {
+        backgroundColor: '#000',
+        borderRadius: 12, // Consistent with select-role
+        paddingVertical: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 12,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#000',
+    },
+    mahtoIdButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

@@ -66,57 +66,64 @@ export default function SelectRoleScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.topActions}>
-                <TouchableOpacity
-                    style={styles.backBtn}
-                    onPress={() => router.back()}
-                >
-                    <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
-                </TouchableOpacity>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.topActions}>
+                    <TouchableOpacity
+                        style={styles.backBtn}
+                        onPress={() => router.back()}
+                    >
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.langBtn}
-                    onPress={() => setShowLangModal(true)}
-                >
-                    <MaterialCommunityIcons name="translate" size={20} color="#666" />
-                    <Text style={styles.langBtnText}>{selectedLang.local}</Text>
-                    <MaterialCommunityIcons name="chevron-down" size={16} color="#666" />
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>{t.welcome} to MAHTO</Text>
-                    <Text style={styles.subtitle}>{t.home === 'होम' ? 'आप ऐप का उपयोग कैसे करना चाहेंगे?' : 'How would you like to use the app?'}</Text>
+                    <TouchableOpacity
+                        style={styles.langBtn}
+                        onPress={() => setShowLangModal(true)}
+                    >
+                        <MaterialCommunityIcons name="translate" size={20} color="#666" />
+                        <Text style={styles.langBtnText}>{selectedLang.local}</Text>
+                        <MaterialCommunityIcons name="chevron-down" size={16} color="#666" />
+                    </TouchableOpacity>
                 </View>
 
-                <View style={styles.grid}>
-                    {roles.map((role) => (
-                        <TouchableOpacity
-                            key={role.id}
-                            style={styles.card}
-                            onPress={() => handleSelect(role.id)}
-                        >
-                            <View style={[styles.iconCircle, { backgroundColor: role.color + '15' }]}>
-                                <MaterialCommunityIcons name={role.icon as any} size={32} color={role.color} />
-                            </View>
-                            <View style={styles.cardInfo}>
-                                <Text style={styles.cardTitle}>{role.title}</Text>
-                                <Text style={styles.cardSub}>{role.subtitle}</Text>
-                            </View>
-                            <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>{t.welcome} to MAHTO</Text>
+                        <Text style={styles.subtitle}>{t.home === 'होम' ? 'आप ऐप का उपयोग कैसे करना चाहेंगे?' : 'How would you like to use the app?'}</Text>
+                    </View>
 
-                <TouchableOpacity
-                    style={styles.loginLink}
-                    onPress={() => router.push('/(auth)/phone-login')}
-                >
-                    <Text style={styles.loginText}>
-                        {t.home === 'होम' ? 'पहले से ही एक खाता है?' : 'Already have an account?'} <Text style={styles.loginBold}>{t.home === 'होम' ? 'लॉगिन' : 'Login'}</Text>
-                    </Text>
-                </TouchableOpacity>
+                    <View style={styles.grid}>
+                        {roles.map((role) => (
+                            <TouchableOpacity
+                                key={role.id}
+                                style={styles.card}
+                                onPress={() => handleSelect(role.id)}
+                            >
+                                <View style={[styles.iconCircle, { backgroundColor: role.color + '15' }]}>
+                                    <MaterialCommunityIcons name={role.icon as any} size={32} color={role.color} />
+                                </View>
+                                <View style={styles.cardInfo}>
+                                    <Text style={styles.cardTitle}>{role.title}</Text>
+                                    <Text style={styles.cardSub}>{role.subtitle}</Text>
+                                </View>
+                                <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+
+                    <View style={styles.loginLink}>
+                        <Text style={styles.loginText}>
+                            {t.home === 'होम' ? 'पहले से ही एक खाता है?' : 'Already have an account?'}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.mahtoIdButton}
+                        onPress={() => router.push('/(auth)/phone-login')}
+                    >
+                        <Text style={styles.mahtoIdButtonText}>Continue with MAHTO ID</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
 
             <Modal
@@ -175,7 +182,6 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: Spacing.lg,
-        paddingTop: 60,
     },
     header: {
         marginBottom: 40,
@@ -230,8 +236,9 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     loginLink: {
-        marginTop: 40,
+        marginTop: 30,
         alignItems: 'center',
+        marginBottom: 5, // Small positive gap
     },
     loginText: {
         fontSize: 15,
@@ -240,6 +247,22 @@ const styles = StyleSheet.create({
     loginBold: {
         color: '#000',
         fontWeight: '800',
+    },
+    mahtoIdButton: {
+        backgroundColor: '#000', // Black background
+        borderRadius: 12, // Rectangular with rounded corners
+        paddingVertical: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 12,
+        marginBottom: 40,
+        borderWidth: 1,
+        borderColor: '#000',
+    },
+    mahtoIdButtonText: {
+        color: '#fff', // White text
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     topActions: {
         flexDirection: 'row',

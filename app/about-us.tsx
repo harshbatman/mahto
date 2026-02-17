@@ -28,7 +28,7 @@ export default function AboutUsScreen() {
                     <View style={styles.logoBadge}>
                         <Text style={styles.logoText}>MAHTO</Text>
                     </View>
-                    <Text style={styles.heroTitle}>Building OS</Text>
+                    <Text style={styles.heroTitle}>Home Building OS</Text>
                     <Text style={styles.heroSubtitle}>The operating system for the entire home building journey.</Text>
                 </View>
 

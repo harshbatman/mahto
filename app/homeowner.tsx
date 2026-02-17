@@ -161,6 +161,17 @@ export default function HomeownerDashboard() {
 
                 <View style={styles.divider} />
 
+                <View style={styles.rewardBanner}>
+                    <View style={styles.rewardInfo}>
+                        <View style={styles.freeBadge}>
+                            <Text style={styles.freeBadgeText}>FREE</Text>
+                        </View>
+                        <Text style={styles.rewardTitle}>Post now at zero cost</Text>
+                        <Text style={styles.rewardSub}>Start your construction journey today</Text>
+                    </View>
+                    <MaterialCommunityIcons name="ticket-percent-outline" size={32} color="#000" />
+                </View>
+
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Quick Actions</Text>
                     <View style={styles.actionGrid}>
@@ -169,7 +180,12 @@ export default function HomeownerDashboard() {
                                 <Image source={require('@/assets/images/3d_contract.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
-                                <Text style={styles.actionTitle}>Post a Contract</Text>
+                                <View style={styles.actionTitleRow}>
+                                    <Text style={styles.actionTitle}>Post a Contract</Text>
+                                    <View style={styles.miniBadge}>
+                                        <Text style={styles.miniBadgeText}>FREE</Text>
+                                    </View>
+                                </View>
                                 <Text style={styles.actionSub}>Hire contractors for major works</Text>
                             </View>
                             <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
@@ -180,7 +196,12 @@ export default function HomeownerDashboard() {
                                 <Image source={require('@/assets/images/3d_job.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
-                                <Text style={styles.actionTitle}>Request a Worker</Text>
+                                <View style={styles.actionTitleRow}>
+                                    <Text style={styles.actionTitle}>Request a Worker</Text>
+                                    <View style={styles.miniBadge}>
+                                        <Text style={styles.miniBadgeText}>FREE</Text>
+                                    </View>
+                                </View>
                                 <Text style={styles.actionSub}>Find helpers for daily tasks</Text>
                             </View>
                             <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
@@ -318,6 +339,22 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#000',
     },
+    actionTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    miniBadge: {
+        backgroundColor: '#000',
+        paddingHorizontal: 6,
+        paddingVertical: 1,
+        borderRadius: 4,
+    },
+    miniBadgeText: {
+        color: '#FFF',
+        fontSize: 8,
+        fontWeight: '900',
+    },
     actionSub: {
         fontSize: 14,
         color: '#545454',
@@ -443,5 +480,44 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#AFAFAF',
         fontWeight: '600',
+    },
+    rewardBanner: {
+        backgroundColor: '#F3F3F3',
+        borderRadius: 24,
+        padding: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 32,
+        borderWidth: 1,
+        borderColor: '#EFEFEF',
+    },
+    rewardInfo: {
+        flex: 1,
+    },
+    freeBadge: {
+        backgroundColor: '#000',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 6,
+        marginBottom: 8,
+    },
+    freeBadgeText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 1,
+    },
+    rewardTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#000',
+    },
+    rewardSub: {
+        fontSize: 13,
+        color: '#666',
+        marginTop: 2,
+        fontWeight: '500',
     },
 });

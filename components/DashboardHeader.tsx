@@ -20,7 +20,7 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
             <View style={styles.topRow}>
                 <TouchableOpacity
                     style={styles.profileBtn}
-                    onPress={() => router.push('/profile-menu')}
+                    onPress={() => router.push('/(tabs)/profile')}
                 >
                     {profile?.role === 'shop' ? (
                         profile.shopLogo ? (
@@ -54,20 +54,22 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                 </TouchableOpacity>
             </View>
 
-            {showSearch && (
-                <View style={styles.searchBar}>
-                    <View style={styles.searchIcon}>
-                        <MaterialCommunityIcons name="magnify" size={24} color="#000" />
+            {
+                showSearch && (
+                    <View style={styles.searchBar}>
+                        <View style={styles.searchIcon}>
+                            <MaterialCommunityIcons name="magnify" size={24} color="#000" />
+                        </View>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={placeholder || "Where to?"}
+                            placeholderTextColor="#545454"
+                            onChangeText={onSearch}
+                        />
                     </View>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder={placeholder || "Where to?"}
-                        placeholderTextColor="#545454"
-                        onChangeText={onSearch}
-                    />
-                </View>
-            )}
-        </View>
+                )
+            }
+        </View >
     );
 }
 

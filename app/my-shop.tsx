@@ -96,9 +96,6 @@ export default function MyShopViewScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
-                </TouchableOpacity>
                 <Text style={styles.headerTitle}>My Shop</Text>
                 <View style={{ width: 40 }} />
             </View>

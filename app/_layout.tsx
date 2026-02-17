@@ -25,6 +25,7 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" />
             <Stack.Screen name="(auth)/login" options={{ animation: 'fade' }} />
             <Stack.Screen name="(auth)/register" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="(auth)/phone-login" options={{ animation: 'slide_from_bottom' }} />

@@ -102,7 +102,7 @@ export default function HomeownerDashboard() {
             <View style={styles.headerWrapper}>
                 <DashboardHeader
                     title={profile?.name || "Homeowner"}
-                    showSearch={true}
+                    showSearch={false}
                     onSearch={handleSearch}
                     placeholder="Search for services..."
                 />
@@ -187,7 +187,7 @@ export default function HomeownerDashboard() {
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>
-                                    <Text style={styles.actionTitle}>Post a Contract</Text>
+                                    <Text style={styles.actionTitle}>Post Contract</Text>
                                     <View style={styles.miniBadge}>
                                         <Text style={styles.miniBadgeText}>FREE</Text>
                                     </View>
@@ -203,12 +203,12 @@ export default function HomeownerDashboard() {
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>
-                                    <Text style={styles.actionTitle}>Request a Worker</Text>
+                                    <Text style={styles.actionTitle}>Post Job</Text>
                                     <View style={styles.miniBadge}>
                                         <Text style={styles.miniBadgeText}>FREE</Text>
                                     </View>
                                 </View>
-                                <Text style={styles.actionSub}>Find helpers for daily tasks</Text>
+                                <Text style={styles.actionSub}>Find workers for daily tasks</Text>
                             </View>
                             <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
                         </TouchableOpacity>
@@ -220,7 +220,10 @@ export default function HomeownerDashboard() {
                         <View style={styles.exploreCardTag}>
                             <Text style={styles.exploreCardTagText}>New Experience</Text>
                         </View>
-                        <Text style={styles.exploreCardTitle}>Explore MAHTO</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.exploreCardTitle}>Explore MAHTO</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" style={{ marginBottom: 4 }} />
+                        </View>
                         <Text style={styles.exploreCardSub}>
                             Discover verified professionals and major material shops in your neighborhood.
                         </Text>

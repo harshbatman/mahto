@@ -24,8 +24,8 @@ export default function Index() {
         if (profile.role === 'contractor' && !profile.isProfileSetup) {
             return <Redirect href="/setup-contractor-profile" />;
         }
-        // Redirect to the correct dashboard based on role
-        return <Redirect href={`/${profile.role}` as any} />;
+        // Redirect to the main tabs
+        return <Redirect href="/(tabs)" />;
     }
 
     return <Redirect href="/(auth)/welcome" />;

@@ -5,7 +5,7 @@
     "owner": "mahtobuild",
     "version": "1.1.33",
     "orientation": "portrait",
-    "icon": "./assets/images/mahto-launcher-icon-padded.png",
+    "icon": "./assets/logo.png",
     "scheme": "ionizedvoid",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -21,7 +21,7 @@
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#000000",
-        "foregroundImage": "./assets/images/mahto-launcher-icon-padded.png"
+        "foregroundImage": "./assets/logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -41,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/mahto-splash-drive.png",
+          "image": "./assets/splash.png",
           "resizeMode": "contain",
           "backgroundColor": "#000000",
           "dark": {

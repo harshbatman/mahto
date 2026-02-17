@@ -235,8 +235,18 @@ const styles = StyleSheet.create({
     },
     categoryCard: {
         flex: 1,
-        padding: 12,
+        backgroundColor: '#FFF',
+        borderRadius: 16,
+        padding: 16,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#F3F3F3',
+        // Elevation/Shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
     },
     iconCircle: {
         width: 64,

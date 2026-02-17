@@ -166,7 +166,7 @@ export default function HomeownerDashboard() {
                         <View style={styles.freeBadge}>
                             <Text style={styles.freeBadgeText}>FREE</Text>
                         </View>
-                        <Text style={styles.rewardTitle}>Post now at zero cost</Text>
+                        <Text style={styles.rewardTitle}>Post now at ₹0 cost</Text>
                         <Text style={styles.rewardSub}>Start your construction journey today</Text>
                     </View>
                     <MaterialCommunityIcons name="ticket-percent-outline" size={32} color="#FFF" />

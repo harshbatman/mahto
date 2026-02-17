@@ -4,6 +4,11 @@ import { Tabs } from 'expo-router';
 import { Image, Platform, StyleSheet, View } from 'react-native';
 
 export default function TabLayout() {
+    const { profile } = useAuth();
+
+    // Get the display name based on role, fallback to 'Profile'
+    const displayName = profile?.shopName || profile?.companyName || profile?.name?.split(' ')[0] || 'Profile';
+
     return (
         <Tabs
             screenOptions={{
@@ -38,9 +43,8 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="profile"
                 options={{
-                    title: 'Profile',
+                    title: displayName,
                     tabBarIcon: ({ color, focused }) => {
-                        const { profile } = useAuth();
                         const profileImage = profile?.shopLogo || profile?.companyLogo || profile?.photoURL;
 
                         return profileImage ? (

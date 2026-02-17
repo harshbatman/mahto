@@ -18,7 +18,7 @@ export default function TabLayout() {
                 headerShown: false,
                 tabBarShowLabel: true,
                 tabBarLabelStyle: styles.tabBarLabel,
-                tabBarStyle: (profile?.role === 'worker' || profile?.role === 'shop') ? { display: 'none' } : {
+                tabBarStyle: {
                     height: 60 + (Platform.OS === 'ios' ? insets.bottom : (insets.bottom > 0 ? insets.bottom : 12)),
                     paddingBottom: Platform.OS === 'ios' ? insets.bottom : (insets.bottom > 0 ? insets.bottom : 12),
                     paddingTop: 12,
@@ -48,19 +48,40 @@ export default function TabLayout() {
                     tabPress: (e) => {
                         if (profile?.role === 'shop') {
                             e.preventDefault();
-                            // Navigate directly to manage-product
-                            // Using a listener to override the default tab navigation
-                            // router.push is not available here directly in the same way, but we can use navigation
                             navigation.navigate('manage-product' as any);
+                        } else if (profile?.role === 'worker') {
+                            e.preventDefault();
+                            navigation.navigate('messages/index' as any);
                         }
                     },
                 })}
                 options={{
-                    title: profile?.role === 'shop' ? 'Add Product' : 'Post',
-                    tabBarIcon: () => (
-                        <View style={styles.postIconContainer}>
-                            <MaterialCommunityIcons name="plus" size={32} color="#FFF" />
-                        </View>
+                    title: profile?.role === 'shop' ? 'Add Product' : (profile?.role === 'worker' ? 'Messages' : 'Post'),
+                    tabBarIcon: ({ focused }) => (
+                        profile?.role === 'worker' ? (
+                            <View style={{
+                                width: 50,
+                                height: 50,
+                                borderRadius: 25,
+                                backgroundColor: focused ? '#000' : '#F3F3F3', // Match header action button style but active state black
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginBottom: 30, // Lift it up like the plus icon
+                                borderWidth: 4,
+                                borderColor: '#f1f5f9',
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 8,
+                                elevation: 5,
+                            }}>
+                                <MaterialCommunityIcons name="message-text" size={24} color={focused ? '#FFF' : '#000'} />
+                            </View>
+                        ) : (
+                            <View style={styles.postIconContainer}>
+                                <MaterialCommunityIcons name="plus" size={32} color="#FFF" />
+                            </View>
+                        )
                     ),
                 }}
             />

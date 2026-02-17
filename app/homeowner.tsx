@@ -207,7 +207,7 @@ export default function HomeownerDashboard() {
                         <View style={styles.freeBadge}>
                             <Text style={styles.freeBadgeText}>FREE</Text>
                         </View>
-                        <Text style={styles.rewardTitle}>Post now at ₹0 cost 🥳</Text>
+                        <Text style={styles.rewardTitle}>Post Contracts & Jobs now at 0 cost</Text>
                         <Text style={styles.rewardSub}>Start your construction journey today</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

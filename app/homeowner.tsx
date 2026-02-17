@@ -340,7 +340,8 @@ const styles = StyleSheet.create({
         elevation: 10,
     },
     exploreCardContent: {
-        flex: 1.2,
+        flex: 1.8,
+        paddingRight: 12,
     },
     exploreCardTag: {
         backgroundColor: 'rgba(255,255,255,0.1)',
@@ -369,14 +370,14 @@ const styles = StyleSheet.create({
         lineHeight: 18,
     },
     exploreCardImageContainer: {
-        flex: 0.8,
+        flex: 1,
         alignItems: 'flex-end',
         justifyContent: 'center',
     },
     exploreCardImage: {
-        width: 120,
-        height: 120,
-        transform: [{ scale: 1.4 }],
+        width: 140,
+        height: 140,
+        marginRight: -25,
     },
     resultsContainer: {
         marginTop: 24,

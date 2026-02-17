@@ -56,7 +56,7 @@ export default function WorkerDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title={profile?.name || "Worker"} showSearch={false} />
+            <DashboardHeader title={`Hi, ${profile?.name || "Worker"}`} showSearch={false} />
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 <View style={styles.heroSection}>
@@ -145,8 +145,7 @@ export default function WorkerDashboard() {
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India </Text>
-                    <Text style={styles.footerText}>🇮🇳</Text>
+                    <Text style={styles.footerText}>Made in 🇮🇳 with ❤️</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

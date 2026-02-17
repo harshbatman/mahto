@@ -101,7 +101,7 @@ export default function HomeownerDashboard() {
         <SafeAreaView style={styles.container}>
             <View style={styles.headerWrapper}>
                 <DashboardHeader
-                    title={profile?.name || "Homeowner"}
+                    title={`Hi, ${profile?.name || "Homeowner"}`}
                     showSearch={false}
                     onSearch={handleSearch}
                     placeholder="Search for services..."

@@ -96,7 +96,7 @@ export default function MyShopViewScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>My Shop</Text>
+                <Text style={styles.headerTitle}>Hi, {profile?.shopName || 'Shop Owner'}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -194,6 +194,10 @@ export default function MyShopViewScreen() {
                             </View>
                         )}
                     </View>
+                </View>
+
+                <View style={[styles.footer, { paddingBottom: 40 }]}>
+                    <Text style={styles.footerText}>Made in 🇮🇳 with ❤️</Text>
                 </View>
             </ScrollView>
 
@@ -330,5 +334,17 @@ const styles = StyleSheet.create({
     productDetailDesc: { fontSize: 15, color: '#64748b', lineHeight: 22, marginBottom: 24 },
     modalActionRow: { marginTop: 8 },
     modalEditBtn: { backgroundColor: '#6366f1', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 20, gap: 10 },
-    modalBtnText: { color: 'white', fontWeight: '800', fontSize: 16 }
+    modalBtnText: { color: 'white', fontWeight: '800', fontSize: 16 },
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 40,
+        paddingBottom: 20,
+    },
+    footerText: {
+        fontSize: 12,
+        color: '#AFAFAF',
+        fontWeight: '600',
+    },
 });

@@ -57,7 +57,7 @@ export default function ContractorDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title={profile?.companyName || profile?.name || "Contractor"} showSearch={false} />
+            <DashboardHeader title={`Hi, ${profile?.companyName || profile?.name || "Contractor"}`} showSearch={false} />
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
@@ -173,8 +173,7 @@ export default function ContractorDashboard() {
                 )}
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India </Text>
-                    <Text style={styles.footerText}>🇮🇳</Text>
+                    <Text style={styles.footerText}>Made in 🇮🇳 with ❤️</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

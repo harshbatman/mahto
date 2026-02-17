@@ -282,6 +282,11 @@ export default function ExploreScreen() {
                                         ) : (
                                             <View style={styles.placeholderBanner} />
                                         )}
+                                        {/* Status Badge */}
+                                        <View style={[styles.statusBadge, styles.statusOpen]}>
+                                            <View style={[styles.statusDot, styles.dotOpen]} />
+                                            <Text style={styles.statusText}>Open Now</Text>
+                                        </View>
                                     </View>
                                     <View style={styles.cardBody}>
                                         <View style={styles.cardHeader}>
@@ -293,8 +298,8 @@ export default function ExploreScreen() {
                                                 )}
                                             </View>
                                             <View style={styles.cardTitleSection}>
-                                                <Text style={styles.cardName}>{item.companyName || item.name}</Text>
-                                                <Text style={styles.cardSub}>{item.contractorServices?.slice(0, 2).join(', ') || 'General Contractor'}</Text>
+                                                <Text style={styles.cardName} numberOfLines={1}>{item.companyName || item.name}</Text>
+                                                <Text style={styles.cardSub} numberOfLines={1}>{item.contractorServices?.slice(0, 2).join(', ') || 'General Contractor'}</Text>
                                             </View>
                                         </View>
                                         <View style={styles.cardFooter}>
@@ -322,28 +327,53 @@ export default function ExploreScreen() {
                         {loading ? (
                             <ActivityIndicator style={{ marginTop: 100 }} color="black" />
                         ) : filteredWorkers.length > 0 ? (
-                            filteredWorkers.map((item, index) => (
-                                <TouchableOpacity key={item.id || item.uid || index} style={styles.listItem} onPress={() => handleNavigate(item)}>
-                                    <View style={styles.listAvatar}>
-                                        {item.photoURL ? (
-                                            <Image source={{ uri: item.photoURL }} style={styles.avatarImg} />
-                                        ) : (
-                                            <MaterialCommunityIcons name="account-outline" size={24} color="black" />
-                                        )}
-                                    </View>
-                                    <View style={styles.listInfo}>
-                                        <Text style={styles.listName}>{item.name}</Text>
-                                        <Text style={styles.listSub}>{item.skills?.[0] || 'Worker'}</Text>
-                                        <View style={styles.listMeta}>
-                                            <MaterialCommunityIcons name="star" size={14} color="black" />
-                                            <Text style={styles.metaText}>{item.averageRating || '4.5'}</Text>
-                                            <Text style={styles.metaDivider}>•</Text>
-                                            <Text style={styles.metaText}>₹{item.dailyRate || '500'}/day</Text>
+                            filteredWorkers.map((item, index) => {
+                                const isOnline = item.isAvailable !== false;
+                                return (
+                                    <TouchableOpacity key={item.id || item.uid || index} style={styles.cardItem} onPress={() => handleNavigate(item)}>
+                                        <View style={styles.cardBanner}>
+                                            {item.photoURL ? (
+                                                <Image source={{ uri: item.photoURL }} style={styles.bannerImg} />
+                                            ) : (
+                                                <View style={[styles.placeholderBanner, { backgroundColor: '#F3F4FF' }]} />
+                                            )}
+
+                                            {/* Status Badge */}
+                                            <View style={[styles.statusBadge, isOnline ? styles.statusAvailable : styles.statusBusy]}>
+                                                <View style={[styles.statusDot, isOnline ? styles.dotAvailable : styles.dotBusy]} />
+                                                <Text style={styles.statusText}>
+                                                    {isOnline ? 'Available' : 'Busy'}
+                                                </Text>
+                                            </View>
                                         </View>
-                                    </View>
-                                    <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
-                                </TouchableOpacity>
-                            ))
+                                        <View style={styles.cardBody}>
+                                            <View style={styles.cardHeader}>
+                                                <View style={styles.cardAvatar}>
+                                                    {item.photoURL ? (
+                                                        <Image source={{ uri: item.photoURL }} style={styles.avatarImg} />
+                                                    ) : (
+                                                        <MaterialCommunityIcons name="account" size={20} color="black" />
+                                                    )}
+                                                </View>
+                                                <View style={styles.cardTitleSection}>
+                                                    <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
+                                                    <Text style={styles.cardSub} numberOfLines={1}>
+                                                        {item.skills?.join(', ') || 'General Worker'}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <View style={styles.cardFooter}>
+                                                <View style={styles.metaBadge}>
+                                                    <MaterialCommunityIcons name="star" size={12} color="black" />
+                                                    <Text style={styles.metaText}>{item.averageRating || '4.5'}</Text>
+                                                </View>
+                                                <Text style={styles.metaDivider}>•</Text>
+                                                <Text style={styles.metaText} numberOfLines={1}>{item.location || 'Nearby'}</Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })
                         ) : (
                             <View style={styles.emptyState}>
                                 <Text style={styles.emptyText}>No workers found</Text>
@@ -366,6 +396,13 @@ export default function ExploreScreen() {
                                         ) : (
                                             <View style={styles.placeholderBanner} />
                                         )}
+                                        {/* Status Badge */}
+                                        <View style={[styles.statusBadge, isShopOpen(item.openingTime, item.closingTime) ? styles.statusOpen : styles.statusClosed]}>
+                                            <View style={[styles.statusDot, isShopOpen(item.openingTime, item.closingTime) ? styles.dotOpen : styles.dotClosed]} />
+                                            <Text style={styles.statusText}>
+                                                {isShopOpen(item.openingTime, item.closingTime) ? 'Open Now' : 'Closed'}
+                                            </Text>
+                                        </View>
                                     </View>
                                     <View style={styles.cardBody}>
                                         <View style={styles.cardHeader}>
@@ -377,18 +414,17 @@ export default function ExploreScreen() {
                                                 )}
                                             </View>
                                             <View style={styles.cardTitleSection}>
-                                                <Text style={styles.cardName}>{item.shopName}</Text>
-                                                <Text style={styles.cardSub}>{item.shopCategories?.slice(0, 2).join(', ') || 'Building Materials'}</Text>
+                                                <Text style={styles.cardName} numberOfLines={1}>{item.shopName}</Text>
+                                                <Text style={styles.cardSub} numberOfLines={1}>{item.shopCategories?.slice(0, 2).join(', ') || 'Building Materials'}</Text>
                                             </View>
                                         </View>
                                         <View style={styles.cardFooter}>
-                                            <View style={[styles.statusTag, { backgroundColor: isShopOpen(item.openingTime, item.closingTime) ? '#000' : '#F3F3F3' }]}>
-                                                <Text style={[styles.statusText, { color: isShopOpen(item.openingTime, item.closingTime) ? '#FFF' : '#AFAFAF' }]}>
-                                                    {isShopOpen(item.openingTime, item.closingTime) ? 'Open' : 'Closed'}
-                                                </Text>
+                                            <View style={styles.metaBadge}>
+                                                <MaterialCommunityIcons name="star" size={12} color="black" />
+                                                <Text style={styles.metaText}>{item.averageRating || '4.5'}</Text>
                                             </View>
                                             <Text style={styles.metaDivider}>•</Text>
-                                            <Text style={styles.metaText}>{item.location || 'Nearby'}</Text>
+                                            <Text style={styles.metaText} numberOfLines={1}>{item.location || 'Nearby'}</Text>
                                         </View>
                                     </View>
                                 </TouchableOpacity>
@@ -602,6 +638,37 @@ const styles = StyleSheet.create({
     cardTitleSection: {
         flex: 1,
     },
+    statusBadge: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        gap: 6,
+    },
+    statusDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    statusText: {
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    statusAvailable: { backgroundColor: '#F0FDF4' },
+    statusBusy: { backgroundColor: '#FEF2F2' },
+    statusOpen: { backgroundColor: '#F0FDF4' },
+    statusClosed: { backgroundColor: '#FEF2F2' },
+    dotAvailable: { backgroundColor: '#22C55E' },
+    dotBusy: { backgroundColor: '#EF4444' },
+    dotOpen: { backgroundColor: '#22C55E' },
+    dotClosed: { backgroundColor: '#EF4444' },
     cardName: {
         fontSize: 16,
         fontWeight: '700',
@@ -619,6 +686,10 @@ const styles = StyleSheet.create({
         borderTopColor: '#FDFDFD',
         paddingTop: 12,
     },
+    avatarImg: {
+        width: '100%',
+        height: '100%',
+    },
     metaBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -628,67 +699,13 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         gap: 4,
     },
-    statusTag: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-    },
-    statusText: {
-        fontSize: 11,
-        fontWeight: '800',
-        textTransform: 'uppercase',
-    },
-    listItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F3F3',
-    },
-    listAvatar: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#F3F3F3',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    avatarImg: {
-        width: '100%',
-        height: '100%',
-    },
-    listInfo: {
-        flex: 1,
-        marginLeft: 16,
-    },
-    listName: {
-        fontSize: 16,
+    metaText: {
+        fontSize: 12,
         fontWeight: '700',
         color: '#000',
     },
-    listSub: {
-        fontSize: 14,
-        color: '#545454',
-        marginTop: 2,
-    },
-    listMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 6,
-        gap: 6,
-    },
-    metaText: {
-        fontSize: 13,
-        color: '#545454',
-    },
     metaDivider: {
         color: '#AFAFAF',
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
     },
     emptyState: {
         paddingVertical: 100,

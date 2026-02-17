@@ -228,60 +228,58 @@ export default function SearchResultsScreen() {
                     keyExtractor={(item) => item.uid || item.id}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                        role === 'worker' ? (
-                            <TouchableOpacity style={styles.resultItem} onPress={() => handleNavigate(item)}>
-                                <View style={styles.resultAvatarContainer}>
-                                    {isValidUri(item.photoURL || item.shopLogo || item.companyLogo) ? (
-                                        <Image source={{ uri: item.photoURL || item.shopLogo || item.companyLogo }} style={styles.resultAvatar} />
-                                    ) : (
-                                        <View style={styles.avatarPlaceholder}>
-                                            <MaterialCommunityIcons
-                                                name="account"
-                                                size={28}
-                                                color="#000"
-                                            />
-                                        </View>
-                                    )}
-                                </View>
-                                <View style={styles.resultInfo}>
-                                    <Text style={styles.resultName}>{item.name}</Text>
-                                    <Text style={styles.resultCategory} numberOfLines={1}>
-                                        {item.skills?.[0] || 'Worker'}
-                                    </Text>
-                                    <View style={styles.resultMeta}>
-                                        <View style={styles.ratingRow}>
-                                            <MaterialCommunityIcons name="star" size={14} color="#000" />
-                                            <Text style={styles.ratingText}>{item.averageRating || '4.5'}</Text>
-                                        </View>
-                                        <Text style={styles.metaDivider}>•</Text>
-                                        <Text style={styles.distanceText}>{item.location || 'Nearby'}</Text>
-                                    </View>
-                                </View>
-                                <MaterialCommunityIcons name="chevron-right" size={24} color="#CCC" />
-                            </TouchableOpacity>
-                        ) : (
+                    renderItem={({ item }) => {
+                        const isOpen = role === 'shop' ? isShopOpen(item.openingTime, item.closingTime) : false;
+                        const isOnline = role === 'worker' ? (item.isAvailable !== false) : true;
+
+                        return (
                             <TouchableOpacity style={styles.cardItem} onPress={() => handleNavigate(item)}>
                                 <View style={styles.cardBanner}>
-                                    {isValidUri(item.shopBanner || item.companyBanner) ? (
-                                        <Image source={{ uri: item.shopBanner || item.companyBanner }} style={styles.bannerImg} />
+                                    {isValidUri(item.shopBanner || item.companyBanner || item.photoURL) ? (
+                                        <Image
+                                            source={{ uri: item.shopBanner || item.companyBanner || item.photoURL }}
+                                            style={styles.bannerImg}
+                                        />
                                     ) : (
-                                        <View style={styles.placeholderBanner} />
+                                        <View style={[styles.placeholderBanner, { backgroundColor: role === 'worker' ? '#F3F4FF' : '#F9F9F9' }]} />
                                     )}
+
+                                    {/* Status Badge */}
+                                    <View style={[
+                                        styles.statusBadge,
+                                        role === 'shop' ? (isOpen ? styles.statusOpen : styles.statusClosed) : (isOnline ? styles.statusAvailable : styles.statusBusy)
+                                    ]}>
+                                        <View style={[
+                                            styles.statusDot,
+                                            role === 'shop' ? (isOpen ? styles.dotOpen : styles.dotClosed) : (isOnline ? styles.dotAvailable : styles.dotBusy)
+                                        ]} />
+                                        <Text style={styles.statusText}>
+                                            {role === 'shop' ? (isOpen ? 'Open Now' : 'Closed') : (isOnline ? 'Available' : 'Busy')}
+                                        </Text>
+                                    </View>
                                 </View>
+
                                 <View style={styles.cardBody}>
                                     <View style={styles.cardHeader}>
                                         <View style={styles.cardAvatar}>
-                                            {isValidUri(item.shopLogo || item.companyLogo) ? (
-                                                <Image source={{ uri: item.shopLogo || item.companyLogo }} style={styles.avatarImg} />
+                                            {isValidUri(item.shopLogo || item.companyLogo || item.photoURL) ? (
+                                                <Image source={{ uri: item.shopLogo || item.companyLogo || item.photoURL }} style={styles.avatarImg} />
                                             ) : (
-                                                <MaterialCommunityIcons name={role === 'shop' ? "store" : "briefcase"} size={20} color="black" />
+                                                <MaterialCommunityIcons
+                                                    name={role === 'shop' ? "store" : role === 'contractor' ? "briefcase" : "account"}
+                                                    size={20}
+                                                    color="black"
+                                                />
                                             )}
                                         </View>
                                         <View style={styles.cardTitleSection}>
-                                            <Text style={styles.cardName}>{item.shopName || item.companyName || item.name}</Text>
+                                            <Text style={styles.cardName} numberOfLines={1}>
+                                                {item.shopName || item.companyName || item.name}
+                                            </Text>
                                             <Text style={styles.cardSub} numberOfLines={1}>
-                                                {role === 'shop' ? (item.shopCategories?.slice(0, 2).join(', ') || 'Building Materials') : (item.contractorServices?.slice(0, 2).join(', ') || 'General Contractor')}
+                                                {role === 'worker' ? (item.skills?.join(', ') || 'General Worker') :
+                                                    role === 'shop' ? (item.shopCategories?.slice(0, 2).join(', ') || 'Building Materials') :
+                                                        (item.contractorServices?.slice(0, 2).join(', ') || 'General Contractor')}
                                             </Text>
                                         </View>
                                     </View>
@@ -291,12 +289,12 @@ export default function SearchResultsScreen() {
                                             <Text style={styles.metaText}>{item.averageRating || '4.5'}</Text>
                                         </View>
                                         <Text style={styles.metaDivider}>•</Text>
-                                        <Text style={styles.metaText}>{item.location || 'Nearby'}</Text>
+                                        <Text style={styles.metaText} numberOfLines={1}>{item.location || 'Nearby'}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                        )
-                    )}
+                        );
+                    }}
                     ListEmptyComponent={
                         <View style={styles.emptyState}>
                             <MaterialCommunityIcons name="account-search-outline" size={64} color="#EEE" />
@@ -581,70 +579,41 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#000',
     },
-    resultItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F3F3',
-    },
-    resultAvatarContainer: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#F3F3F3',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    resultAvatar: {
-        width: '100%',
-        height: '100%',
-    },
-    avatarPlaceholder: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    resultInfo: {
-        flex: 1,
-        marginLeft: 16,
-    },
-    resultName: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#000',
-    },
-    resultCategory: {
-        fontSize: 14,
-        color: '#545454',
-        marginTop: 2,
-    },
-    resultMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 4,
-    },
-    ratingRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    ratingText: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#000',
-    },
     metaDivider: {
         marginHorizontal: 8,
         color: '#CCC',
         fontSize: 12,
     },
-    distanceText: {
-        fontSize: 13,
-        color: '#545454',
+    statusBadge: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        gap: 6,
     },
+    statusDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    statusText: {
+        fontSize: 11,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    statusAvailable: { backgroundColor: '#F0FDF4' },
+    statusBusy: { backgroundColor: '#FEF2F2' },
+    statusOpen: { backgroundColor: '#F0FDF4' },
+    statusClosed: { backgroundColor: '#FEF2F2' },
+    dotAvailable: { backgroundColor: '#22C55E' },
+    dotBusy: { backgroundColor: '#EF4444' },
+    dotOpen: { backgroundColor: '#22C55E' },
+    dotClosed: { backgroundColor: '#EF4444' },
     emptyState: {
         marginTop: 100,
         alignItems: 'center',

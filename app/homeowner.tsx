@@ -127,7 +127,13 @@ export default function HomeownerDashboard() {
                                     )}
                                 </View>
                                 <View style={styles.resultInfo}>
-                                    <Text style={styles.resultName}>{user.companyName || user.name || user.shopName}</Text>
+                                    <View style={styles.nameRow}>
+                                        <Text style={styles.resultName}>{user.companyName || user.name || user.shopName}</Text>
+                                        <View style={[
+                                            styles.quickStatusDot,
+                                            user.role === 'worker' ? (user.isAvailable !== false ? styles.dotAvailable : styles.dotBusy) : styles.dotOpen
+                                        ]} />
+                                    </View>
                                     <Text style={styles.resultSub}>{user.role.charAt(0).toUpperCase() + user.role.slice(1)} • {user.location || 'Nearby'}</Text>
                                 </View>
                                 <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
@@ -465,6 +471,20 @@ const styles = StyleSheet.create({
         color: '#545454',
         marginTop: 2,
     },
+    nameRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    quickStatusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    dotAvailable: { backgroundColor: '#22C55E' },
+    dotBusy: { backgroundColor: '#EF4444' },
+    dotOpen: { backgroundColor: '#22C55E' },
+    dotClosed: { backgroundColor: '#EF4444' },
     loading: {
         paddingVertical: 20,
         alignItems: 'center',

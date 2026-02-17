@@ -269,16 +269,18 @@ export default function UserProfileScreen() {
                     <View style={styles.section}>
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Reviews</Text>
-                            <TouchableOpacity onPress={() => {
-                                if (!currentUser) {
-                                    router.push('/(auth)/phone-login');
-                                    return;
-                                }
-                                setSelectedRating(0);
-                                setComment('');
-                                setRatingModalVisible(true);
-                            }}>
-                                <Text style={styles.rateLink}>Rate Business</Text>
+                            <TouchableOpacity
+                                style={styles.rateButton}
+                                onPress={() => {
+                                    if (!currentUser) {
+                                        router.push('/(auth)/phone-login');
+                                        return;
+                                    }
+                                    setSelectedRating(0);
+                                    setComment('');
+                                    setRatingModalVisible(true);
+                                }}>
+                                <Text style={styles.rateButtonText}>Rate Business</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -326,7 +328,7 @@ export default function UserProfileScreen() {
                                     <MaterialCommunityIcons
                                         name={star <= selectedRating ? "star" : "star-outline"}
                                         size={40}
-                                        color="black"
+                                        color={star <= selectedRating ? "#FFC107" : "#000"}
                                     />
                                 </TouchableOpacity>
                             ))}
@@ -589,11 +591,16 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#000',
     },
-    rateLink: {
-        fontSize: 14,
+    rateButton: {
+        backgroundColor: '#000',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    rateButtonText: {
+        color: '#FFF',
+        fontSize: 12,
         fontWeight: '700',
-        color: '#000',
-        textDecorationLine: 'underline',
     },
     reviewItem: {
         paddingVertical: 16,

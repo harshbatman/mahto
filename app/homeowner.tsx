@@ -241,9 +241,7 @@ export default function HomeownerDashboard() {
                 </TouchableOpacity>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India with </Text>
-                    <MaterialCommunityIcons name="heart" size={14} color="#EF4444" />
-                    <Text style={styles.footerText}> 🇮🇳</Text>
+                    <Text style={styles.footerText}>Made in India 🇮🇳 with love ❤️</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

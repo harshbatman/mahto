@@ -19,7 +19,6 @@ import {
     View
 } from 'react-native';
 
-
 export default function SettingsScreen() {
     const router = useRouter();
     const { language, setLanguage, t } = useLanguage();
@@ -47,7 +46,6 @@ export default function SettingsScreen() {
             return;
         }
 
-        // Basic validation for matching phone number if profile exists
         if (profile?.phoneNumber && !profile.phoneNumber.endsWith(confirmPhone)) {
             Alert.alert('Error', 'Phone number does not match your account.');
             return;
@@ -64,15 +62,13 @@ export default function SettingsScreen() {
                     onPress: async () => {
                         setIsDeleting(true);
                         try {
-                            // In a real app, you would call a backend service here
-                            // For now, we simulate the process and log out
                             setTimeout(async () => {
                                 await logout();
                                 router.replace('/(auth)/welcome');
                                 setIsDeleting(false);
                             }, 2000);
                         } catch (error) {
-                            Alert.alert('Error', 'Failed to delete account. Please try again.');
+                            Alert.alert('Error', 'Failed to delete account.');
                             setIsDeleting(false);
                         }
                     }
@@ -95,18 +91,17 @@ export default function SettingsScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionLabel}>{t.preferences}</Text>
                     <View style={styles.menuBox}>
-                        <View style={styles.menuRow}>
-                            <TouchableOpacity
-                                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}
-                                onPress={() => router.push('/notifications' as any)}
-                            >
-                                <View style={styles.rowInfo}>
-                                    <MaterialCommunityIcons name="inbox-outline" size={24} color="black" />
-                                    <Text style={styles.rowText}>Notification Inbox</Text>
-                                </View>
-                                <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            style={styles.menuRow}
+                            onPress={() => router.push('/notifications' as any)}
+                        >
+                            <View style={styles.rowInfo}>
+                                <MaterialCommunityIcons name="inbox-outline" size={24} color="black" />
+                                <Text style={styles.rowText}>Notification Inbox</Text>
+                            </View>
+                            <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
+                        </TouchableOpacity>
+
                         <View style={styles.menuRow}>
                             <View style={styles.rowInfo}>
                                 <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
@@ -119,6 +114,7 @@ export default function SettingsScreen() {
                                 thumbColor={notifications ? '#FFF' : '#FFF'}
                             />
                         </View>
+
                         <TouchableOpacity
                             style={styles.menuRow}
                             onPress={() => setShowLangModal(true)}
@@ -138,7 +134,7 @@ export default function SettingsScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionLabel}>Support & Legal</Text>
                     <View style={styles.menuBox}>
-                        {menuItems.map((item, index) => (
+                        {menuItems.map((item) => (
                             <TouchableOpacity
                                 key={item.id}
                                 style={styles.menuRow}
@@ -181,7 +177,6 @@ export default function SettingsScreen() {
                 </View>
             </ScrollView>
 
-            {/* Language Modal */}
             <Modal
                 visible={showLangModal}
                 transparent={true}
@@ -196,32 +191,23 @@ export default function SettingsScreen() {
                                 <MaterialCommunityIcons name="close" size={24} color="black" />
                             </TouchableOpacity>
                         </View>
-
                         <FlatList
                             data={LANGUAGES}
                             keyExtractor={(item) => item.id}
                             showsVerticalScrollIndicator={false}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
-                                    style={[
-                                        styles.langItem,
-                                        selectedLang.id === item.id && styles.langItemActive
-                                    ]}
+                                    style={[styles.langItem, selectedLang.id === item.id && styles.langItemActive]}
                                     onPress={() => {
                                         setLanguage(item.id as LanguageCode);
                                         setShowLangModal(false);
                                     }}
                                 >
                                     <View>
-                                        <Text style={[
-                                            styles.langName,
-                                            selectedLang.id === item.id && styles.langNameActive
-                                        ]}>{item.name}</Text>
+                                        <Text style={[styles.langName, selectedLang.id === item.id && styles.langNameActive]}>{item.name}</Text>
                                         <Text style={styles.langLocal}>{item.local}</Text>
                                     </View>
-                                    {selectedLang.id === item.id && (
-                                        <MaterialCommunityIcons name="check-circle" size={24} color="black" />
-                                    )}
+                                    {selectedLang.id === item.id && <MaterialCommunityIcons name="check-circle" size={24} color="black" />}
                                 </TouchableOpacity>
                             )}
                         />
@@ -229,7 +215,6 @@ export default function SettingsScreen() {
                 </View>
             </Modal>
 
-            {/* Account Deletion Modal */}
             <Modal
                 visible={showDeleteModal}
                 transparent={true}
@@ -241,65 +226,46 @@ export default function SettingsScreen() {
                         <View style={styles.modalHeader}>
                             <View>
                                 <Text style={styles.modalTitle}>Delete Account</Text>
-                                <Text style={styles.deleteSubtitle}>To confirm, please enter your details</Text>
+                                <Text style={styles.deleteSubtitle}>Enter details to confirm permanent deletion</Text>
                             </View>
                             <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
                                 <MaterialCommunityIcons name="close" size={24} color="black" />
                             </TouchableOpacity>
                         </View>
-
                         <View style={styles.deleteForm}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.inputLabel}>Phone Number</Text>
                                 <TextInput
                                     style={styles.textInput}
-                                    placeholder="Enter your registered phone no"
+                                    placeholder="Registered phone number"
                                     keyboardType="phone-pad"
                                     value={confirmPhone}
                                     onChangeText={setConfirmPhone}
-                                    placeholderTextColor="#AFAFAF"
                                 />
                             </View>
-
                             <View style={styles.inputGroup}>
                                 <Text style={styles.inputLabel}>Password</Text>
-                                <View style={styles.passwordInputWrapper}>
+                                <View style={styles.passwordWrapper}>
                                     <TextInput
                                         style={styles.passwordInput}
-                                        placeholder="Enter your password"
+                                        placeholder="Account password"
                                         secureTextEntry={!showPassword}
                                         value={confirmPassword}
                                         onChangeText={setConfirmPassword}
-                                        placeholderTextColor="#AFAFAF"
                                     />
-                                    <TouchableOpacity
-                                        onPress={() => setShowPassword(!showPassword)}
-                                        style={styles.eyeBtn}
-                                    >
-                                        <MaterialCommunityIcons
-                                            name={showPassword ? "eye-off" : "eye"}
-                                            size={20}
-                                            color="#AFAFAF"
-                                        />
+                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
+                                        <MaterialCommunityIcons name={showPassword ? "eye-off" : "eye"} size={20} color="#666" />
                                     </TouchableOpacity>
                                 </View>
                             </View>
-
                             <TouchableOpacity
-                                style={[styles.deleteConfirmBtn, isDeleting && styles.disabledBtn]}
+                                style={[styles.deleteConfirmBtn, isDeleting && { opacity: 0.7 }]}
                                 onPress={handleDeleteAccount}
                                 disabled={isDeleting}
                             >
-                                {isDeleting ? (
-                                    <ActivityIndicator color="white" />
-                                ) : (
-                                    <Text style={styles.deleteConfirmText}>Delete Permanently</Text>
-                                )}
+                                {isDeleting ? <ActivityIndicator color="white" /> : <Text style={styles.deleteConfirmText}>Permanently Delete Account</Text>}
                             </TouchableOpacity>
-
-                            <Text style={styles.deleteWarning}>
-                                Note: This will permanently remove all your data, postings, and history from MAHTO.
-                            </Text>
+                            <Text style={styles.deleteWarning}>This action cannot be undone. All data will be lost.</Text>
                         </View>
                     </View>
                 </View>
@@ -309,218 +275,42 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFF',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-    },
-    backBtn: {
-        padding: 4,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#000',
-    },
-    content: {
-        paddingHorizontal: 20,
-    },
-    section: {
-        marginTop: 24,
-    },
-    sectionLabel: {
-        fontSize: 12,
-        fontWeight: '800',
-        color: '#AFAFAF',
-        letterSpacing: 1,
-        marginBottom: 16,
-        marginLeft: 4,
-    },
-    menuBox: {
-        backgroundColor: '#FFF',
-    },
-    menuRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F3F3',
-    },
-    rowInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    rowText: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#000',
-    },
-    rowValue: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    valueText: {
-        fontSize: 14,
-        color: '#545454',
-        fontWeight: '600',
-    },
-    footer: {
-        alignItems: 'center',
-        marginTop: 60,
-        paddingBottom: 40,
-    },
-    appTitle: {
-        fontSize: 20,
-        fontWeight: '900',
-        letterSpacing: 2,
-        color: '#000',
-    },
-    versionText: {
-        fontSize: 12,
-        color: '#AFAFAF',
-        fontWeight: '700',
-        marginTop: 4,
-    },
-    modalBackdrop: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        justifyContent: 'center',
-        padding: 24,
-    },
-    modalContent: {
-        backgroundColor: '#FFF',
-        borderRadius: 24,
-        padding: 24,
-        maxHeight: '80%',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-    },
-    langItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 12,
-        marginBottom: 8,
-    },
-    langItemActive: {
-        backgroundColor: '#F3F3F3',
-    },
-    langName: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#545454',
-    },
-    langNameActive: {
-        color: '#000',
-    },
-    langLocal: {
-        fontSize: 14,
-        color: '#AFAFAF',
-        marginTop: 2,
-    },
-    deleteModalBackdrop: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        justifyContent: 'flex-end',
-    },
-    deleteModalContent: {
-        backgroundColor: '#FFF',
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        padding: 24,
-        paddingBottom: 40,
-    },
-    deleteSubtitle: {
-        fontSize: 14,
-        color: '#545454',
-        marginTop: 4,
-        fontWeight: '500',
-    },
-    deleteForm: {
-        marginTop: 24,
-        gap: 20,
-    },
-    inputGroup: {
-        gap: 8,
-    },
-    inputLabel: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#000',
-    },
-    textInput: {
-        backgroundColor: '#F8F9FA',
-        borderRadius: 16,
-        padding: 16,
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#000',
-        borderWidth: 1,
-        borderColor: '#EEE',
-    },
-    passwordInputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F8F9FA',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#EEE',
-    },
-    passwordInput: {
-        flex: 1,
-        padding: 16,
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#000',
-    },
-    eyeBtn: {
-        padding: 16,
-    },
-    deleteConfirmBtn: {
-        backgroundColor: '#FF3B30',
-        borderRadius: 16,
-        padding: 18,
-        alignItems: 'center',
-        marginTop: 8,
-        shadowColor: '#FF3B30',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    deleteConfirmText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '800',
-    },
-    disabledBtn: {
-        opacity: 0.6,
-    },
-    deleteWarning: {
-        fontSize: 12,
-        color: '#AFAFAF',
-        textAlign: 'center',
-        lineHeight: 18,
-        fontWeight: '600',
-        marginTop: 8,
-    }
+    container: { flex: 1, backgroundColor: '#FFF' },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16 },
+    backBtn: { padding: 4 },
+    headerTitle: { fontSize: 18, fontWeight: '700' },
+    content: { paddingHorizontal: 20 },
+    section: { marginTop: 24 },
+    sectionLabel: { fontSize: 12, fontWeight: '800', color: '#AFAFAF', letterSpacing: 1, marginBottom: 16, marginLeft: 4 },
+    menuBox: { backgroundColor: '#FFF' },
+    menuRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: '#F3F3F3' },
+    rowInfo: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    rowText: { fontSize: 16, fontWeight: '700' },
+    rowValue: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    valueText: { fontSize: 14, color: '#545454', fontWeight: '600' },
+    footer: { alignItems: 'center', marginTop: 60, paddingBottom: 40 },
+    appTitle: { fontSize: 20, fontWeight: '900', letterSpacing: 2 },
+    versionText: { fontSize: 12, color: '#AFAFAF', fontWeight: '700', marginTop: 4 },
+    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
+    modalContent: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, maxHeight: '80%' },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    modalTitle: { fontSize: 20, fontWeight: '800' },
+    langItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 16, borderRadius: 12, marginBottom: 8 },
+    langItemActive: { backgroundColor: '#F3F3F3' },
+    langName: { fontSize: 16, fontWeight: '700', color: '#545454' },
+    langNameActive: { color: '#000' },
+    langLocal: { fontSize: 14, color: '#AFAFAF', marginTop: 2 },
+    deleteModalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+    deleteModalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 },
+    deleteSubtitle: { fontSize: 14, color: '#545454', marginTop: 4 },
+    deleteForm: { marginTop: 24, gap: 20 },
+    inputGroup: { gap: 8 },
+    inputLabel: { fontSize: 14, fontWeight: '700' },
+    textInput: { backgroundColor: '#F8F9FA', borderRadius: 16, padding: 16, fontSize: 16, borderWidth: 1, borderColor: '#EEE' },
+    passwordWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F9FA', borderRadius: 16, borderWidth: 1, borderColor: '#EEE' },
+    passwordInput: { flex: 1, padding: 16, fontSize: 16 },
+    eyeBtn: { padding: 16 },
+    deleteConfirmBtn: { backgroundColor: '#FF3B30', borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
+    deleteConfirmText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+    deleteWarning: { fontSize: 12, color: '#AFAFAF', textAlign: 'center', marginTop: 8 },
 });

@@ -31,7 +31,7 @@ export default function ShopDashboard() {
                     showSearch={false}
                 />
                 <View style={styles.heroSection}>
-                    <Text style={styles.heroGreeting}>Store Hub</Text>
+                    <Text style={styles.heroGreeting}>Store</Text>
                     <Text style={styles.heroName}>{profile?.shopName || 'Partner'}</Text>
                 </View>
 

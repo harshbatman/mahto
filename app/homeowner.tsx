@@ -167,7 +167,7 @@ export default function HomeownerDashboard() {
 
                 <View style={styles.divider} />
 
-                <View style={styles.rewardBanner}>
+                <TouchableOpacity style={styles.rewardBanner} onPress={() => router.push('/(tabs)/post')}>
                     <View style={styles.rewardInfo}>
                         <View style={styles.freeBadge}>
                             <Text style={styles.freeBadgeText}>FREE</Text>
@@ -175,8 +175,11 @@ export default function HomeownerDashboard() {
                         <Text style={styles.rewardTitle}>Post now at ₹0 cost 🥳</Text>
                         <Text style={styles.rewardSub}>Start your construction journey today</Text>
                     </View>
-                    <Text style={{ fontSize: 36 }}>🎉</Text>
-                </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontSize: 36 }}>🎉</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+                    </View>
+                </TouchableOpacity>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -238,8 +241,9 @@ export default function HomeownerDashboard() {
                 </TouchableOpacity>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India </Text>
-                    <Text style={styles.footerText}>🇮🇳</Text>
+                    <Text style={styles.footerText}>Made in India with </Text>
+                    <MaterialCommunityIcons name="heart" size={14} color="#EF4444" />
+                    <Text style={styles.footerText}> 🇮🇳</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PostTab() {
@@ -10,14 +10,14 @@ export default function PostTab() {
         {
             title: 'Post Contract',
             subtitle: 'For major construction or renovation works',
-            icon: 'file-document-outline',
+            image: require('@/assets/images/3d_contract.png'),
             route: '/post-contract',
             color: '#6366f1'
         },
         {
             title: 'Post Job',
             subtitle: 'Find workers for daily or small tasks',
-            icon: 'account-hard-hat-outline',
+            image: require('@/assets/images/3d_job.png'),
             route: '/post-job',
             color: '#22c55e'
         },
@@ -39,8 +39,8 @@ export default function PostTab() {
                             style={styles.card}
                             onPress={() => router.push(option.route as any)}
                         >
-                            <View style={[styles.iconContainer, { backgroundColor: option.color + '15' }]}>
-                                <MaterialCommunityIcons name={option.icon as any} size={32} color={option.color} />
+                            <View style={styles.iconContainer}>
+                                <Image source={option.image} style={{ width: 50, height: 50 }} resizeMode="contain" />
                             </View>
                             <View style={styles.cardText}>
                                 <Text style={styles.cardTitle}>{option.title}</Text>

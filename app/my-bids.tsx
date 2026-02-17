@@ -93,7 +93,7 @@ export default function MyBidsScreen() {
                     <MaterialCommunityIcons name="file-document-outline" size={64} color="#ccc" />
                     <Text style={styles.emptyText}>You haven't placed any bids yet.</Text>
                     <TouchableOpacity style={styles.browseBtn} onPress={() => router.push('/browse-contracts')}>
-                        <Text style={styles.browseBtnText}>Browse Contracts</Text>
+                        <Text style={styles.browseBtnText}>Find Contracts</Text>
                     </TouchableOpacity>
                 </View>
             ) : (

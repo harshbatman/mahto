@@ -140,7 +140,7 @@ export default function BrowseContractsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Browse Contracts</Text>
+                <Text style={styles.headerTitle}>Find Contracts</Text>
                 <View style={{ width: 40 }} />
             </View>
 

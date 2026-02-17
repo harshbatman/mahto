@@ -560,7 +560,7 @@ export default function PostContractScreen() {
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text style={styles.postBtnText}>Publish Contract</Text>
+                                <Text style={styles.postBtnText}>Post contract</Text>
                             )}
                         </TouchableOpacity>
                     </View>
@@ -651,8 +651,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     categoryBtnActive: {
-        borderColor: '#6366f1',
-        backgroundColor: '#6366f1',
+        borderColor: '#000',
+        backgroundColor: '#000',
     },
     categoryBtnText: {
         fontSize: 13,
@@ -791,15 +791,15 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     postBtn: {
-        backgroundColor: '#6366f1',
+        backgroundColor: '#000',
         padding: 18,
         borderRadius: 20,
         alignItems: 'center',
         marginTop: 12,
         marginBottom: 60,
-        shadowColor: '#6366f1',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.1,
         shadowRadius: 12,
         elevation: 8,
     },

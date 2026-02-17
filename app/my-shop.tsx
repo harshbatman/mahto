@@ -120,9 +120,23 @@ export default function MyShopViewScreen() {
                         )}
                     </View>
                     <Text style={styles.userName}>{profile?.shopName || 'My Shop'}</Text>
-                    <Text style={styles.userRole}>
-                        {profile?.shopCategories?.join(', ') || 'General Supplier'}
-                    </Text>
+                    <View style={styles.categoryRow}>
+                        <Text style={styles.userRole}>
+                            {profile?.shopCategories?.join(', ') || 'General Supplier'}
+                        </Text>
+                        <TouchableOpacity
+                            style={styles.editCategoryBtn}
+                            onPress={() => router.push({
+                                pathname: '/select-shop-category',
+                                params: {
+                                    mode: 'edit',
+                                    initialCategories: JSON.stringify(profile?.shopCategories || [])
+                                }
+                            })}
+                        >
+                            <MaterialCommunityIcons name="pencil-circle" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
 
                     <View style={styles.statsRow}>
                         <View style={styles.statItem}>
@@ -295,15 +309,17 @@ const styles = StyleSheet.create({
     userName: { fontSize: 22, fontWeight: '900', marginTop: 12 },
     userRole: { fontSize: 14, color: '#64748b', marginTop: 4 },
     statsRow: { flexDirection: 'row', marginTop: 20, alignItems: 'center' },
+    categoryRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
     statItem: { alignItems: 'center', paddingHorizontal: 24 },
     statValue: { fontSize: 18, fontWeight: '800' },
     statLabel: { fontSize: 11, color: '#64748b', marginTop: 2 },
+    editCategoryBtn: { padding: 4 },
     statDivider: { width: 1, height: 24, backgroundColor: '#e2e8f0' },
     content: { padding: Spacing.lg },
     section: { marginBottom: 32 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
     sectionTitle: { fontSize: 18, fontWeight: '800', marginBottom: 16 },
-    addBtn: { backgroundColor: '#6366f1', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, gap: 4 },
+    addBtn: { backgroundColor: 'black', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, gap: 4 },
     addBtnText: { color: 'white', fontSize: 13, fontWeight: '700' },
     productGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     productCard: { width: '48%', backgroundColor: 'white', borderRadius: 20, borderWidth: 1, borderColor: '#f1f5f9', overflow: 'hidden' },

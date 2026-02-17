@@ -18,14 +18,11 @@ export default function ProfileTab() {
 
     const menuItems = [
         {
-            title: profile?.role === 'shop' ? 'Shop Profile' : profile?.role === 'contractor' ? 'Business Profile' : 'Personal Profile',
+            title: 'Edit Profile',
             icon: profile?.role === 'shop' ? 'store-outline' : profile?.role === 'contractor' ? 'briefcase-outline' : 'account-outline',
             route: profile?.role === 'shop' ? '/edit-shop' : profile?.role === 'contractor' ? '/edit-contractor-profile' : '/edit-profile'
         },
         { title: 'Settings', icon: 'cog-outline', route: '/settings' },
-        { title: 'Help & Support', icon: 'help-circle-outline', route: '/help-support' },
-        { title: 'Privacy Policy', icon: 'shield-check-outline', route: '/privacy-policy' },
-        { title: 'About Us', icon: 'information-outline', route: '/about-us' },
     ];
 
     const handleSignOut = () => {

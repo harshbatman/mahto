@@ -188,15 +188,23 @@ export default function HomeownerDashboard() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.exploreBar} onPress={() => router.push('/explore')}>
-                    <View style={styles.exploreIcon}>
-                        <MaterialCommunityIcons name="map-search-outline" size={24} color="black" />
+                <TouchableOpacity style={styles.exploreCard} onPress={() => router.push('/explore')}>
+                    <View style={styles.exploreCardContent}>
+                        <View style={styles.exploreCardTag}>
+                            <Text style={styles.exploreCardTagText}>New Experience</Text>
+                        </View>
+                        <Text style={styles.exploreCardTitle}>Explore MAHTO</Text>
+                        <Text style={styles.exploreCardSub}>
+                            Discover verified professionals and major material shops in your neighborhood.
+                        </Text>
                     </View>
-                    <View style={styles.exploreInfo}>
-                        <Text style={styles.exploreTitle}>Explore MAHTO</Text>
-                        <Text style={styles.exploreSub}>Browse all verified professionals and shops nearby</Text>
+                    <View style={styles.exploreCardImageContainer}>
+                        <Image
+                            source={require('@/assets/images/3d_explore.png')}
+                            style={styles.exploreCardImage}
+                            resizeMode="contain"
+                        />
                     </View>
-                    <MaterialCommunityIcons name="arrow-right" size={20} color="black" />
                 </TouchableOpacity>
 
                 <View style={styles.footer}>
@@ -315,34 +323,60 @@ const styles = StyleSheet.create({
         color: '#545454',
         marginTop: 2,
     },
-    exploreBar: {
+    exploreCard: {
+        backgroundColor: '#1A1A1A',
+        borderRadius: 24,
+        padding: 24,
+        marginTop: 16,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F3F3F3',
-        padding: 20,
-        borderRadius: 16,
-        marginTop: 8,
+        justifyContent: 'space-between',
+        overflow: 'hidden',
+        // Shadow for depth
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 10,
     },
-    exploreIcon: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
+    exploreCardContent: {
+        flex: 1.2,
     },
-    exploreInfo: {
-        flex: 1,
-        marginLeft: 12,
-        marginRight: 12,
+    exploreCardTag: {
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
+        marginBottom: 12,
     },
-    exploreTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#000',
+    exploreCardTagText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
-    exploreSub: {
+    exploreCardTitle: {
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#FFF',
+        marginBottom: 8,
+    },
+    exploreCardSub: {
         fontSize: 13,
-        color: '#545454',
-        marginTop: 2,
+        color: '#AFAFAF',
+        lineHeight: 18,
+    },
+    exploreCardImageContainer: {
+        flex: 0.8,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
+    exploreCardImage: {
+        width: 100,
+        height: 100,
+        transform: [{ scale: 1.2 }],
     },
     resultsContainer: {
         marginTop: 24,

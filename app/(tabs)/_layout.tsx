@@ -16,7 +16,9 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: {
+                tabBarShowLabel: true,
+                tabBarLabelStyle: styles.tabBarLabel,
+                tabBarStyle: (profile?.role === 'worker' || profile?.role === 'shop') ? { display: 'none' } : {
                     height: 60 + (Platform.OS === 'ios' ? insets.bottom : (insets.bottom > 0 ? insets.bottom : 12)),
                     paddingBottom: Platform.OS === 'ios' ? insets.bottom : (insets.bottom > 0 ? insets.bottom : 12),
                     paddingTop: 12,
@@ -29,10 +31,6 @@ export default function TabLayout() {
                     shadowOpacity: 0.05,
                     shadowRadius: 12,
                 },
-                tabBarActiveTintColor: '#000',
-                tabBarInactiveTintColor: '#94a3b8',
-                tabBarShowLabel: true,
-                tabBarLabelStyle: styles.tabBarLabel,
             }}
         >
             <Tabs.Screen

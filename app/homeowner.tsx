@@ -31,9 +31,9 @@ export default function HomeownerDashboard() {
     const [resultsTitle, setResultsTitle] = useState('');
 
     const categories = [
-        { id: 'contractor', title: t.contractors, icon: 'briefcase-outline' },
-        { id: 'worker', title: t.workers, icon: 'account-hard-hat-outline' },
-        { id: 'shop', title: t.materials, icon: 'store-outline' },
+        { id: 'contractor', title: t.contractors, image: require('@/assets/images/3d_contractor.png') },
+        { id: 'worker', title: t.workers, image: require('@/assets/images/3d_worker.png') },
+        { id: 'shop', title: t.materials, image: require('@/assets/images/3d_materials.png') },
     ];
 
     const handleSearch = async (text: string) => {
@@ -152,7 +152,7 @@ export default function HomeownerDashboard() {
                             onPress={() => handleCategorySearch(cat.id, cat.title)}
                         >
                             <View style={styles.iconCircle}>
-                                <MaterialCommunityIcons name={cat.icon as any} size={28} color="black" />
+                                <Image source={cat.image} style={styles.categoryImage} resizeMode="contain" />
                             </View>
                             <Text style={styles.categoryLabel}>{cat.title}</Text>
                         </TouchableOpacity>
@@ -241,13 +241,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     iconCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: '#FFF',
+        width: 64,
+        height: 64,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 4,
+    },
+    categoryImage: {
+        width: 60,
+        height: 60,
     },
     categoryLabel: {
         fontSize: 13,

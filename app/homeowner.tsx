@@ -241,7 +241,7 @@ export default function HomeownerDashboard() {
                 </TouchableOpacity>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India 🇮🇳 with love ❤️</Text>
+                    <Text style={styles.footerText}>Made in 🇮🇳 with ❤️</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

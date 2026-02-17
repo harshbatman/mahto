@@ -79,7 +79,7 @@ export default function AboutUsScreen() {
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Version 1.1.20</Text>
+                    <Text style={styles.footerText}>Version 1.1.33</Text>
                     <Text style={styles.footerText}>Made in India 🇮🇳</Text>
                 </View>
             </ScrollView>

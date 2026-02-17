@@ -3,7 +3,7 @@
     "name": "MAHTO",
     "slug": "mahto",
     "owner": "mahtobuild",
-    "version": "1.1.27",
+    "version": "1.1.33",
     "orientation": "portrait",
     "icon": "./assets/images/mahto-launcher-icon-padded.png",
     "scheme": "ionizedvoid",
@@ -11,13 +11,13 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.harsh.mahto",
-      "buildNumber": "27",
+      "buildNumber": "33",
       "supportsTablet": true
     },
     "android": {
       "package": "com.harsh.mahto",
-      "versionCode": 27,
-      "versionName": "1.1.27",
+      "versionCode": 33,
+      "versionName": "1.1.33",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#000000",

@@ -97,7 +97,10 @@ export default function MyShopViewScreen() {
         <SafeAreaView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Hi, {profile?.shopName || 'Shop Owner'}</Text>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>{profile?.shopName || 'Shop Owner'}</Text>
                     <View style={{ width: 40 }} />
                 </View>
                 {/* Shop Banner */}

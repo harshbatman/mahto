@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     miniBadge: {
-        backgroundColor: '#000',
+        backgroundColor: '#FF3B30',
         paddingHorizontal: 6,
         paddingVertical: 1,
         borderRadius: 4,
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     freeBadge: {
-        backgroundColor: '#000',
+        backgroundColor: '#FF3B30',
         alignSelf: 'flex-start',
         paddingHorizontal: 8,
         paddingVertical: 2,

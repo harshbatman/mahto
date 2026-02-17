@@ -1,10 +1,9 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { useAuth } from '@/context/AuthContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { BackHandler, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BackHandler, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -37,35 +36,33 @@ export default function ShopDashboard() {
                 </View>
 
                 {/* Main Actions */}
-                <View style={styles.actionGrid}>
+                <View style={[styles.actionGrid, { justifyContent: 'center' }]}>
                     <TouchableOpacity
                         style={styles.actionCard}
                         onPress={() => router.push('/my-shop')}
                     >
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="store-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_my_shop_dashboard.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>My Shop</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.actionCard}
-                        onPress={() => router.push({ pathname: '/search-results', params: { role: 'shop', title: 'All Shops' } })}
+                        onPress={() => router.push({ pathname: '/search-results', params: { role: 'shop', title: 'Other Shops' } })}
                     >
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="store-search-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_other_shops_dashboard.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
-                        <Text style={styles.actionLabel}>Browse Shops</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.actionCard}
-                        onPress={() => router.push('/profile-menu')}
-                    >
-                        <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="cog-outline" size={28} color="black" />
-                        </View>
-                        <Text style={styles.actionLabel}>Settings</Text>
+                        <Text style={styles.actionLabel}>Other Shops</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -138,19 +135,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     iconCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 64,
+        height: 64,
+        borderRadius: 20,
         backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
+        // Elevation/Shadow for icon
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    actionIcon: {
+        width: 50,
+        height: 50,
     },
     actionLabel: {
-        fontSize: 13,
-        fontWeight: '700',
+        fontSize: 12,
+        fontWeight: '800',
         color: '#000',
         textAlign: 'center',
+        marginTop: 4,
     },
     divider: {
         height: 1,

@@ -142,7 +142,7 @@ export default function PostJobScreen() {
                                             </Text>
                                             {isSelected && (
                                                 <View style={styles.checkBadge}>
-                                                    <MaterialCommunityIcons name="check-circle" size={16} color="#6366f1" />
+                                                    <MaterialCommunityIcons name="check-circle" size={16} color="#000" />
                                                 </View>
                                             )}
                                         </TouchableOpacity>
@@ -340,7 +340,7 @@ export default function PostJobScreen() {
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text style={styles.postBtnText}>Post Job</Text>
+                                <Text style={styles.postBtnText}>Post job</Text>
                             )}
                         </TouchableOpacity>
                     </View>
@@ -419,8 +419,8 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     skillCardSelected: {
-        borderColor: '#6366f1',
-        backgroundColor: '#f5f3ff',
+        borderColor: '#000',
+        backgroundColor: '#F3F3F3',
     },
     skillImage: {
         width: 70,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     skillNameSelected: {
-        color: '#6366f1',
+        color: '#000',
     },
     checkBadge: {
         position: 'absolute',
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
         color: '#6b7280',
     },
     paymentBtnTextActive: {
-        color: '#6366f1',
+        color: '#000',
     },
     currencyWrapper: {
         position: 'relative',
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     summaryTotalWorkers: {
-        color: '#6366f1',
+        color: '#FFF',
         fontWeight: '800',
         fontSize: 14,
     },
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 8,
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(71, 85, 105, 0.15)',
     },
     summaryFacilityText: {
-        color: '#a5b4fc',
+        color: '#FFF',
         fontSize: 10,
         fontWeight: '800',
     },
@@ -657,15 +657,15 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     postBtn: {
-        backgroundColor: '#6366f1',
+        backgroundColor: '#000',
         padding: 18,
         borderRadius: 18,
         alignItems: 'center',
         marginTop: 10,
         marginBottom: 60,
-        shadowColor: '#6366f1',
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.15,
         shadowRadius: 10,
         elevation: 6,
     },

@@ -5,6 +5,7 @@ import { uploadImage } from '@/services/storage/imageService';
 import { sanitizeError } from '@/utils/errorHandler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -33,6 +34,38 @@ export default function PostContractScreen() {
     const { profile } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [locationLoading, setLocationLoading] = useState(false);
+
+    const getCurrentLocation = async () => {
+        try {
+            setLocationLoading(true);
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Please allow location access to use this feature.');
+                return;
+            }
+
+            const location = await Location.getCurrentPositionAsync({});
+            const [address] = await Location.reverseGeocodeAsync({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+            });
+
+            if (address) {
+                const formattedLocation = [
+                    address.street,
+                    address.subregion || address.district,
+                    address.city,
+                ].filter(Boolean).join(', ');
+                setForm({ ...form, location: formattedLocation });
+            }
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'Could not get your current location.');
+        } finally {
+            setLocationLoading(false);
+        }
+    };
     const [images, setImages] = useState<string[]>([]);
 
     const [form, setForm] = useState({
@@ -432,7 +465,23 @@ export default function PostContractScreen() {
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Project Location</Text>
+                                <View style={styles.labelRow}>
+                                    <Text style={styles.label}>Project Location</Text>
+                                    <TouchableOpacity
+                                        onPress={getCurrentLocation}
+                                        disabled={locationLoading}
+                                        style={styles.locationBtn}
+                                    >
+                                        {locationLoading ? (
+                                            <ActivityIndicator size="small" color="#000" />
+                                        ) : (
+                                            <>
+                                                <MaterialCommunityIcons name="map-marker-radius-outline" size={16} color="#000" />
+                                                <Text style={styles.locationBtnText}>Use current location</Text>
+                                            </>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Area, City"
@@ -618,6 +667,27 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '700',
         color: '#475569',
+    },
+    labelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    locationBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        backgroundColor: '#FFF',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+    },
+    locationBtnText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#000',
     },
     input: {
         borderWidth: 1,

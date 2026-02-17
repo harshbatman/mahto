@@ -74,6 +74,19 @@ export default function WorkerDashboard() {
                 </View>
 
                 {/* Main Actions */}
+                <TouchableOpacity style={styles.rewardBanner} onPress={() => router.push('/browse-jobs')}>
+                    <View style={styles.rewardInfo}>
+                        <View style={styles.freeBadge}>
+                            <Text style={styles.freeBadgeText}>FREE</Text>
+                        </View>
+                        <Text style={styles.rewardTitle}>Start applying for jobs now compeletly free ₹0</Text>
+                        <Text style={styles.rewardSub}>Find best jobs for you today</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontSize: 36 }}>🎉</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+                    </View>
+                </TouchableOpacity>
                 <View style={styles.actionGrid}>
                     <TouchableOpacity
                         style={styles.actionCard}
@@ -197,6 +210,48 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: 20,
         paddingBottom: 40,
+    },
+    rewardBanner: {
+        backgroundColor: '#1A1A1A',
+        borderRadius: 24,
+        padding: 24,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    rewardInfo: {
+        flex: 1,
+    },
+    freeBadge: {
+        backgroundColor: '#FF3B30',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 6,
+        marginBottom: 8,
+    },
+    freeBadgeText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 1,
+    },
+    rewardTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#FFF',
+    },
+    rewardSub: {
+        fontSize: 13,
+        color: '#AFAFAF',
+        marginTop: 4,
+        fontWeight: '500',
     },
     heroSection: {
         marginTop: 24,

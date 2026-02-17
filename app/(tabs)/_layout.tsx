@@ -1,6 +1,7 @@
+import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Image, Platform, StyleSheet, View } from 'react-native';
 
 export default function TabLayout() {
     return (
@@ -38,9 +39,25 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: 'Profile',
-                    tabBarIcon: ({ color, focused }) => (
-                        <MaterialCommunityIcons name={focused ? "account" : "account-outline"} size={26} color={color} />
-                    ),
+                    tabBarIcon: ({ color, focused }) => {
+                        const { profile } = useAuth();
+                        const profileImage = profile?.shopLogo || profile?.companyLogo || profile?.photoURL;
+
+                        return profileImage ? (
+                            <Image
+                                source={{ uri: profileImage }}
+                                style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 16,
+                                    borderWidth: focused ? 2 : 0,
+                                    borderColor: color
+                                }}
+                            />
+                        ) : (
+                            <MaterialCommunityIcons name={focused ? "account" : "account-outline"} size={32} color={color} />
+                        );
+                    },
                 }}
             />
         </Tabs>
@@ -64,7 +81,7 @@ const styles = StyleSheet.create({
     tabBarLabel: {
         fontSize: 11,
         fontWeight: '800',
-        marginTop: -4,
+        marginTop: 4,
     },
     postIconContainer: {
         width: 50,

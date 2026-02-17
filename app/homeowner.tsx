@@ -374,9 +374,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     exploreCardImage: {
-        width: 100,
-        height: 100,
-        transform: [{ scale: 1.2 }],
+        width: 120,
+        height: 120,
+        transform: [{ scale: 1.4 }],
     },
     resultsContainer: {
         marginTop: 24,

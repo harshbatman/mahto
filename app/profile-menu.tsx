@@ -61,10 +61,24 @@ export default function ProfileMenuScreen() {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
                 <View style={styles.profileHero}>
                     <View style={styles.avatarBox}>
-                        {(profile?.photoURL || profile?.shopLogo || profile?.companyLogo) ? (
-                            <Image source={{ uri: profile.photoURL || profile.shopLogo || profile.companyLogo }} style={styles.avatarImg} />
+                        {profile?.role === 'shop' ? (
+                            profile.shopLogo ? (
+                                <Image source={{ uri: profile.shopLogo }} style={styles.avatarImg} />
+                            ) : (
+                                <MaterialCommunityIcons name="store-outline" size={48} color="black" />
+                            )
+                        ) : profile?.role === 'contractor' ? (
+                            profile.companyLogo ? (
+                                <Image source={{ uri: profile.companyLogo }} style={styles.avatarImg} />
+                            ) : (
+                                <MaterialCommunityIcons name="briefcase-outline" size={48} color="black" />
+                            )
                         ) : (
-                            <MaterialCommunityIcons name="account-outline" size={48} color="black" />
+                            profile?.photoURL ? (
+                                <Image source={{ uri: profile.photoURL }} style={styles.avatarImg} />
+                            ) : (
+                                <MaterialCommunityIcons name="account-outline" size={48} color="black" />
+                            )
                         )}
                     </View>
                     <View style={styles.heroInfo}>

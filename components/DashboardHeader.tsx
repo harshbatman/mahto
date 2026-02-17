@@ -22,14 +22,24 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     style={styles.profileBtn}
                     onPress={() => router.push('/profile-menu')}
                 >
-                    {profile?.role === 'shop' && profile?.shopLogo ? (
-                        <Image source={{ uri: profile.shopLogo }} style={styles.profileImg} />
-                    ) : profile?.role === 'contractor' && profile?.companyLogo ? (
-                        <Image source={{ uri: profile.companyLogo }} style={styles.profileImg} />
-                    ) : profile?.photoURL ? (
-                        <Image source={{ uri: profile.photoURL }} style={styles.profileImg} />
+                    {profile?.role === 'shop' ? (
+                        profile.shopLogo ? (
+                            <Image source={{ uri: profile.shopLogo }} style={styles.profileImg} />
+                        ) : (
+                            <MaterialCommunityIcons name="store-outline" size={40} color="black" />
+                        )
+                    ) : profile?.role === 'contractor' ? (
+                        profile.companyLogo ? (
+                            <Image source={{ uri: profile.companyLogo }} style={styles.profileImg} />
+                        ) : (
+                            <MaterialCommunityIcons name="briefcase-outline" size={40} color="black" />
+                        )
                     ) : (
-                        <MaterialCommunityIcons name="account-circle" size={40} color="black" />
+                        profile?.photoURL ? (
+                            <Image source={{ uri: profile.photoURL }} style={styles.profileImg} />
+                        ) : (
+                            <MaterialCommunityIcons name="account-circle" size={40} color="black" />
+                        )
                     )}
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>

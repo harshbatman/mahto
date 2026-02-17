@@ -143,7 +143,8 @@ export default function SearchResultsScreen() {
                 companyLogo: user.companyLogo,
                 companyBanner: user.companyBanner,
                 ownerName: user.ownerName,
-                contractorServices: JSON.stringify(user.contractorServices || [])
+                contractorServices: JSON.stringify(user.contractorServices || []),
+                workerBanner: user.workerBanner
             }
         });
     };
@@ -235,9 +236,9 @@ export default function SearchResultsScreen() {
                         return (
                             <TouchableOpacity style={styles.cardItem} onPress={() => handleNavigate(item)}>
                                 <View style={styles.cardBanner}>
-                                    {isValidUri(item.shopBanner || item.companyBanner || item.photoURL) ? (
+                                    {isValidUri(item.shopBanner || item.companyBanner || item.workerBanner) ? (
                                         <Image
-                                            source={{ uri: item.shopBanner || item.companyBanner || item.photoURL }}
+                                            source={{ uri: item.shopBanner || item.companyBanner || item.workerBanner }}
                                             style={styles.bannerImg}
                                         />
                                     ) : (
@@ -262,14 +263,24 @@ export default function SearchResultsScreen() {
                                 <View style={styles.cardBody}>
                                     <View style={styles.cardHeader}>
                                         <View style={styles.cardAvatar}>
-                                            {isValidUri(item.shopLogo || item.companyLogo || item.photoURL) ? (
-                                                <Image source={{ uri: item.shopLogo || item.companyLogo || item.photoURL }} style={styles.avatarImg} />
+                                            {role === 'shop' ? (
+                                                item.shopLogo ? (
+                                                    <Image source={{ uri: item.shopLogo }} style={styles.avatarImg} />
+                                                ) : (
+                                                    <MaterialCommunityIcons name="store" size={20} color="black" />
+                                                )
+                                            ) : role === 'contractor' ? (
+                                                item.companyLogo ? (
+                                                    <Image source={{ uri: item.companyLogo }} style={styles.avatarImg} />
+                                                ) : (
+                                                    <MaterialCommunityIcons name="briefcase" size={20} color="black" />
+                                                )
                                             ) : (
-                                                <MaterialCommunityIcons
-                                                    name={role === 'shop' ? "store" : role === 'contractor' ? "briefcase" : "account"}
-                                                    size={20}
-                                                    color="black"
-                                                />
+                                                item.photoURL ? (
+                                                    <Image source={{ uri: item.photoURL }} style={styles.avatarImg} />
+                                                ) : (
+                                                    <MaterialCommunityIcons name="account" size={20} color="black" />
+                                                )
                                             )}
                                         </View>
                                         <View style={styles.cardTitleSection}>

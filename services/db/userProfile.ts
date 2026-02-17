@@ -19,6 +19,7 @@ export interface UserProfile {
     isAvailable?: boolean;
     averageRating?: number;
     ratingCount?: number;
+    workerBanner?: string;
     // Shop specific
     shopCategories?: string[];
     shopBanner?: string;

@@ -41,6 +41,7 @@ export default function EditProfileScreen() {
     const [dailyRate, setDailyRate] = useState(profile?.dailyRate?.toString() || '');
     const [isAvailable, setIsAvailable] = useState(profile?.isAvailable ?? true);
     const [newSkill, setNewSkill] = useState('');
+    const [workerBanner, setWorkerBanner] = useState<string | null>(profile?.workerBanner || null);
 
 
 
@@ -95,6 +96,48 @@ export default function EditProfileScreen() {
                 } catch (error: any) {
                     console.error("Auto-save photo error:", error);
                     Alert.alert('Upload Failed', 'Could not save profile photo. Please try again.');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        }
+    };
+
+    const pickBanner = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+            allowsEditing: true,
+            aspect: [16, 9],
+            quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            const localUri = result.assets[0].uri;
+            setWorkerBanner(localUri);
+
+            // Auto-save logic
+            if (user) {
+                setLoading(true);
+                try {
+                    const storagePath = `banners/${user.uid}_${Date.now()}.jpg`;
+                    const uploadedUrl = await uploadImage(localUri, storagePath);
+                    setWorkerBanner(uploadedUrl);
+
+                    await saveUserProfile({
+                        ...profile,
+                        uid: user.uid,
+                        workerBanner: uploadedUrl,
+                    } as any);
+
+                    Alert.alert('Banner Updated', 'Your worker banner has been updated successfully.');
+                } catch (error: any) {
+                    Alert.alert('Upload Failed', 'Could not save banner. Please try again.');
                 } finally {
                     setLoading(false);
                 }
@@ -164,6 +207,7 @@ export default function EditProfileScreen() {
                 experienceYears: profile?.role === 'worker' ? parseInt(experience) || 0 : 0,
                 dailyRate: profile?.role === 'worker' ? parseInt(dailyRate) || 0 : undefined,
                 isAvailable: profile?.role === 'worker' ? isAvailable : undefined,
+                workerBanner: workerBanner || undefined,
                 about: about,
                 isProfileSetup: true
             } as any);
@@ -191,7 +235,19 @@ export default function EditProfileScreen() {
 
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.photoSection}>
-                    <View style={styles.photoContainer}>
+                    {profile?.role === 'worker' && (
+                        <TouchableOpacity onPress={pickBanner} style={styles.bannerContainer}>
+                            {workerBanner ? (
+                                <Image source={{ uri: workerBanner }} style={styles.bannerImg} />
+                            ) : (
+                                <View style={styles.bannerPlaceholder}>
+                                    <MaterialCommunityIcons name="image-plus" size={32} color={Colors.light.muted} />
+                                    <Text style={styles.uploadText}>Add Work Banner</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    )}
+                    <View style={[styles.photoContainer, profile?.role === 'worker' && styles.workerPhotoShift]}>
                         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
                             {photo ? (
                                 <Image source={{ uri: photo }} style={styles.avatar} />
@@ -201,7 +257,7 @@ export default function EditProfileScreen() {
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.photoTip}>
-                        Tap to change profile picture
+                        {profile?.role === 'worker' ? 'Tap to change profile & banner' : 'Tap to change profile picture'}
                     </Text>
                 </View>
 
@@ -429,6 +485,41 @@ const styles = StyleSheet.create({
     avatar: {
         width: '100%',
         height: '100%',
+    },
+    bannerContainer: {
+        width: '100%',
+        height: 150,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 16,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#eee',
+        borderStyle: 'dashed',
+        marginBottom: 20,
+    },
+    bannerImg: {
+        width: '100%',
+        height: '100%',
+    },
+    bannerPlaceholder: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+    },
+    uploadText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: Colors.light.muted,
+    },
+    workerPhotoShift: {
+        marginTop: -60,
+        elevation: 10,
+        shadowColor: 'black',
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        backgroundColor: 'white',
+        borderRadius: 50,
     },
     photoContainer: {
         position: 'relative',

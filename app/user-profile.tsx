@@ -14,7 +14,7 @@ export default function UserProfileScreen() {
     const router = useRouter();
     const { user: currentUser, profile: currentProfile } = useAuth();
     const params = useLocalSearchParams();
-    const { id: profileUid, name, shopOwnerName, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable, shopCategories: shopCategoriesStr, shopLogo: paramShopLogo, shopBanner: paramShopBanner, openingTime: paramOpeningTime, closingTime: paramClosingTime, address: paramAddress, companyName, companyLogo, companyBanner, ownerName, contractorServices: contractorServicesStr, yearsInBusiness: paramYearsInBusiness } = params;
+    const { id: profileUid, name, shopOwnerName, role, category, rating, distance, phoneNumber, location, skills: skillsStr, experienceYears, about, dailyRate, isAvailable, shopCategories: shopCategoriesStr, shopLogo: paramShopLogo, shopBanner: paramShopBanner, openingTime: paramOpeningTime, closingTime: paramClosingTime, address: paramAddress, companyName, companyLogo, companyBanner, ownerName, contractorServices: contractorServicesStr, yearsInBusiness: paramYearsInBusiness, workerBanner: paramWorkerBanner } = params;
     const [freshProfile, setFreshProfile] = useState<UserProfile | null>(null);
     const [displayPhoto, setDisplayPhoto] = useState<string | undefined>(undefined);
     const [displayBanner, setDisplayBanner] = useState<string | undefined>(undefined);
@@ -53,10 +53,16 @@ export default function UserProfileScreen() {
                 if (userProfile) {
                     setFreshProfile(userProfile);
 
-                    const photo = sanitizeUri(userProfile.shopLogo || userProfile.companyLogo || userProfile.photoURL);
+                    const roleToUse = userProfile.role || role;
+                    let photoToDisplay;
+                    if (roleToUse === 'shop') photoToDisplay = userProfile.shopLogo;
+                    else if (roleToUse === 'contractor') photoToDisplay = userProfile.companyLogo;
+                    else photoToDisplay = userProfile.photoURL;
+
+                    const photo = sanitizeUri(photoToDisplay);
                     if (photo) setDisplayPhoto(photo);
 
-                    const banner = sanitizeUri(userProfile.shopBanner || userProfile.companyBanner);
+                    const banner = sanitizeUri(userProfile.shopBanner || userProfile.companyBanner || userProfile.workerBanner);
                     if (banner) setDisplayBanner(banner);
                 }
 
@@ -77,10 +83,15 @@ export default function UserProfileScreen() {
         };
 
         // Initialize with params if available
-        const paramPhoto = sanitizeUri((paramShopLogo || companyLogo || params.photoURL) as string);
+        let initialPhoto;
+        if (role === 'shop') initialPhoto = paramShopLogo;
+        else if (role === 'contractor') initialPhoto = companyLogo;
+        else initialPhoto = params.photoURL;
+
+        const paramPhoto = sanitizeUri(initialPhoto as string);
         if (paramPhoto) setDisplayPhoto(paramPhoto);
 
-        const paramBanner = sanitizeUri((paramShopBanner || companyBanner) as string);
+        const paramBanner = sanitizeUri((paramShopBanner || companyBanner || paramWorkerBanner) as string);
         if (paramBanner) setDisplayBanner(paramBanner);
 
         fetchData();

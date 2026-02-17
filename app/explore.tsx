@@ -175,7 +175,8 @@ export default function ExploreScreen() {
                 companyLogo: user.companyLogo,
                 companyBanner: user.companyBanner,
                 ownerName: user.ownerName,
-                contractorServices: JSON.stringify(user.contractorServices || [])
+                contractorServices: JSON.stringify(user.contractorServices || []),
+                workerBanner: user.workerBanner
             }
         });
     };
@@ -332,8 +333,8 @@ export default function ExploreScreen() {
                                 return (
                                     <TouchableOpacity key={item.id || item.uid || index} style={styles.cardItem} onPress={() => handleNavigate(item)}>
                                         <View style={styles.cardBanner}>
-                                            {item.photoURL ? (
-                                                <Image source={{ uri: item.photoURL }} style={styles.bannerImg} />
+                                            {item.workerBanner ? (
+                                                <Image source={{ uri: item.workerBanner }} style={styles.bannerImg} />
                                             ) : (
                                                 <View style={[styles.placeholderBanner, { backgroundColor: '#F3F4FF' }]} />
                                             )}

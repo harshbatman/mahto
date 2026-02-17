@@ -23,7 +23,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-// ...
+
 export default function SetupWorkerProfile() {
     const { user, profile } = useAuth();
     const router = useRouter();
@@ -33,6 +33,7 @@ export default function SetupWorkerProfile() {
     const [phone, setPhone] = useState(profile?.phoneNumber || '');
     const [address, setAddress] = useState('');
     const [photo, setPhoto] = useState<string | null>(null);
+    const [workerBanner, setWorkerBanner] = useState<string | null>(null);
     const [experience, setExperience] = useState('');
     const [about, setAbout] = useState('');
     const [dailyRate, setDailyRate] = useState('');
@@ -70,12 +71,32 @@ export default function SetupWorkerProfile() {
 
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: 'images',
-            allowsEditing: false,
+            allowsEditing: true,
+            aspect: [1, 1],
             quality: 0.8,
         });
 
         if (!result.canceled && result.assets && result.assets.length > 0) {
             setPhoto(result.assets[0].uri);
+        }
+    };
+
+    const pickBanner = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+            allowsEditing: true,
+            aspect: [16, 9],
+            quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            setWorkerBanner(result.assets[0].uri);
         }
     };
 
@@ -126,9 +147,14 @@ export default function SetupWorkerProfile() {
 
         setLoading(true);
         try {
-            let photoURL = "";
+            let photoURL = profile?.photoURL || "";
             if (photo) {
                 photoURL = await uploadImage(photo, `profiles/${user.uid}.jpg`);
+            }
+
+            let bannerURL = profile?.workerBanner || "";
+            if (workerBanner) {
+                bannerURL = await uploadImage(workerBanner, `banners/${user.uid}.jpg`);
             }
 
             await saveUserProfile({
@@ -137,7 +163,8 @@ export default function SetupWorkerProfile() {
                 name: name,
                 phoneNumber: phone,
                 address: address,
-                photoURL: photoURL || profile?.photoURL || "",
+                photoURL: photoURL,
+                workerBanner: bannerURL,
                 email: user.email || '',
                 role: 'worker',
                 createdAt: profile?.createdAt || Date.now(),
@@ -171,16 +198,29 @@ export default function SetupWorkerProfile() {
                         <Text style={styles.headerSubtitle}>Complete these details to start getting work</Text>
                     </View>
 
-                    <View style={styles.photoSection}>
+                    <View style={styles.photoContainer}>
+                        <TouchableOpacity onPress={pickBanner} style={styles.bannerUpload}>
+                            {workerBanner ? (
+                                <Image source={{ uri: workerBanner }} style={styles.banner} />
+                            ) : (
+                                <View style={styles.bannerPlaceholder}>
+                                    <MaterialCommunityIcons name="image-plus" size={32} color={Colors.light.muted} />
+                                    <Text style={styles.uploadText}>Add Work Banner</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+
                         <TouchableOpacity onPress={pickImage} style={styles.photoUpload}>
                             {photo ? (
                                 <Image source={{ uri: photo }} style={styles.photo} />
                             ) : (
                                 <View style={styles.photoPlaceholder}>
-                                    <MaterialCommunityIcons name="camera-plus" size={40} color={Colors.light.muted} />
-                                    <Text style={styles.uploadText}>Upload Photo</Text>
+                                    <MaterialCommunityIcons name="camera-plus" size={30} color={Colors.light.muted} />
                                 </View>
                             )}
+                            <View style={styles.editBadge}>
+                                <MaterialCommunityIcons name="pencil" size={12} color="white" />
+                            </View>
                         </TouchableOpacity>
                     </View>
 
@@ -250,7 +290,6 @@ export default function SetupWorkerProfile() {
                                 />
                             </View>
                         </View>
-
 
                         <View style={styles.switchContainer}>
                             <View>
@@ -350,15 +389,21 @@ const styles = StyleSheet.create({
         color: Colors.light.muted,
         marginTop: 4,
     },
-    photoSection: {
+    uploadText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: Colors.light.muted,
+        marginTop: 4,
+    },
+    photoContainer: {
         alignItems: 'center',
         marginBottom: 30,
     },
-    photoUpload: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
+    bannerUpload: {
+        width: '100%',
+        height: 160,
         backgroundColor: '#f8f9fa',
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -366,18 +411,51 @@ const styles = StyleSheet.create({
         borderStyle: 'dashed',
         overflow: 'hidden',
     },
+    banner: {
+        width: '100%',
+        height: '100%',
+    },
+    bannerPlaceholder: {
+        alignItems: 'center',
+        gap: 8,
+    },
+    photoUpload: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: 'white',
+        marginTop: -50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 4,
+        borderColor: 'white',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        position: 'relative',
+    },
     photo: {
         width: '100%',
         height: '100%',
+        borderRadius: 50,
     },
     photoPlaceholder: {
         alignItems: 'center',
     },
-    uploadText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: Colors.light.muted,
-        marginTop: 4,
+    editBadge: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: 'black',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: 'white',
     },
     form: {
         gap: 20,

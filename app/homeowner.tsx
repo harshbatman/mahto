@@ -166,7 +166,7 @@ export default function HomeownerDashboard() {
                     <View style={styles.actionGrid}>
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-contract')}>
                             <View style={styles.actionIcon}>
-                                <MaterialCommunityIcons name="file-document-outline" size={24} color="black" />
+                                <Image source={require('@/assets/images/3d_contract.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <Text style={styles.actionTitle}>Post a Contract</Text>
@@ -177,7 +177,7 @@ export default function HomeownerDashboard() {
 
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-job')}>
                             <View style={styles.actionIcon}>
-                                <MaterialCommunityIcons name="hammer" size={24} color="black" />
+                                <Image source={require('@/assets/images/3d_job.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <Text style={styles.actionTitle}>Request a Worker</Text>
@@ -296,6 +296,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#F3F3F3',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    realisticActionIcon: {
+        width: 32,
+        height: 32,
     },
     actionInfo: {
         flex: 1,

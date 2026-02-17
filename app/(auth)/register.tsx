@@ -73,7 +73,7 @@ export default function RegisterScreen() {
                 </TouchableOpacity>
 
                 <View style={styles.header}>
-                    <Text style={styles.title}>Join as {role?.charAt(0).toUpperCase() + role?.slice(1)}</Text>
+                    <Text style={styles.title}>Join as {role === 'shop' ? 'Shopowner' : role?.charAt(0).toUpperCase() + role?.slice(1)}</Text>
                     <Text style={styles.subtitle}>Create your profile using phone</Text>
                 </View>
 

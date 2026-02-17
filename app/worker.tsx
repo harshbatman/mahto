@@ -3,12 +3,14 @@ import { useAuth } from '@/context/AuthContext';
 import { getMyJobApplications, JobApplication } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     BackHandler,
     Dimensions,
+    Image,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -25,6 +27,14 @@ export default function WorkerDashboard() {
     const { profile } = useAuth();
     const [applications, setApplications] = useState<JobApplication[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const getStatusColors = (status: string): [string, string] => {
+        switch (status) {
+            case 'accepted': return ['#22c55e', '#16a34a'];
+            case 'rejected': return ['#ef4444', '#dc2626'];
+            default: return ['#334155', '#1e293b'];
+        }
+    };
 
     const fetchApplications = async () => {
         if (!profile?.uid) return;
@@ -70,7 +80,11 @@ export default function WorkerDashboard() {
                         onPress={() => router.push('/browse-jobs')}
                     >
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="briefcase-search-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_find_jobs.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>Find Jobs</Text>
                     </TouchableOpacity>
@@ -83,9 +97,13 @@ export default function WorkerDashboard() {
                         })}
                     >
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="account-group-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_other_workers.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
-                        <Text style={styles.actionLabel}>Find Workers</Text>
+                        <Text style={styles.actionLabel}>Other Workers</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -96,7 +114,11 @@ export default function WorkerDashboard() {
                         })}
                     >
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="account-hard-hat-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/role_contractor.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>Contractors</Text>
                     </TouchableOpacity>
@@ -119,17 +141,33 @@ export default function WorkerDashboard() {
                     ) : applications.length > 0 ? (
                         <View style={styles.appList}>
                             {applications.map((app) => (
-                                <TouchableOpacity key={app.id} style={styles.appItem} onPress={() => router.push('/applied-jobs')}>
-                                    <View style={styles.appInfo}>
-                                        <Text style={styles.appTitle}>{app.jobTitle}</Text>
-                                        <Text style={styles.appLocation}>{app.jobLocation}</Text>
+                                <TouchableOpacity key={app.id} style={styles.stylishAppCard} onPress={() => router.push('/applied-jobs')}>
+                                    <View style={styles.cardTop}>
+                                        <View style={styles.jobIconBox}>
+                                            <MaterialCommunityIcons name="briefcase-variant" size={24} color="#000" />
+                                        </View>
+                                        <LinearGradient
+                                            colors={getStatusColors(app.status)}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 1 }}
+                                            style={styles.statusBadge}
+                                        >
+                                            <Text style={styles.statusText}>{app.status.toUpperCase()}</Text>
+                                        </LinearGradient>
                                     </View>
-                                    <Text style={[
-                                        styles.statusText,
-                                        { color: app.status === 'accepted' ? '#000' : app.status === 'rejected' ? '#AFAFAF' : '#545454' }
-                                    ]}>
-                                        {app.status.toUpperCase()}
-                                    </Text>
+
+                                    <View style={styles.cardMid}>
+                                        <Text style={styles.appTitle} numberOfLines={1}>{app.jobTitle}</Text>
+                                        <View style={styles.locationRow}>
+                                            <MaterialCommunityIcons name="map-marker-radius" size={14} color="#64748b" />
+                                            <Text style={styles.appLocation}>{app.jobLocation}</Text>
+                                        </View>
+                                    </View>
+
+                                    <View style={styles.cardBottom}>
+                                        <Text style={styles.appliedDate}>Applied on {new Date(app.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</Text>
+                                        <MaterialCommunityIcons name="chevron-right" size={20} color="#CBD5E1" />
+                                    </View>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -189,19 +227,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     iconCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 64,
+        height: 64,
+        borderRadius: 20,
         backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
+        // Elevation for the icon itself
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    actionIcon: {
+        width: 50,
+        height: 50,
     },
     actionLabel: {
-        fontSize: 13,
-        fontWeight: '700',
+        fontSize: 12,
+        fontWeight: '800',
         color: '#000',
         textAlign: 'center',
+        marginTop: 4,
     },
     divider: {
         height: 1,
@@ -230,30 +279,77 @@ const styles = StyleSheet.create({
     appList: {
         gap: 8,
     },
-    appItem: {
+    stylishAppCard: {
+        backgroundColor: '#FFF',
+        borderRadius: 24,
+        padding: 20,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#F1F5F9',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.05,
+        shadowRadius: 16,
+        elevation: 3,
+    },
+    cardTop: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    jobIconBox: {
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        backgroundColor: '#F8FAFC',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#F1F5F9',
+    },
+    statusBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 10,
+    },
+    statusText: {
+        fontSize: 10,
+        fontWeight: '900',
+        color: '#FFF',
+        letterSpacing: 0.5,
+    },
+    cardMid: {
+        marginBottom: 16,
+    },
+    locationRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F3F3',
+        gap: 4,
+        marginTop: 4,
     },
-    appInfo: {
-        flex: 1,
+    cardBottom: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#F8FAFC',
+    },
+    appliedDate: {
+        fontSize: 12,
+        color: '#94A3B8',
+        fontWeight: '600',
     },
     appTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#000',
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#0F172A',
     },
     appLocation: {
         fontSize: 14,
-        color: '#545454',
-        marginTop: 2,
-    },
-    statusText: {
-        fontSize: 11,
-        fontWeight: '800',
-        letterSpacing: 0.5,
+        color: '#64748B',
+        fontWeight: '500',
     },
     emptyState: {
         alignItems: 'center',

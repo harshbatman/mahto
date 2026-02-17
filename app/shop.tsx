@@ -26,12 +26,11 @@ export default function ShopDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader
-                title={profile?.shopName || "Shop Dashboard"}
-                showSearch={false}
-            />
-
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                <DashboardHeader
+                    title={profile?.shopName || "Shop Dashboard"}
+                    showSearch={false}
+                />
                 <View style={styles.heroSection}>
                     <Text style={styles.heroGreeting}>Store Hub</Text>
                     <Text style={styles.heroName}>{profile?.shopName || 'Partner'}</Text>

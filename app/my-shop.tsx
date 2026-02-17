@@ -95,12 +95,11 @@ export default function MyShopViewScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Hi, {profile?.shopName || 'Shop Owner'}</Text>
-                <View style={{ width: 40 }} />
-            </View>
-
             <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Hi, {profile?.shopName || 'Shop Owner'}</Text>
+                    <View style={{ width: 40 }} />
+                </View>
                 {/* Shop Banner */}
                 {profile?.shopBanner && (
                     <View style={styles.bannerContainer}>

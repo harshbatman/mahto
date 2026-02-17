@@ -57,12 +57,12 @@ export default function ContractorDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <DashboardHeader title={`Hi, ${profile?.companyName || profile?.name || "Contractor"}`} showSearch={false} />
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
+                <DashboardHeader title={`Hi, ${profile?.companyName || profile?.name || "Contractor"}`} showSearch={false} />
                 <View style={styles.heroSection}>
                     <Text style={styles.heroGreeting}>Business Hub</Text>
                     <Text style={styles.heroName}>{profile?.companyName || profile?.name || 'Contractor'}</Text>

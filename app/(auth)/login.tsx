@@ -39,7 +39,7 @@ export default function RoleSelection() {
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!loading && user && profile) {
-            router.replace(`/${profile.role}` as any);
+            router.replace('/(tabs)');
         }
     }, [user, profile, loading]);
 

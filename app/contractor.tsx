@@ -64,7 +64,7 @@ export default function ContractorDashboard() {
             >
                 <DashboardHeader title={`Hi, ${profile?.companyName || profile?.name || "Contractor"}`} showSearch={false} />
                 <View style={styles.heroSection}>
-                    <Text style={styles.heroGreeting}>Business Hub</Text>
+                    <Text style={styles.heroGreeting}>Business</Text>
                     <Text style={styles.heroName}>{profile?.companyName || profile?.name || 'Contractor'}</Text>
                 </View>
 
@@ -91,7 +91,9 @@ export default function ContractorDashboard() {
                         </View>
                         <Text style={styles.actionLabel}>My Jobs</Text>
                     </TouchableOpacity>
+                </View>
 
+                <View style={[styles.actionGrid, { marginTop: 12 }]}>
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'worker', title: 'Find Workers' } })}>
                         <View style={styles.iconCircle}>
                             <Image
@@ -102,9 +104,7 @@ export default function ContractorDashboard() {
                         </View>
                         <Text style={styles.actionLabel}>Find Workers</Text>
                     </TouchableOpacity>
-                </View>
 
-                <View style={[styles.actionGrid, { marginTop: 12 }]}>
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'contractor', title: 'Other Contractors' } })}>
                         <View style={styles.iconCircle}>
                             <Image
@@ -115,7 +115,9 @@ export default function ContractorDashboard() {
                         </View>
                         <Text style={styles.actionLabel}>Other Contractor</Text>
                     </TouchableOpacity>
+                </View>
 
+                <View style={[styles.actionGrid, { marginTop: 12 }]}>
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/browse-contracts')}>
                         <View style={styles.iconCircle}>
                             <Image
@@ -124,7 +126,7 @@ export default function ContractorDashboard() {
                                 resizeMode="contain"
                             />
                         </View>
-                        <Text style={styles.actionLabel}>Contracts</Text>
+                        <Text style={styles.actionLabel}>Find Contracts</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/my-bids')}>

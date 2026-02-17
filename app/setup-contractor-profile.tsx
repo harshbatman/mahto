@@ -137,7 +137,7 @@ export default function SetupContractorProfileScreen() {
             });
 
             Alert.alert('Success', 'Profile setup complete!');
-            router.replace('/contractor'); // Navigate to contractor dashboard
+            router.replace('/(tabs)'); // Navigate to main dashboard
         } catch (error) {
             console.error(error);
             Alert.alert('Error', sanitizeError(error));

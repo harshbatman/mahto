@@ -53,7 +53,7 @@ export default function RegisterScreen() {
             } else if (role === 'homeowner') {
                 router.replace('/setup-homeowner-profile');
             } else {
-                router.replace(`/${role}` as any);
+                router.replace('/(tabs)');
             }
         } catch (error: any) {
             showToast({

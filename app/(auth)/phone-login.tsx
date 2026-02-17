@@ -23,7 +23,7 @@ export default function PhoneLoginScreen() {
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!authLoading && user && profile) {
-            router.replace(`/${profile.role}` as any);
+            router.replace('/(tabs)');
         }
     }, [user, profile, authLoading]);
     const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES.find(c => c.code === 'IN') || COUNTRIES[0]);
@@ -54,7 +54,7 @@ export default function PhoneLoginScreen() {
             const profile = await getUserProfile(user.uid);
 
             if (profile) {
-                router.replace(`/${profile.role}`);
+                router.replace('/(tabs)');
             } else {
                 router.replace('/(auth)/login');
             }

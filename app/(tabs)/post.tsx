@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -5,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PostTab() {
     const router = useRouter();
+
+    const { profile } = useAuth();
 
     const postOptions = [
         {
@@ -21,7 +24,12 @@ export default function PostTab() {
             route: '/post-job',
             color: '#22c55e'
         },
-    ];
+    ].filter(option => {
+        if (profile?.role === 'contractor') {
+            return option.title === 'Post Job';
+        }
+        return true;
+    });
 
     return (
         <SafeAreaView style={styles.container}>

@@ -17,7 +17,7 @@ export default function PostTab() {
         {
             title: 'Post Job',
             subtitle: 'Find workers for daily or small tasks',
-            image: require('@/assets/images/3d_job.png'),
+            image: require('@/assets/images/3d_job_new_v1.png'),
             route: '/post-job',
             color: '#22c55e'
         },

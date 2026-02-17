@@ -202,7 +202,7 @@ export default function HomeownerDashboard() {
 
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-job')}>
                             <View style={styles.actionIcon}>
-                                <Image source={require('@/assets/images/3d_job.png')} style={styles.realisticActionIcon} />
+                                <Image source={require('@/assets/images/3d_job_new_v1.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>

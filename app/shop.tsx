@@ -104,8 +104,7 @@ export default function ShopDashboard() {
                 )}
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Made in India </Text>
-                    <Text style={styles.footerText}>🇮🇳</Text>
+                    <Text style={styles.footerText}>Made in 🇮🇳 with ❤️</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

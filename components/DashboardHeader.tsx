@@ -1,4 +1,3 @@
-import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -30,7 +29,7 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     ) : profile?.photoURL ? (
                         <Image source={{ uri: profile.photoURL }} style={styles.profileImg} />
                     ) : (
-                        <MaterialCommunityIcons name="account-circle" size={36} color="black" />
+                        <MaterialCommunityIcons name="account-circle" size={40} color="black" />
                     )}
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
@@ -41,17 +40,19 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     style={styles.messageBtn}
                     onPress={() => router.push('/messages')}
                 >
-                    <MaterialCommunityIcons name="message-text" size={24} color="black" />
+                    <MaterialCommunityIcons name="message-outline" size={28} color="black" />
                 </TouchableOpacity>
             </View>
 
             {showSearch && (
                 <View style={styles.searchBar}>
-                    <MaterialCommunityIcons name="magnify" size={20} color={Colors.light.muted} />
+                    <View style={styles.searchIcon}>
+                        <MaterialCommunityIcons name="magnify" size={24} color="#000" />
+                    </View>
                     <TextInput
                         style={styles.searchInput}
-                        placeholder={placeholder || "Search for jobs, materials, or people..."}
-                        placeholderTextColor={Colors.light.muted}
+                        placeholder={placeholder || "Where to?"}
+                        placeholderTextColor="#545454"
                         onChangeText={onSearch}
                     />
                 </View>
@@ -62,37 +63,34 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: Spacing.lg,
-        paddingTop: Spacing.xxl,
-        paddingBottom: Spacing.md,
-        backgroundColor: Colors.light.background,
+        paddingHorizontal: 20,
+        paddingTop: 60,
+        paddingBottom: 20,
+        backgroundColor: '#FFF',
     },
     topRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: Spacing.lg,
-        gap: Spacing.md,
+        marginBottom: 20,
+        gap: 12,
     },
     titleContainer: {
         flex: 1,
     },
     title: {
-        fontSize: 22,
-        fontWeight: '900',
-        color: Colors.light.text,
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#000',
     },
     subtitle: {
         fontSize: 14,
-        color: Colors.light.muted,
+        color: '#545454',
     },
     profileBtn: {
         width: 44,
         height: 44,
         borderRadius: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
         overflow: 'hidden',
-        backgroundColor: '#f0f0f0',
     },
     profileImg: {
         width: '100%',
@@ -101,23 +99,29 @@ const styles = StyleSheet.create({
     searchBar: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.light.surface,
-        padding: Spacing.md,
-        borderRadius: 12,
-        gap: Spacing.sm,
+        backgroundColor: '#EEEEEE',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 30,
+        gap: 10,
+    },
+    searchIcon: {
+        width: 24,
+        height: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     searchInput: {
         flex: 1,
-        color: Colors.light.text,
-        fontSize: 15,
+        color: '#000',
+        fontSize: 18,
+        fontWeight: '600',
         padding: 0,
     },
     messageBtn: {
         width: 44,
         height: 44,
-        borderRadius: 22,
         justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f0f0f0',
+        alignItems: 'flex-end',
     },
 });

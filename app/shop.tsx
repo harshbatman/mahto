@@ -1,11 +1,13 @@
 import DashboardHeader from '@/components/DashboardHeader';
-import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { BackHandler, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BackHandler, Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
 
 export default function ShopDashboard() {
     const { profile } = useAuth();
@@ -14,100 +16,86 @@ export default function ShopDashboard() {
 
     useEffect(() => {
         if (!isFocused) return;
-
         const backAction = () => {
-            // When on the dashboard and focused, the back button should exit the app
-            // rather than going back to auth or index screens.
             BackHandler.exitApp();
             return true;
         };
-
-        const backHandler = BackHandler.addEventListener(
-            'hardwareBackPress',
-            backAction
-        );
-
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
         return () => backHandler.remove();
     }, [isFocused]);
-
-    const menuItems = [
-        {
-            title: 'My Shop',
-            subtitle: 'View your profile & details',
-            icon: 'storefront',
-            route: '/my-shop',
-            color: '#6366f1',
-            bg: '#f5f3ff'
-        },
-        {
-            title: 'Shops',
-            subtitle: 'Explore the shops',
-            icon: 'magnify',
-            route: '/search-results',
-            params: { role: 'shop', title: 'All Shops' },
-            color: '#059669',
-            bg: '#ecfdf5'
-        }
-    ];
 
     return (
         <SafeAreaView style={styles.container}>
             <DashboardHeader
                 title={profile?.shopName || "Shop Dashboard"}
-                subtitle="Manage your business"
                 showSearch={false}
             />
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 <View style={styles.heroSection}>
-                    <Text style={styles.heroGreeting}>Welcome back,</Text>
-                    <Text style={styles.heroName}>{profile?.shopOwnerName || 'Partner'}! 👋</Text>
-                    <Text style={styles.heroSub}>Access your shop details or explore the MAHTO network.</Text>
+                    <Text style={styles.heroGreeting}>Store Hub</Text>
+                    <Text style={styles.heroName}>{profile?.shopName || 'Partner'}</Text>
                 </View>
 
-                <View style={styles.grid}>
-                    {menuItems.map((item, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={[styles.card, { backgroundColor: item.bg }]}
-                            onPress={() => item.params ? router.push({ pathname: item.route as any, params: item.params }) : router.push(item.route as any)}
-                        >
-                            <View style={[styles.iconBox, { backgroundColor: 'white' }]}>
-                                <MaterialCommunityIcons name={item.icon as any} size={28} color={item.color} />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Text style={styles.cardTitle}>{item.title}</Text>
-                                <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
-                            </View>
-                            <MaterialCommunityIcons name="chevron-right" size={20} color="#94a3b8" />
-                        </TouchableOpacity>
-                    ))}
+                {/* Main Actions */}
+                <View style={styles.actionGrid}>
+                    <TouchableOpacity
+                        style={styles.actionCard}
+                        onPress={() => router.push('/my-shop')}
+                    >
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name="store-outline" size={28} color="black" />
+                        </View>
+                        <Text style={styles.actionLabel}>My Shop</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.actionCard}
+                        onPress={() => router.push({ pathname: '/search-results', params: { role: 'shop', title: 'All Shops' } })}
+                    >
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name="store-search-outline" size={28} color="black" />
+                        </View>
+                        <Text style={styles.actionLabel}>Browse Shops</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.actionCard}
+                        onPress={() => router.push('/profile-menu')}
+                    >
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name="cog-outline" size={28} color="black" />
+                        </View>
+                        <Text style={styles.actionLabel}>Settings</Text>
+                    </TouchableOpacity>
                 </View>
 
-                {/* Quick Summary Section */}
+                <View style={styles.divider} />
+
                 {profile?.shopName && (
-                    <View style={styles.statusSection}>
-                        <Text style={styles.sectionTitle}>Shop Status</Text>
-                        <View style={styles.statusCard}>
-                            <View style={styles.statusItem}>
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Shop Overview</Text>
+                        <View style={styles.statusBox}>
+                            <View style={styles.statusRow}>
                                 <Text style={styles.statusLabel}>Visibility</Text>
-                                <View style={[styles.badge, { backgroundColor: '#dcfce7' }]}>
-                                    <Text style={[styles.badgeText, { color: '#166534' }]}>Live</Text>
-                                </View>
+                                <Text style={styles.statusValue}>Public</Text>
                             </View>
-                            <View style={styles.statusItem}>
+                            <View style={styles.statusRow}>
                                 <Text style={styles.statusLabel}>Delivery</Text>
-                                <Text style={styles.statusVal}>
-                                    {profile.isHomeDeliveryAvailable ? 'Available' : 'Not Set'}
-                                </Text>
+                                <Text style={styles.statusValue}>{profile.isHomeDeliveryAvailable ? 'Available' : 'No'}</Text>
                             </View>
-                            <View style={styles.statusItem}>
+                            <View style={styles.statusRow}>
                                 <Text style={styles.statusLabel}>Experience</Text>
-                                <Text style={styles.statusVal}>{profile.yearsInBusiness || 0} Years</Text>
+                                <Text style={styles.statusValue}>{profile.yearsInBusiness || 0} Years</Text>
                             </View>
                         </View>
                     </View>
                 )}
+
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>Made in India </Text>
+                    <Text style={styles.footerText}>🇮🇳</Text>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -116,107 +104,100 @@ export default function ShopDashboard() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.light.background,
+        backgroundColor: '#FFF',
     },
     scrollContent: {
-        padding: Spacing.lg,
+        paddingHorizontal: 20,
+        paddingBottom: 40,
     },
     heroSection: {
+        marginTop: 24,
         marginBottom: 32,
-        marginTop: 8,
     },
     heroGreeting: {
         fontSize: 16,
-        color: Colors.light.muted,
-        fontWeight: '600',
+        color: '#545454',
+        fontWeight: '500',
     },
     heroName: {
-        fontSize: 28,
-        fontWeight: '900',
-        color: 'black',
-        marginVertical: 4,
+        fontSize: 32,
+        fontWeight: '700',
+        color: '#000',
+        marginTop: 4,
+        letterSpacing: -0.5,
     },
-    heroSub: {
-        fontSize: 15,
-        color: '#666',
-        lineHeight: 22,
-    },
-    grid: {
-        gap: 16,
-    },
-    card: {
+    actionGrid: {
         flexDirection: 'row',
-        alignItems: 'center',
-        padding: 24,
-        borderRadius: 24,
-        gap: 20,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
+        gap: 12,
+        marginBottom: 32,
     },
-    iconBox: {
-        width: 60,
-        height: 60,
-        borderRadius: 18,
+    actionCard: {
+        flex: 1,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'center',
+    },
+    iconCircle: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 1,
+        marginBottom: 8,
     },
-    cardContent: {
-        flex: 1,
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: '800',
-        color: '#1e293b',
-    },
-    cardSubtitle: {
+    actionLabel: {
         fontSize: 13,
-        color: '#64748b',
-        marginTop: 4,
+        fontWeight: '700',
+        color: '#000',
+        textAlign: 'center',
     },
-    statusSection: {
-        marginTop: 40,
-        paddingBottom: 40,
+    divider: {
+        height: 1,
+        backgroundColor: '#F3F3F3',
+        marginBottom: 32,
+    },
+    section: {
+        marginBottom: 32,
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: '800',
-        color: '#1e293b',
+        fontWeight: '700',
+        color: '#000',
         marginBottom: 16,
     },
-    statusCard: {
-        backgroundColor: 'white',
-        borderRadius: 24,
+    statusBox: {
+        backgroundColor: '#F3F3F3',
+        borderRadius: 16,
         padding: 20,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
         gap: 16,
     },
-    statusItem: {
+    statusRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     statusLabel: {
-        fontSize: 14,
-        color: '#64748b',
-        fontWeight: '600',
+        fontSize: 15,
+        color: '#545454',
+        fontWeight: '500',
     },
-    statusVal: {
-        fontSize: 14,
-        color: '#1e293b',
+    statusValue: {
+        fontSize: 15,
+        color: '#000',
         fontWeight: '700',
     },
-    badge: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 8,
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 40,
+        paddingBottom: 20,
     },
-    badgeText: {
+    footerText: {
         fontSize: 12,
-        fontWeight: '800',
-    }
+        color: '#AFAFAF',
+        fontWeight: '600',
+    },
 });

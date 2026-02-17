@@ -7,12 +7,13 @@ export const Colors = {
     icon: '#000000',
     tabIconDefault: '#666666',
     tabIconSelected: '#000000',
-    border: '#E2E2E2',
+    border: '#EEEEEE',
     accent: '#000000',
-    muted: '#666666',
-    surface: '#F6F6F6',
+    muted: '#545454',
+    surface: '#F3F3F3',
+    primary: '#000000',
+    secondary: '#FFFFFF',
   },
-  // We prioritize light mode for this design as requested, but keep dark for system compatibility
   dark: {
     text: '#FFFFFF',
     background: '#000000',
@@ -22,8 +23,10 @@ export const Colors = {
     tabIconSelected: '#FFFFFF',
     border: '#222222',
     accent: '#FFFFFF',
-    muted: '#999999',
+    muted: '#AFAFAF',
     surface: '#1A1A1A',
+    primary: '#FFFFFF',
+    secondary: '#000000',
   },
 };
 
@@ -37,10 +40,12 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
+  none: 0,
   sm: 4,
   md: 8,
   lg: 12,
   xl: 16,
+  xxl: 24,
   round: 9999,
 };
 

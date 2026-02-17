@@ -1,7 +1,6 @@
 import { CONTRACTOR_SERVICES } from '@/constants/contractorServices';
 import { SHOP_CATEGORIES } from '@/constants/shopCategories';
 import { SKILLS_DATA } from '@/constants/skills';
-import { Spacing } from '@/constants/theme';
 import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -202,127 +201,6 @@ export default function ExploreScreen() {
         return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
     };
 
-    const renderContractorItem = ({ item }: { item: any }) => {
-        const firstService = item.contractorServices?.[0];
-        const serviceIcon = CONTRACTOR_SERVICES.find(s => s.name === firstService)?.icon || 'briefcase';
-
-        return (
-            <TouchableOpacity style={styles.contractorCard} onPress={() => handleNavigate(item)}>
-                <Image
-                    source={{ uri: item.companyBanner || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19' }}
-                    style={styles.cardCover}
-                />
-                <View style={styles.cardContent}>
-                    <View style={styles.cardAvatarContainer}>
-                        {item.companyLogo ? (
-                            <Image source={{ uri: item.companyLogo }} style={styles.cardAvatar} />
-                        ) : (
-                            <View style={styles.avatarPlaceholder}>
-                                <MaterialCommunityIcons name={serviceIcon as any} size={24} color="#6366f1" />
-                            </View>
-                        )}
-                    </View>
-                    <View style={styles.contractorHeaderRow}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.cardName} numberOfLines={1}>{item.companyName || item.name}</Text>
-                            <View style={styles.ratingRow}>
-                                <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
-                                <Text style={styles.ratingText}>{item.averageRating || '4.5'} ({item.ratingCount || 0})</Text>
-                            </View>
-                        </View>
-                        <View style={styles.viewProfileBtn}>
-                            <Text style={styles.viewProfileText}>View Profile</Text>
-                        </View>
-                    </View>
-                    <Text style={styles.cardSub} numberOfLines={1}>{item.contractorServices?.join(', ') || 'General Construction'}</Text>
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
-    const renderWorkerItem = ({ item }: { item: any }) => {
-        const firstSkill = item.skills?.[0];
-        const skillImage = SKILLS_DATA.find(s => s.name === firstSkill)?.image;
-
-        return (
-            <TouchableOpacity style={styles.workerCard} onPress={() => handleNavigate(item)}>
-                <View style={styles.workerAvatarContainer}>
-                    {item.photoURL ? (
-                        <Image source={{ uri: item.photoURL }} style={styles.workerAvatar} />
-                    ) : skillImage ? (
-                        <Image source={skillImage} style={styles.workerAvatar} />
-                    ) : (
-                        <View style={[styles.workerAvatar, styles.avatarPlaceholder]}>
-                            <MaterialCommunityIcons name="account" size={40} color="#cbd5e1" />
-                        </View>
-                    )}
-                    {item.isAvailable !== false && <View style={styles.availableBadge} />}
-                </View>
-                <View style={styles.workerInfo}>
-                    <View style={styles.workerHeaderRow}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.workerName} numberOfLines={1}>{item.name}</Text>
-                            <Text style={styles.workerSkill} numberOfLines={1}>{item.skills?.[0] || 'Worker'}</Text>
-                        </View>
-                        <View style={styles.viewProfileBtn}>
-                            <Text style={styles.viewProfileText}>View Profile</Text>
-                        </View>
-                    </View>
-                    <View style={styles.workerBottom}>
-                        <Text style={styles.workerRate}>₹{item.dailyRate || '500'}/day</Text>
-                    </View>
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
-    const renderShopItem = ({ item }: { item: any }) => {
-        const isOpen = isShopOpen(item.openingTime, item.closingTime);
-        const firstCat = item.shopCategories?.[0];
-        const catImage = SHOP_CATEGORIES.find(c => c.name === firstCat)?.image;
-
-        return (
-            <TouchableOpacity style={styles.shopCard} onPress={() => handleNavigate(item)}>
-                <Image
-                    source={{ uri: item.shopBanner || 'https://images.unsplash.com/photo-1578575437130-527eed3abbec' }}
-                    style={styles.shopCover}
-                />
-                <View style={[
-                    styles.shopStatusBadge,
-                    { backgroundColor: isOpen ? '#10b981' : '#ef4444' }
-                ]}>
-                    <Text style={styles.shopStatusText}>{isOpen ? 'OPEN' : 'CLOSED'}</Text>
-                </View>
-                <View style={styles.shopContent}>
-                    <View style={styles.shopLogoContainer}>
-                        {item.shopLogo ? (
-                            <Image source={{ uri: item.shopLogo }} style={styles.shopLogo} />
-                        ) : catImage ? (
-                            <Image source={catImage} style={styles.shopLogo} />
-                        ) : (
-                            <View style={styles.avatarPlaceholder}>
-                                <MaterialCommunityIcons name="store" size={24} color="#6366f1" />
-                            </View>
-                        )}
-                    </View>
-                    <View style={styles.shopHeaderRow}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.shopName} numberOfLines={1}>{item.shopName}</Text>
-                            <Text style={styles.shopCat} numberOfLines={1}>{item.shopCategories?.join(', ') || 'Materials'}</Text>
-                        </View>
-                        <View style={styles.viewProfileBtn}>
-                            <Text style={styles.viewProfileText}>View Shop</Text>
-                        </View>
-                    </View>
-                    <View style={styles.shopFooter}>
-                        <MaterialCommunityIcons name="map-marker" size={12} color="#64748b" />
-                        <Text style={styles.shopDist}>{item.location || 'Nearby'}</Text>
-                    </View>
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
     const [activeTab, setActiveTab] = useState(0);
     const scrollRef = useRef<ScrollView>(null);
 
@@ -343,35 +221,27 @@ export default function ExploreScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Explore MAHTO</Text>
+                <Text style={styles.headerTitle}>Explore</Text>
+                <View style={{ width: 40 }} />
             </View>
 
-            {/* Search Bar */}
+            {/* Search Section */}
             <View style={styles.searchSection}>
                 <View style={styles.searchBar}>
-                    <MaterialCommunityIcons name="magnify" size={20} color="#64748b" />
+                    <MaterialCommunityIcons name="magnify" size={22} color="black" />
                     <TextInput
                         style={styles.searchInput}
                         placeholder={`Search ${['contractors', 'workers', 'shops'][activeTab]}...`}
                         value={searchQuery}
                         onChangeText={handleSearch}
-                        placeholderTextColor="#94a3b8"
+                        placeholderTextColor="#AFAFAF"
                     />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity onPress={() => handleSearch('')}>
-                            <MaterialCommunityIcons name="close-circle" size={18} color="#94a3b8" />
-                        </TouchableOpacity>
-                    )}
                 </View>
                 <TouchableOpacity
-                    style={[styles.filterBtn, (minRating > 0 || onlyAvailable || selectedSkills.length > 0 || selectedShopCategories.length > 0 || selectedContractorServices.length > 0) && styles.filterBtnActive]}
+                    style={styles.filterBtn}
                     onPress={() => setShowFilterModal(true)}
                 >
-                    <MaterialCommunityIcons
-                        name="tune-variant"
-                        size={20}
-                        color={(minRating > 0 || onlyAvailable || selectedSkills.length > 0 || selectedShopCategories.length > 0 || selectedContractorServices.length > 0) ? "white" : "black"}
-                    />
+                    <MaterialCommunityIcons name="tune-variant" size={22} color="black" />
                 </TouchableOpacity>
             </View>
 
@@ -402,16 +272,44 @@ export default function ExploreScreen() {
                 <View style={{ width }}>
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
                         {loading ? (
-                            <ActivityIndicator style={{ marginTop: 100 }} color="#6366f1" />
+                            <ActivityIndicator style={{ marginTop: 100 }} color="black" />
                         ) : filteredContractors.length > 0 ? (
                             filteredContractors.map((item, index) => (
-                                <View key={item.id || item.uid || index} style={styles.verticalItem}>
-                                    {renderContractorItem({ item })}
-                                </View>
+                                <TouchableOpacity key={item.id || item.uid || index} style={styles.cardItem} onPress={() => handleNavigate(item)}>
+                                    <View style={styles.cardBanner}>
+                                        {item.companyBanner ? (
+                                            <Image source={{ uri: item.companyBanner }} style={styles.bannerImg} />
+                                        ) : (
+                                            <View style={styles.placeholderBanner} />
+                                        )}
+                                    </View>
+                                    <View style={styles.cardBody}>
+                                        <View style={styles.cardHeader}>
+                                            <View style={styles.cardAvatar}>
+                                                {item.companyLogo ? (
+                                                    <Image source={{ uri: item.companyLogo }} style={styles.avatarImg} />
+                                                ) : (
+                                                    <MaterialCommunityIcons name="briefcase" size={20} color="black" />
+                                                )}
+                                            </View>
+                                            <View style={styles.cardTitleSection}>
+                                                <Text style={styles.cardName}>{item.companyName || item.name}</Text>
+                                                <Text style={styles.cardSub}>{item.contractorServices?.slice(0, 2).join(', ') || 'General Contractor'}</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.cardFooter}>
+                                            <View style={styles.metaBadge}>
+                                                <MaterialCommunityIcons name="star" size={12} color="black" />
+                                                <Text style={styles.metaText}>{item.averageRating || '4.5'}</Text>
+                                            </View>
+                                            <Text style={styles.metaDivider}>•</Text>
+                                            <Text style={styles.metaText}>{item.location || 'Nearby'}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
                             ))
                         ) : (
                             <View style={styles.emptyState}>
-                                <MaterialCommunityIcons name="account-search-outline" size={64} color="#e2e8f0" />
                                 <Text style={styles.emptyText}>No contractors found</Text>
                             </View>
                         )}
@@ -422,16 +320,32 @@ export default function ExploreScreen() {
                 <View style={{ width }}>
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
                         {loading ? (
-                            <ActivityIndicator style={{ marginTop: 100 }} color="#6366f1" />
+                            <ActivityIndicator style={{ marginTop: 100 }} color="black" />
                         ) : filteredWorkers.length > 0 ? (
                             filteredWorkers.map((item, index) => (
-                                <View key={item.id || item.uid || index} style={styles.verticalItem}>
-                                    {renderWorkerItem({ item })}
-                                </View>
+                                <TouchableOpacity key={item.id || item.uid || index} style={styles.listItem} onPress={() => handleNavigate(item)}>
+                                    <View style={styles.listAvatar}>
+                                        {item.photoURL ? (
+                                            <Image source={{ uri: item.photoURL }} style={styles.avatarImg} />
+                                        ) : (
+                                            <MaterialCommunityIcons name="account-outline" size={24} color="black" />
+                                        )}
+                                    </View>
+                                    <View style={styles.listInfo}>
+                                        <Text style={styles.listName}>{item.name}</Text>
+                                        <Text style={styles.listSub}>{item.skills?.[0] || 'Worker'}</Text>
+                                        <View style={styles.listMeta}>
+                                            <MaterialCommunityIcons name="star" size={14} color="black" />
+                                            <Text style={styles.metaText}>{item.averageRating || '4.5'}</Text>
+                                            <Text style={styles.metaDivider}>•</Text>
+                                            <Text style={styles.metaText}>₹{item.dailyRate || '500'}/day</Text>
+                                        </View>
+                                    </View>
+                                    <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
+                                </TouchableOpacity>
                             ))
                         ) : (
                             <View style={styles.emptyState}>
-                                <MaterialCommunityIcons name="account-search-outline" size={64} color="#e2e8f0" />
                                 <Text style={styles.emptyText}>No workers found</Text>
                             </View>
                         )}
@@ -442,156 +356,122 @@ export default function ExploreScreen() {
                 <View style={{ width }}>
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
                         {loading ? (
-                            <ActivityIndicator style={{ marginTop: 100 }} color="#6366f1" />
+                            <ActivityIndicator style={{ marginTop: 100 }} color="black" />
                         ) : filteredShops.length > 0 ? (
                             filteredShops.map((item, index) => (
-                                <View key={item.id || item.uid || index} style={styles.verticalItem}>
-                                    {renderShopItem({ item })}
-                                </View>
+                                <TouchableOpacity key={item.id || item.uid || index} style={styles.cardItem} onPress={() => handleNavigate(item)}>
+                                    <View style={styles.cardBanner}>
+                                        {item.shopBanner ? (
+                                            <Image source={{ uri: item.shopBanner }} style={styles.bannerImg} />
+                                        ) : (
+                                            <View style={styles.placeholderBanner} />
+                                        )}
+                                    </View>
+                                    <View style={styles.cardBody}>
+                                        <View style={styles.cardHeader}>
+                                            <View style={styles.cardAvatar}>
+                                                {item.shopLogo ? (
+                                                    <Image source={{ uri: item.shopLogo }} style={styles.avatarImg} />
+                                                ) : (
+                                                    <MaterialCommunityIcons name="store" size={20} color="black" />
+                                                )}
+                                            </View>
+                                            <View style={styles.cardTitleSection}>
+                                                <Text style={styles.cardName}>{item.shopName}</Text>
+                                                <Text style={styles.cardSub}>{item.shopCategories?.slice(0, 2).join(', ') || 'Building Materials'}</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.cardFooter}>
+                                            <View style={[styles.statusTag, { backgroundColor: isShopOpen(item.openingTime, item.closingTime) ? '#000' : '#F3F3F3' }]}>
+                                                <Text style={[styles.statusText, { color: isShopOpen(item.openingTime, item.closingTime) ? '#FFF' : '#AFAFAF' }]}>
+                                                    {isShopOpen(item.openingTime, item.closingTime) ? 'Open' : 'Closed'}
+                                                </Text>
+                                            </View>
+                                            <Text style={styles.metaDivider}>•</Text>
+                                            <Text style={styles.metaText}>{item.location || 'Nearby'}</Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
                             ))
                         ) : (
                             <View style={styles.emptyState}>
-                                <MaterialCommunityIcons name="store-search-outline" size={64} color="#e2e8f0" />
                                 <Text style={styles.emptyText}>No shops found</Text>
                             </View>
                         )}
                     </ScrollView>
                 </View>
             </ScrollView>
-            <Modal
-                visible={showFilterModal}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setShowFilterModal(false)}
-            >
+
+            {/* Filter Modal */}
+            <Modal visible={showFilterModal} animationType="slide" transparent={true}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Filters</Text>
+                            <Text style={styles.modalTitle}>Filter</Text>
                             <TouchableOpacity onPress={() => setShowFilterModal(false)}>
                                 <MaterialCommunityIcons name="close" size={24} color="black" />
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView contentContainerStyle={styles.modalBody}>
-                            <Text style={styles.filterLabel}>Minimum Rating</Text>
+                        <ScrollView style={styles.modalBody}>
+                            <Text style={styles.filterTitle}>Minimum Rating</Text>
                             <View style={styles.ratingRow}>
                                 {[1, 2, 3, 4, 5].map(star => (
                                     <TouchableOpacity
                                         key={star}
-                                        style={[styles.starBtn, minRating >= star && styles.starBtnActive]}
-                                        onPress={() => setMinRating(star === minRating ? 0 : star)}
+                                        style={[styles.starItem, minRating >= star && styles.starItemActive]}
+                                        onPress={() => setMinRating(star)}
                                     >
-                                        <MaterialCommunityIcons
-                                            name={minRating >= star ? "star" : "star-outline"}
-                                            size={24}
-                                            color={minRating >= star ? "white" : "#64748b"}
-                                        />
-                                        <Text style={[styles.starText, minRating >= star && styles.starTextActive]}>{star}+</Text>
+                                        <Text style={[styles.starText, minRating >= star && styles.starTextActive]}>{star}</Text>
+                                        <MaterialCommunityIcons name="star" size={14} color={minRating >= star ? "white" : "black"} />
                                     </TouchableOpacity>
                                 ))}
                             </View>
 
-                            {activeTab === 0 && (
-                                <>
-                                    <View style={styles.filterDivider} />
-                                    <Text style={styles.filterLabel}>Contractor Services</Text>
-                                    <View style={styles.chipContainer}>
-                                        {CONTRACTOR_SERVICES.map(service => (
-                                            <TouchableOpacity
-                                                key={service.id}
-                                                style={[styles.chip, selectedContractorServices.includes(service.name) && styles.chipActive]}
-                                                onPress={() => toggleContractorService(service.name)}
-                                            >
-                                                <MaterialCommunityIcons
-                                                    name={service.icon as any}
-                                                    size={18}
-                                                    color={selectedContractorServices.includes(service.name) ? "white" : "#6366f1"}
-                                                />
-                                                <Text style={[styles.chipText, selectedContractorServices.includes(service.name) && styles.chipTextActive]}>
-                                                    {service.name}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                </>
-                            )}
-
                             {activeTab === 1 && (
                                 <>
-                                    <View style={styles.filterDivider} />
-                                    <Text style={styles.filterLabel}>Worker Skills</Text>
-                                    <View style={styles.chipContainer}>
-                                        {SKILLS_DATA.map(skill => (
-                                            <TouchableOpacity
-                                                key={skill.id}
-                                                style={[styles.chip, selectedSkills.includes(skill.name) && styles.chipActive]}
-                                                onPress={() => toggleSkill(skill.name)}
-                                            >
-                                                <Image source={skill.image} style={styles.chipImage} />
-                                                <Text style={[styles.chipText, selectedSkills.includes(skill.name) && styles.chipTextActive]}>
-                                                    {skill.name}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-
-                                    <View style={styles.filterDivider} />
-                                    <Text style={styles.filterLabel}>Availability</Text>
-                                    <TouchableOpacity
-                                        style={styles.switchRow}
-                                        onPress={() => setOnlyAvailable(!onlyAvailable)}
-                                    >
-                                        <Text style={styles.switchLabel}>Available Workers Only</Text>
-                                        <View style={[styles.switch, onlyAvailable && styles.switchActive]}>
-                                            <View style={[styles.switchKnob, onlyAvailable && styles.switchKnobActive]} />
+                                    <Text style={styles.filterTitle}>Availability</Text>
+                                    <TouchableOpacity style={styles.checkRow} onPress={() => setOnlyAvailable(!onlyAvailable)}>
+                                        <Text style={styles.checkLabel}>Available workers only</Text>
+                                        <View style={[styles.checkbox, onlyAvailable && styles.checkboxActive]}>
+                                            {onlyAvailable && <MaterialCommunityIcons name="check" size={16} color="white" />}
                                         </View>
                                     </TouchableOpacity>
                                 </>
                             )}
 
-                            {activeTab === 2 && (
-                                <>
-                                    <View style={styles.filterDivider} />
-                                    <Text style={styles.filterLabel}>Shop Categories</Text>
-                                    <View style={styles.chipContainer}>
-                                        {SHOP_CATEGORIES.map(cat => (
-                                            <TouchableOpacity
-                                                key={cat.id}
-                                                style={[styles.chip, selectedShopCategories.includes(cat.name) && styles.chipActive]}
-                                                onPress={() => toggleShopCategory(cat.name)}
-                                            >
-                                                <Image source={cat.image} style={styles.chipImage} />
-                                                <Text style={[styles.chipText, selectedShopCategories.includes(cat.name) && styles.chipTextActive]}>
-                                                    {cat.name}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                </>
-                            )}
+                            <Text style={styles.filterTitle}>Categories</Text>
+                            <View style={styles.chipGrid}>
+                                {(activeTab === 0 ? CONTRACTOR_SERVICES : activeTab === 1 ? SKILLS_DATA : SHOP_CATEGORIES).map((item: any) => (
+                                    <TouchableOpacity
+                                        key={item.id}
+                                        style={[
+                                            styles.chip,
+                                            (activeTab === 0 ? selectedContractorServices.includes(item.name) : activeTab === 1 ? selectedSkills.includes(item.name) : selectedShopCategories.includes(item.name)) && styles.chipActive
+                                        ]}
+                                        onPress={() => activeTab === 0 ? toggleContractorService(item.name) : activeTab === 1 ? toggleSkill(item.name) : toggleShopCategory(item.name)}
+                                    >
+                                        <Text style={[
+                                            styles.chipText,
+                                            (activeTab === 0 ? selectedContractorServices.includes(item.name) : activeTab === 1 ? selectedSkills.includes(item.name) : selectedShopCategories.includes(item.name)) && styles.chipTextActive
+                                        ]}>{item.name}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </ScrollView>
 
                         <View style={styles.modalFooter}>
-                            <TouchableOpacity
-                                style={styles.resetBtn}
-                                onPress={() => {
-                                    setMinRating(0);
-                                    setOnlyAvailable(false);
-                                    setSelectedSkills([]);
-                                    setSelectedShopCategories([]);
-                                    setSelectedContractorServices([]);
-                                    applyFilters(searchQuery, 0, false, [], [], []);
-                                    setShowFilterModal(false);
-                                }}
-                            >
-                                <Text style={styles.resetBtnText}>Reset</Text>
+                            <TouchableOpacity style={styles.resetBtn} onPress={() => {
+                                setMinRating(0);
+                                setOnlyAvailable(false);
+                                setSelectedSkills([]);
+                                setSelectedShopCategories([]);
+                                setSelectedContractorServices([]);
+                            }}>
+                                <Text style={styles.resetText}>Reset</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.applyBtn}
-                                onPress={handleApplyFilters}
-                            >
-                                <Text style={styles.applyBtnText}>Apply Filters</Text>
+                            <TouchableOpacity style={styles.applyBtn} onPress={handleApplyFilters}>
+                                <Text style={styles.applyText}>Show Results</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -604,332 +484,219 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#FFF',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: Spacing.lg,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     backBtn: {
         padding: 4,
-        marginRight: 12,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: '900',
-        color: 'black',
-    },
-    tabBar: {
-        flexDirection: 'row',
-        backgroundColor: 'white',
-        paddingHorizontal: Spacing.lg,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    tabItem: {
-        paddingVertical: 14,
-        marginRight: 24,
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    activeTabItem: {
-        borderBottomColor: '#6366f1',
-    },
-    tabText: {
-        fontSize: 15,
+        fontSize: 18,
         fontWeight: '700',
-        color: '#64748b',
-    },
-    activeTabText: {
-        color: '#6366f1',
-    },
-    tabContent: {
-        padding: Spacing.lg,
-        paddingBottom: 40,
-    },
-    verticalItem: {
-        marginBottom: 16,
-    },
-    verticalList: {
-        paddingHorizontal: Spacing.lg,
-        gap: 16,
-    },
-    contractorCard: {
-        width: '100%',
-        backgroundColor: 'white',
-        borderRadius: 24,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-    },
-    cardCover: {
-        width: '100%',
-        height: 120,
-        backgroundColor: '#f1f5f9',
-    },
-    cardContent: {
-        padding: 16,
-        paddingTop: 36,
-    },
-    cardAvatarContainer: {
-        position: 'absolute',
-        top: -30,
-        left: 16,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'white',
-        padding: 4,
-        elevation: 6,
-    },
-    cardAvatar: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 26,
-    },
-    avatarPlaceholder: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 26,
-        backgroundColor: '#f1f5f9',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    contractorHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-    },
-    viewProfileBtn: {
-        backgroundColor: '#6366f1',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 12,
-    },
-    viewProfileText: {
-        color: 'white',
-        fontSize: 12,
-        fontWeight: '800',
-    },
-    cardName: {
-        fontSize: 18,
-        fontWeight: '900',
-        color: '#1e293b',
-    },
-    ratingRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginTop: 6,
-    },
-    ratingText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#64748b',
-    },
-    cardSub: {
-        fontSize: 14,
-        color: '#94a3b8',
-        marginTop: 6,
-        fontWeight: '500',
-    },
-    workerCard: {
-        width: '100%',
-        flexDirection: 'row',
-        backgroundColor: 'white',
-        borderRadius: 24,
-        padding: 16,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-        elevation: 4,
-    },
-    workerAvatarContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        position: 'relative',
-        marginRight: 16,
-    },
-    workerAvatar: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 40,
-    },
-    availableBadge: {
-        position: 'absolute',
-        bottom: 4,
-        right: 4,
-        width: 16,
-        height: 16,
-        borderRadius: 8,
-        backgroundColor: '#10b981',
-        borderWidth: 2,
-        borderColor: 'white',
-    },
-    workerHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 8,
-    },
-    workerInfo: {
-        flex: 1,
-    },
-    workerName: {
-        fontSize: 18,
-        fontWeight: '900',
-        color: '#1e293b',
-    },
-    workerSkill: {
-        fontSize: 14,
-        color: '#64748b',
-        marginTop: 4,
-        fontWeight: '600',
-    },
-    workerBottom: {
-        marginTop: 10,
-        backgroundColor: '#f0fdf4',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 12,
-        alignSelf: 'flex-start',
-    },
-    workerRate: {
-        fontSize: 13,
-        fontWeight: '900',
-        color: '#10b981',
-    },
-    shopCard: {
-        width: '100%',
-        backgroundColor: 'white',
-        borderRadius: 24,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-        elevation: 4,
-    },
-    shopCover: {
-        width: '100%',
-        height: 110,
-    },
-    shopContent: {
-        padding: 16,
-        paddingTop: 36,
-    },
-    shopLogoContainer: {
-        position: 'absolute',
-        top: -30,
-        left: 16,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'white',
-        padding: 4,
-        elevation: 6,
-    },
-    shopLogo: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 26,
-    },
-    shopHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-    },
-    shopName: {
-        fontSize: 18,
-        fontWeight: '900',
-        color: '#1e293b',
-    },
-    shopCat: {
-        fontSize: 14,
-        color: '#64748b',
-        marginTop: 4,
-        fontWeight: '500',
-    },
-    shopFooter: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginTop: 10,
-    },
-    shopDist: {
-        fontSize: 13,
-        color: '#94a3b8',
-    },
-    shopStatusBadge: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 10,
-        zIndex: 10,
-    },
-    shopStatusText: {
-        color: 'white',
-        fontSize: 10,
-        fontWeight: '900',
+        color: '#000',
     },
     searchSection: {
         flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: Spacing.lg,
-        paddingVertical: 12,
-        backgroundColor: 'white',
+        paddingHorizontal: 20,
+        paddingBottom: 16,
         gap: 12,
     },
     searchBar: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-        paddingHorizontal: 12,
-        height: 48,
-        borderRadius: 14,
-        gap: 8,
+        backgroundColor: '#F3F3F3',
+        paddingHorizontal: 16,
+        height: 52,
+        borderRadius: 12,
+        gap: 12,
     },
     searchInput: {
         flex: 1,
-        fontSize: 15,
-        color: '#1e293b',
-        fontWeight: '500',
-        padding: 0,
+        fontSize: 16,
+        color: '#000',
     },
     filterBtn: {
-        width: 48,
-        height: 48,
-        backgroundColor: '#f1f5f9',
-        borderRadius: 14,
+        width: 52,
+        height: 52,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    filterBtnActive: {
-        backgroundColor: '#6366f1',
+    tabBar: {
+        flexDirection: 'row',
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
+    },
+    tabItem: {
+        paddingVertical: 16,
+        marginRight: 24,
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+    },
+    activeTabItem: {
+        borderBottomColor: '#000',
+    },
+    tabText: {
+        fontSize: 15,
+        color: '#AFAFAF',
+        fontWeight: '600',
+    },
+    activeTabText: {
+        color: '#000',
+        fontWeight: '700',
+    },
+    tabContent: {
+        paddingHorizontal: 20,
+    },
+    cardItem: {
+        backgroundColor: '#FFF',
+        borderRadius: 16,
+        marginBottom: 24,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#F3F3F3',
+    },
+    cardBanner: {
+        width: '100%',
+        height: 120,
+        backgroundColor: '#F9F9F9',
+    },
+    bannerImg: {
+        width: '100%',
+        height: '100%',
+    },
+    placeholderBanner: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#F3F3F3',
+    },
+    cardBody: {
+        padding: 16,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    cardAvatar: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#F3F3F3',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#EEE',
+    },
+    cardTitleSection: {
+        flex: 1,
+    },
+    cardName: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000',
+    },
+    cardSub: {
+        fontSize: 13,
+        color: '#545454',
+        marginTop: 2,
+    },
+    cardFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#FDFDFD',
+        paddingTop: 12,
+    },
+    metaBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F3F3F3',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+        gap: 4,
+    },
+    statusTag: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    statusText: {
+        fontSize: 11,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    listItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
+    },
+    listAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#F3F3F3',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    avatarImg: {
+        width: '100%',
+        height: '100%',
+    },
+    listInfo: {
+        flex: 1,
+        marginLeft: 16,
+    },
+    listName: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000',
+    },
+    listSub: {
+        fontSize: 14,
+        color: '#545454',
+        marginTop: 2,
+    },
+    listMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 6,
+        gap: 6,
+    },
+    metaText: {
+        fontSize: 13,
+        color: '#545454',
+    },
+    metaDivider: {
+        color: '#AFAFAF',
+    },
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
     },
     emptyState: {
+        paddingVertical: 100,
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 60,
-        gap: 16,
     },
     emptyText: {
-        fontSize: 16,
-        color: '#94a3b8',
-        fontWeight: '600',
+        fontSize: 15,
+        color: '#AFAFAF',
     },
     modalOverlay: {
         flex: 1,
@@ -937,11 +704,11 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        maxHeight: '80%',
+        backgroundColor: '#FFF',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
         paddingBottom: 40,
+        maxHeight: '80%',
     },
     modalHeader: {
         flexDirection: 'row',
@@ -949,144 +716,121 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 24,
         borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        borderBottomColor: '#F3F3F3',
     },
     modalTitle: {
         fontSize: 20,
-        fontWeight: '900',
-        color: '#1e293b',
+        fontWeight: '700',
     },
     modalBody: {
         padding: 24,
     },
-    filterLabel: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#1e293b',
+    filterTitle: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#000',
         marginBottom: 16,
     },
-    starBtn: {
+    ratingRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginBottom: 32,
+    },
+    starItem: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        justifyContent: 'center',
+        height: 44,
         borderRadius: 12,
+        backgroundColor: '#F3F3F3',
         gap: 4,
     },
-    starBtnActive: {
-        backgroundColor: '#6366f1',
+    starItemActive: {
+        backgroundColor: '#000',
     },
     starText: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: '700',
-        color: '#64748b',
+        color: '#000',
     },
     starTextActive: {
-        color: 'white',
+        color: '#FFF',
     },
-    switchRow: {
+    checkRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#f8fafc',
-        padding: 16,
-        borderRadius: 16,
+        marginBottom: 32,
     },
-    switchLabel: {
-        fontSize: 15,
-        fontWeight: '700',
-        color: '#334155',
+    checkLabel: {
+        fontSize: 16,
+        color: '#000',
     },
-    switch: {
-        width: 50,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: '#e2e8f0',
-        padding: 2,
-    },
-    switchActive: {
-        backgroundColor: '#10b981',
-    },
-    switchKnob: {
+    checkbox: {
         width: 24,
         height: 24,
-        borderRadius: 12,
-        backgroundColor: 'white',
-        elevation: 2,
-    },
-    switchKnobActive: {
-        transform: [{ translateX: 22 }],
-    },
-    modalFooter: {
-        flexDirection: 'row',
-        padding: 24,
-        gap: 12,
-        borderTopWidth: 1,
-        borderTopColor: '#f1f5f9',
-    },
-    resetBtn: {
-        flex: 1,
-        height: 56,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: '#F3F3F3',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 16,
-        backgroundColor: '#f1f5f9',
     },
-    resetBtnText: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#64748b',
+    checkboxActive: {
+        backgroundColor: '#000',
+        borderColor: '#000',
     },
-    applyBtn: {
-        flex: 2,
-        height: 56,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 16,
-        backgroundColor: '#6366f1',
-    },
-    applyBtnText: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: 'white',
-    },
-    filterDivider: {
-        height: 1,
-        backgroundColor: '#f1f5f9',
-        marginVertical: 24,
-    },
-    chipContainer: {
+    chipGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
     },
     chip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         paddingVertical: 10,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        gap: 8,
+        borderRadius: 12,
+        backgroundColor: '#F3F3F3',
     },
     chipActive: {
-        backgroundColor: '#6366f1',
-        borderColor: '#6366f1',
-    },
-    chipImage: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
+        backgroundColor: '#000',
     },
     chipText: {
         fontSize: 14,
-        fontWeight: '700',
-        color: '#64748b',
+        color: '#000',
+        fontWeight: '600',
     },
     chipTextActive: {
-        color: 'white',
+        color: '#FFF',
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        padding: 24,
+        borderTopWidth: 1,
+        borderTopColor: '#F3F3F3',
+        gap: 12,
+    },
+    resetBtn: {
+        flex: 1,
+        height: 52,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    resetText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000',
+    },
+    applyBtn: {
+        flex: 2,
+        height: 52,
+        backgroundColor: '#000',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    applyText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#FFF',
     },
 });

@@ -1,4 +1,3 @@
-import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getChatId } from '@/services/db/messageService';
 import { getShopProducts, Product } from '@/services/db/productService';
@@ -7,7 +6,7 @@ import { getUserProfile, UserProfile } from '@/services/db/userProfile';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Dimensions, FlatList, Image, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -135,164 +134,131 @@ export default function UserProfileScreen() {
         }
     };
 
-    const renderProductItem = ({ item }: { item: Product }) => (
-        <TouchableOpacity style={styles.productCard} onPress={() => openProduct(item)}>
-            <Image source={{ uri: item.images[0] }} style={styles.productImage} />
-            <View style={styles.productInfo}>
-                <Text style={styles.productTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.productPrice}>
-                    {item.contactForPrice ? 'Contact for Price' : `₹${item.price}`}
-                </Text>
-            </View>
-        </TouchableOpacity>
-    );
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{freshProfile?.name || name || 'Profile'}</Text>
+                <Text style={styles.headerTitle}>Details</Text>
                 <View style={{ width: 40 }} />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-                {(role === 'shop' || role === 'contractor') && displayBanner && (
-                    <View style={styles.profileBannerContainer}>
-                        <Image source={{ uri: displayBanner }} style={styles.profileBanner} />
+                {displayBanner ? (
+                    <View style={styles.bannerContainer}>
+                        <Image source={{ uri: displayBanner }} style={styles.bannerImage} />
+                        <View style={styles.bannerOverlay} />
                     </View>
+                ) : (role === 'shop' || role === 'contractor') && (
+                    <View style={[styles.bannerContainer, { backgroundColor: '#F3F3F3' }]} />
                 )}
 
-                <View style={[
-                    styles.profileHero,
-                    ((role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor') && displayBanner) && styles.shopProfileHero,
-                    ((role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor') && !displayBanner) && { paddingVertical: 40 }
-                ]}>
-                    <View style={[styles.avatarContainer, (role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor') && styles.shopAvatarContainer]}>
+                <View style={[styles.profileHero, displayBanner && styles.heroWithBanner]}>
+                    <View style={[styles.avatarContainer, displayBanner && styles.avatarWithBanner]}>
                         {displayPhoto ? (
                             <Image source={{ uri: displayPhoto }} style={styles.avatarImage} />
                         ) : (
-                            <MaterialCommunityIcons name={role === 'shop' || freshProfile?.role === 'shop' ? "store" : role === 'contractor' || freshProfile?.role === 'contractor' ? "briefcase" : "account"} size={60} color="#9ca3af" />
+                            <MaterialCommunityIcons
+                                name={role === 'shop' || freshProfile?.role === 'shop' ? "store" : role === 'contractor' || freshProfile?.role === 'contractor' ? "briefcase" : "account"}
+                                size={50}
+                                color="#000"
+                            />
                         )}
                     </View>
-                    <Text style={styles.userName}>
-                        {role === 'shop' || freshProfile?.role === 'shop' ? (freshProfile?.shopName || freshProfile?.name || name) : role === 'contractor' || freshProfile?.role === 'contractor' ? (freshProfile?.companyName || companyName || freshProfile?.name || name) : (freshProfile?.name || name)}
-                    </Text>
-                    <Text style={styles.userRole}>
-                        {role === 'shop' || freshProfile?.role === 'shop' ? (freshProfile?.shopCategories?.join(', ') || category) : role === 'contractor' || freshProfile?.role === 'contractor' ? (freshProfile?.contractorServices?.join(', ') || contractorServices?.join(', ') || category) : (freshProfile?.category || category)}
-                    </Text>
-                    {(role === 'shop' || freshProfile?.role === 'shop') && (freshProfile?.shopOwnerName || shopOwnerName) && (
-                        <Text style={[styles.userRole, { marginTop: 2, fontSize: 13, fontWeight: '600' }]}>
-                            Owner: {freshProfile?.shopOwnerName || shopOwnerName}
+                    <View style={styles.heroInfo}>
+                        <Text style={styles.userName}>
+                            {role === 'shop' || freshProfile?.role === 'shop' ? (freshProfile?.shopName || freshProfile?.name || name) : role === 'contractor' || freshProfile?.role === 'contractor' ? (freshProfile?.companyName || companyName || freshProfile?.name || name) : (freshProfile?.name || name)}
                         </Text>
-                    )}
-                    {(role === 'contractor' || freshProfile?.role === 'contractor') && (freshProfile?.ownerName || ownerName) && (
-                        <Text style={[styles.userRole, { marginTop: 2, fontSize: 13, fontWeight: '600' }]}>
-                            Owner: {freshProfile?.ownerName || ownerName}
+                        <Text style={styles.userRole}>
+                            {role === 'shop' || freshProfile?.role === 'shop' ? (freshProfile?.shopCategories?.join(', ') || category) : role === 'contractor' || freshProfile?.role === 'contractor' ? (freshProfile?.contractorServices?.join(', ') || contractorServices?.join(', ') || category) : (category)}
                         </Text>
-                    )}
-
-                    <View style={styles.statsRow}>
-                        <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{freshProfile?.averageRating || rating || '0'}</Text>
-                            <Text style={styles.statLabel}>{freshProfile?.ratingCount || 0} Ratings</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{freshProfile?.yearsInBusiness || paramYearsInBusiness || freshProfile?.experienceYears || experienceYears || '0'}yr</Text>
-                            <Text style={styles.statLabel}>{role === 'shop' || freshProfile?.role === 'shop' || role === 'contractor' || freshProfile?.role === 'contractor' ? 'In Business' : 'Experience'}</Text>
-                        </View>
-                        <View style={styles.statDivider} />
-                        <View style={styles.statItem}>
-                            <Text style={styles.statValue}>{distance || 'Nearby'}</Text>
-                            <Text style={styles.statLabel}>Distance</Text>
-                        </View>
                     </View>
                 </View>
 
+                <View style={styles.statsRow}>
+                    <View style={styles.statItem}>
+                        <Text style={styles.statValue}>{freshProfile?.averageRating || rating || '0'}</Text>
+                        <Text style={styles.statLabel}>Rating</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                        <Text style={styles.statValue}>{freshProfile?.yearsInBusiness || paramYearsInBusiness || freshProfile?.experienceYears || experienceYears || '0'}y</Text>
+                        <Text style={styles.statLabel}>Exp</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                        <Text style={styles.statValue}>{distance || '1.2km'}</Text>
+                        <Text style={styles.statLabel}>Dist</Text>
+                    </View>
+                </View>
+
+                <View style={styles.actionRow}>
+                    <TouchableOpacity style={styles.primaryBtn} onPress={handleCall}>
+                        <MaterialCommunityIcons name="phone" size={20} color="white" />
+                        <Text style={styles.primaryBtnText}>Call</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.secondaryBtn} onPress={handleMessage}>
+                        <MaterialCommunityIcons name="message-text-outline" size={20} color="black" />
+                        <Text style={styles.secondaryBtnText}>Message</Text>
+                    </TouchableOpacity>
+                </View>
+
                 <View style={styles.content}>
-
-
-
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{role === 'shop' || freshProfile?.role === 'shop' ? 'Shop Information' : 'Contact & Location'}</Text>
-                        <View style={styles.infoCard}>
-                            {role === 'shop' || freshProfile?.role === 'shop' ? (
-                                <>
-                                    <View style={styles.infoRow}>
-                                        <MaterialCommunityIcons name="clock-outline" size={20} color={Colors.light.muted} />
-                                        <Text style={styles.infoText}>
-                                            Business Hours: {freshProfile?.openingTime || paramOpeningTime || '8:00 AM'} - {freshProfile?.closingTime || paramClosingTime || '8:00 PM'}
-                                        </Text>
-                                    </View>
-                                    <View style={[styles.infoRow, { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#f1f5f9' }]}>
-                                        <MaterialCommunityIcons name="map-marker-outline" size={20} color={Colors.light.muted} />
-                                        <Text style={styles.infoText}>{freshProfile?.address || paramAddress || freshProfile?.location || location || 'Address not provided'}</Text>
-                                    </View>
-                                </>
-                            ) : (
-                                <View style={styles.infoRow}>
-                                    <MaterialCommunityIcons name="map-marker-radius" size={20} color={Colors.light.muted} />
-                                    <Text style={styles.infoText}>{freshProfile?.address || paramAddress || freshProfile?.location || location || 'Address not provided'}</Text>
-                                </View>
-                            )}
+                        <Text style={styles.sectionTitle}>Information</Text>
+                        <View style={styles.infoRow}>
+                            <MaterialCommunityIcons name="map-marker-outline" size={20} color="#545454" />
+                            <Text style={styles.infoText}>{freshProfile?.address || paramAddress || location || 'Address not provided'}</Text>
                         </View>
+                        {(role === 'shop' || freshProfile?.role === 'shop') && (
+                            <View style={[styles.infoRow, { marginTop: 12 }]}>
+                                <MaterialCommunityIcons name="clock-outline" size={20} color="#545454" />
+                                <Text style={styles.infoText}>
+                                    Open: {freshProfile?.openingTime || paramOpeningTime || '8:00 AM'} - {freshProfile?.closingTime || paramClosingTime || '8:00 PM'}
+                                </Text>
+                            </View>
+                        )}
                     </View>
 
                     {displayAbout && (
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>About</Text>
-                            <View style={styles.infoCard}>
-                                <Text style={styles.aboutText}>{displayAbout}</Text>
-                            </View>
+                            <Text style={styles.aboutText}>{displayAbout}</Text>
                         </View>
                     )}
 
-                    {((role === 'worker' || freshProfile?.role === 'worker') && skills.length > 0) && (
+                    {((role === 'worker' || freshProfile?.role === 'worker' || role === 'contractor' || freshProfile?.role === 'contractor') && (skills.length > 0 || contractorServices.length > 0)) && (
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Skills & Expertise</Text>
-                            <View style={styles.skillsContainer}>
-                                {skills.map((skill: string, index: number) => (
-                                    <View key={index} style={styles.skillBadge}>
-                                        <Text style={styles.skillBadgeText}>{skill}</Text>
+                            <Text style={styles.sectionTitle}>Expertise</Text>
+                            <View style={styles.skillsGrid}>
+                                {(skills.length > 0 ? skills : contractorServices).map((item: string, index: number) => (
+                                    <View key={index} style={styles.skillChip}>
+                                        <Text style={styles.skillChipText}>{item}</Text>
                                     </View>
                                 ))}
                             </View>
                         </View>
                     )}
 
-                    {((role === 'contractor' || freshProfile?.role === 'contractor') && contractorServices.length > 0) && (
+                    {role === 'shop' && products.length > 0 && (
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Services Offered</Text>
-                            <View style={styles.skillsContainer}>
-                                {contractorServices.map((service: string, index: number) => (
-                                    <View key={index} style={styles.skillBadge}>
-                                        <Text style={styles.skillBadgeText}>{service}</Text>
-                                    </View>
+                            <Text style={styles.sectionTitle}>Store Gallery</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.galleryContainer}>
+                                {products.map((item) => (
+                                    <TouchableOpacity key={item.id} style={styles.galleryItem} onPress={() => openProduct(item)}>
+                                        <Image source={{ uri: item.images[0] }} style={styles.galleryImage} />
+                                        <View style={styles.galleryPrice}>
+                                            <Text style={styles.galleryPriceText}>{item.contactForPrice ? 'Price' : `₹${item.price}`}</Text>
+                                        </View>
+                                    </TouchableOpacity>
                                 ))}
-                            </View>
+                            </ScrollView>
                         </View>
                     )}
 
-
-
-                    <View style={styles.actionRow}>
-                        <TouchableOpacity style={styles.primaryBtn} onPress={handleCall}>
-                            <MaterialCommunityIcons name="phone" size={20} color="white" />
-                            <Text style={styles.primaryBtnText}>Call</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.secondaryBtn} onPress={handleMessage}>
-                            <MaterialCommunityIcons name="message-text" size={20} color="black" />
-                            <Text style={styles.secondaryBtnText}>Message</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Rating Section - Always visible for layout/testing */}
                     <View style={styles.section}>
-                        <TouchableOpacity
-                            style={[styles.ratingBtn, { backgroundColor: '#fff7ed', borderColor: '#fdba74', borderWidth: 2 }]}
-                            onPress={() => {
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Reviews</Text>
+                            <TouchableOpacity onPress={() => {
                                 if (!currentUser) {
                                     router.push('/(auth)/phone-login');
                                     return;
@@ -300,82 +266,48 @@ export default function UserProfileScreen() {
                                 setSelectedRating(0);
                                 setComment('');
                                 setRatingModalVisible(true);
-                            }}
-                        >
-                            <MaterialCommunityIcons name="star" size={26} color="#f59e0b" />
-                            <Text style={[styles.ratingBtnText, { color: '#9a3412', fontSize: 18 }]}>Rate this {role === 'shop' ? 'Shop' : role === 'contractor' ? 'Company' : 'Business'}</Text>
-                        </TouchableOpacity>
-                    </View>
-
-
-                    {/* Reviews Section */}
-                    <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Reviews ({reviews.length})</Text>
+                            }}>
+                                <Text style={styles.rateLink}>Rate Business</Text>
+                            </TouchableOpacity>
                         </View>
 
                         {reviews.length > 0 ? (
                             reviews.map((rev, idx) => (
-                                <View key={rev.id || idx} style={styles.reviewCard}>
+                                <View key={rev.id || idx} style={styles.reviewItem}>
                                     <View style={styles.reviewHeader}>
-                                        <View style={styles.reviewerInfo}>
-                                            <TouchableOpacity onPress={() => router.push({
-                                                pathname: '/user-profile',
-                                                params: { id: rev.reviewerId, name: rev.reviewerName }
-                                            })}>
-                                                <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
-                                            </TouchableOpacity>
-                                            <View style={styles.reviewStars}>
-                                                {[1, 2, 3, 4, 5].map(s => (
-                                                    <MaterialCommunityIcons
-                                                        key={s}
-                                                        name={s <= rev.rating ? "star" : "star-outline"}
-                                                        size={14}
-                                                        color="#f59e0b"
-                                                    />
-                                                ))}
-                                            </View>
+                                        <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
+                                        <View style={styles.reviewRating}>
+                                            <MaterialCommunityIcons name="star" size={12} color="black" />
+                                            <Text style={styles.reviewRatingText}>{rev.rating}</Text>
                                         </View>
-                                        <Text style={styles.reviewDate}>
-                                            {rev.createdAt?.toDate ? rev.createdAt.toDate().toLocaleDateString() : new Date(rev.createdAt).toLocaleDateString()}
-                                        </Text>
                                     </View>
                                     {rev.comment ? (
                                         <Text style={styles.reviewComment}>{rev.comment}</Text>
                                     ) : null}
+                                    <Text style={styles.reviewDate}>
+                                        {rev.createdAt?.toDate ? rev.createdAt.toDate().toLocaleDateString() : new Date(rev.createdAt).toLocaleDateString()}
+                                    </Text>
                                 </View>
                             ))
                         ) : (
                             <View style={styles.emptyReviews}>
-                                <MaterialCommunityIcons name="comment-outline" size={32} color="#cbd5e1" />
                                 <Text style={styles.emptyReviewsText}>No reviews yet</Text>
                             </View>
                         )}
                     </View>
-
-                    {/* Products Section for Shops - Moved to Bottom */}
-                    {role === 'shop' && products.length > 0 && (
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Product Catalog</Text>
-                            <FlatList
-                                data={products}
-                                renderItem={renderProductItem}
-                                keyExtractor={(item) => item.id!}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={styles.productList}
-                            />
-                        </View>
-                    )}
                 </View>
             </ScrollView>
 
             {/* Rating Modal */}
             <Modal visible={ratingModalVisible} transparent={true} animationType="slide">
-                <View style={styles.ratingModalOverlay}>
-                    <View style={styles.ratingModalContent}>
-                        <Text style={styles.ratingModalTitle}>Rate {role === 'shop' ? 'Shop' : 'Worker'}</Text>
-                        <Text style={styles.ratingModalSub}>How was your experience with {name}?</Text>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Rate Experience</Text>
+                            <TouchableOpacity onPress={() => setRatingModalVisible(false)}>
+                                <MaterialCommunityIcons name="close" size={24} color="black" />
+                            </TouchableOpacity>
+                        </View>
 
                         <View style={styles.starRow}>
                             {[1, 2, 3, 4, 5].map(star => (
@@ -383,89 +315,53 @@ export default function UserProfileScreen() {
                                     <MaterialCommunityIcons
                                         name={star <= selectedRating ? "star" : "star-outline"}
                                         size={40}
-                                        color="#f59e0b"
+                                        color="black"
                                     />
                                 </TouchableOpacity>
                             ))}
                         </View>
 
                         <TextInput
-                            style={styles.reviewInput}
-                            placeholder="Add a comment (optional)"
+                            style={styles.modalInput}
+                            placeholder="Add your comment"
                             value={comment}
                             onChangeText={setComment}
                             multiline
                         />
 
-                        <View style={styles.ratingModalButtons}>
-                            <TouchableOpacity
-                                style={styles.cancelBtn}
-                                onPress={() => setRatingModalVisible(false)}
-                            >
-                                <Text style={styles.cancelBtnText}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.submitRatingBtn, !selectedRating && { opacity: 0.5 }]}
-                                onPress={handleRatingSubmit}
-                                disabled={!selectedRating || submitting}
-                            >
-                                <Text style={styles.submitRatingBtnText}>
-                                    {submitting ? 'Submitting...' : 'Submit'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            style={[styles.modalSubmitBtn, !selectedRating && styles.disabledBtn]}
+                            onPress={handleRatingSubmit}
+                            disabled={!selectedRating || submitting}
+                        >
+                            {submitting ? <ActivityIndicator color="white" /> : <Text style={styles.modalSubmitBtnText}>Post Review</Text>}
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
 
-            {/* Product Detail Modal with Horizontal Image Slider */}
-            <Modal
-                visible={productModalVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setProductModalVisible(false)}
-            >
-                <View style={styles.productModalOverlay}>
+            {/* Product Modal */}
+            <Modal visible={productModalVisible} transparent={true} animationType="fade">
+                <View style={styles.modalOverlay}>
                     <View style={styles.productModalContent}>
-                        <TouchableOpacity
-                            style={styles.closeModalBtn}
-                            onPress={() => setProductModalVisible(false)}
-                        >
-                            <MaterialCommunityIcons name="close" size={28} color="black" />
+                        <TouchableOpacity style={styles.closeBtn} onPress={() => setProductModalVisible(false)}>
+                            <MaterialCommunityIcons name="close" size={24} color="black" />
                         </TouchableOpacity>
-
                         {selectedProduct && (
                             <ScrollView showsVerticalScrollIndicator={false}>
-                                {/* Horizontal Image Slider */}
                                 <FlatList
-                                    data={selectedProduct?.images || []}
-                                    keyExtractor={(img, index) => index.toString()}
+                                    data={selectedProduct.images}
                                     horizontal
                                     pagingEnabled
-                                    showsHorizontalScrollIndicator={false}
-                                    renderItem={({ item }) => (
-                                        <Image source={{ uri: item }} style={styles.fullProductImage} />
-                                    )}
+                                    renderItem={({ item }) => <Image source={{ uri: item }} style={styles.fullProductImage} />}
+                                    keyExtractor={(_, i) => i.toString()}
                                 />
-
                                 <View style={styles.productDetailInfo}>
-                                    <Text style={styles.productDetailTitle}>{selectedProduct?.title}</Text>
-                                    <View style={styles.priceContainer}>
-                                        {selectedProduct?.contactForPrice ? (
-                                            <View style={styles.contactBadge}>
-                                                <Text style={styles.contactBadgeText}>Contact for Price</Text>
-                                            </View>
-                                        ) : (
-                                            <Text style={styles.productDetailPrice}>₹{selectedProduct?.price}</Text>
-                                        )}
-                                    </View>
-
-                                    <Text style={styles.productDetailDescLabel}>Description</Text>
-                                    <Text style={styles.productDetailDesc}>{selectedProduct?.description || 'No description provided.'}</Text>
-
-                                    <TouchableOpacity style={styles.inquiryBtn} onPress={handleCall}>
-                                        <MaterialCommunityIcons name="phone" size={20} color="white" />
-                                        <Text style={styles.inquiryBtnText}>Call for Inquiry</Text>
+                                    <Text style={styles.productDetailTitle}>{selectedProduct.title}</Text>
+                                    <Text style={styles.productDetailPrice}>{selectedProduct.contactForPrice ? 'Contact' : `₹${selectedProduct.price}`}</Text>
+                                    <Text style={styles.productDetailDesc}>{selectedProduct.description}</Text>
+                                    <TouchableOpacity style={styles.modalSubmitBtn} onPress={handleCall}>
+                                        <Text style={styles.modalSubmitBtnText}>Contact Seller</Text>
                                     </TouchableOpacity>
                                 </View>
                             </ScrollView>
@@ -473,245 +369,362 @@ export default function UserProfileScreen() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView >
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'white' },
+    container: {
+        flex: 1,
+        backgroundColor: '#FFF',
+    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: Spacing.lg,
-        paddingTop: 16,
-        paddingBottom: 8,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
-    backBtn: { padding: 4 },
-    headerTitle: { fontSize: 18, fontWeight: '800' },
-    callHeaderBtn: { padding: 8, backgroundColor: '#f3f4f6', borderRadius: 12 },
-    profileHero: { alignItems: 'center', paddingVertical: 24, backgroundColor: '#f8fafc', borderBottomLeftRadius: 32, borderBottomRightRadius: 32 },
-    avatarContainer: { width: 100, height: 100, borderRadius: 50, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', elevation: 4, shadowOpacity: 0.1, overflow: 'hidden' },
-    avatarImage: { width: '100%', height: '100%' },
-    userName: { fontSize: 22, fontWeight: '900', marginTop: 12 },
-    userRole: { fontSize: 14, color: '#64748b', marginTop: 4 },
-    statsRow: { flexDirection: 'row', marginTop: 20, alignItems: 'center' },
-    statItem: { alignItems: 'center', paddingHorizontal: 24 },
-    statValue: { fontSize: 18, fontWeight: '800' },
-    statLabel: { fontSize: 11, color: '#64748b', marginTop: 2 },
-    statDivider: { width: 1, height: 24, backgroundColor: '#e2e8f0' },
-    profileBannerContainer: {
-        width: width - (Spacing.lg * 2),
+    backBtn: {
+        padding: 4,
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#000',
+    },
+    bannerContainer: {
+        width: '100%',
         height: 180,
-        alignSelf: 'center',
-        borderRadius: 24,
-        overflow: 'hidden',
-        marginTop: 8,
+        backgroundColor: '#F3F3F3',
     },
-    profileBanner: {
+    bannerImage: {
         width: '100%',
         height: '100%',
-        backgroundColor: '#f1f5f9',
-        borderRadius: 24,
     },
-    bannerPlaceholder: {
-        justifyContent: 'center',
-        alignItems: 'center',
+    bannerOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.1)',
     },
-    shopProfileHero: {
+    heroWithBanner: {
         marginTop: -50,
-        backgroundColor: 'transparent',
+        paddingBottom: 24,
     },
-    shopAvatarContainer: {
+    avatarWithBanner: {
         borderWidth: 4,
-        borderColor: 'white',
+        borderColor: '#FFF',
     },
-    content: { padding: Spacing.lg },
-    section: { marginBottom: 32 },
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    sectionTitle: { fontSize: 18, fontWeight: '800', marginBottom: 16 },
-    productList: { gap: 12 },
-    productCard: { width: 160, backgroundColor: 'white', borderRadius: 20, borderWidth: 1, borderColor: '#f1f5f9', overflow: 'hidden' },
-    productImage: { width: '100%', aspectRatio: 1 },
-    productInfo: { padding: 12 },
-    productTitle: { fontSize: 14, fontWeight: '700', color: '#1e293b' },
-    productPrice: { fontSize: 12, fontWeight: '800', color: '#10b981', marginTop: 4 },
-    aboutText: { fontSize: 15, color: '#475569', lineHeight: 24 },
-    infoCard: { padding: 16, backgroundColor: '#f8fafc', borderRadius: 20, borderWidth: 1, borderColor: '#f1f5f9' },
-    infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    infoText: { fontSize: 14, color: '#1e293b', flex: 1 },
-    actionRow: { flexDirection: 'row', gap: 12, marginTop: 8, marginBottom: 40 },
-    primaryBtn: { flex: 1.5, backgroundColor: 'black', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 20, gap: 8 },
-    primaryBtnText: { color: 'white', fontWeight: '800', fontSize: 16 },
-    secondaryBtn: { flex: 1, backgroundColor: '#f1f5f9', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 20, gap: 8 },
-    secondaryBtnText: { color: 'black', fontWeight: '800', fontSize: 16 },
-    ratingBtn: {
-        backgroundColor: '#fffbeb',
+    profileHero: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 32,
+    },
+    avatarContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: '#F3F3F3',
         justifyContent: 'center',
-        padding: 16,
-        borderRadius: 20,
-        gap: 8,
-        borderWidth: 1,
-        borderColor: '#fef3c7',
-        marginBottom: 32,
-    },
-    ratingBtnText: {
-        color: '#b45309',
-        fontSize: 16,
-        fontWeight: '800',
-    },
-    ratingModalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        padding: 20,
-    },
-    ratingModalContent: {
-        backgroundColor: 'white',
-        borderRadius: 32,
-        padding: 28,
         alignItems: 'center',
+        overflow: 'hidden',
     },
-    ratingModalTitle: {
-        fontSize: 22,
-        fontWeight: '900',
-        marginBottom: 8,
-        color: '#1e293b',
-    },
-    ratingModalSub: {
-        fontSize: 15,
-        color: '#64748b',
-        textAlign: 'center',
-        marginBottom: 24,
-    },
-    starRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 24,
-    },
-    reviewInput: {
+    avatarImage: {
         width: '100%',
-        backgroundColor: '#f8fafc',
-        borderRadius: 20,
-        padding: 16,
-        height: 120,
-        textAlignVertical: 'top',
-        marginBottom: 24,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-        fontSize: 15,
+        height: '100%',
     },
-    ratingModalButtons: {
-        flexDirection: 'row',
-        gap: 12,
-        width: '100%',
-    },
-    cancelBtn: {
+    heroInfo: {
+        marginLeft: 20,
         flex: 1,
-        padding: 18,
-        borderRadius: 16,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
     },
-    cancelBtnText: {
-        fontWeight: '800',
-        color: '#64748b',
-        fontSize: 15,
+    userName: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#000',
     },
-    submitRatingBtn: {
-        flex: 1,
-        backgroundColor: 'black',
-        padding: 18,
-        borderRadius: 16,
-        alignItems: 'center',
+    userRole: {
+        fontSize: 14,
+        color: '#545454',
+        marginTop: 4,
     },
-    submitRatingBtnText: {
-        color: 'white',
-        fontWeight: '800',
-        fontSize: 15,
-    },
-    reviewCard: {
-        backgroundColor: '#f8fafc',
-        borderRadius: 20,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-    reviewHeader: {
+    statsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        paddingHorizontal: 20,
+        paddingBottom: 32,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
     },
-    reviewerInfo: {
-        flex: 1,
+    statItem: {
+        alignItems: 'flex-start',
     },
-    reviewerName: {
-        fontSize: 15,
+    statValue: {
+        fontSize: 18,
         fontWeight: '700',
-        color: '#1e293b',
+        color: '#000',
     },
-    reviewStars: {
-        flexDirection: 'row',
+    statLabel: {
+        fontSize: 12,
+        color: '#AFAFAF',
+        fontWeight: '600',
+        textTransform: 'uppercase',
         marginTop: 2,
     },
-    reviewDate: {
-        fontSize: 12,
-        color: '#94a3b8',
+    actionRow: {
+        flexDirection: 'row',
+        padding: 20,
+        gap: 12,
     },
-    reviewComment: {
-        fontSize: 14,
-        color: '#475569',
-        lineHeight: 20,
-    },
-    emptyReviews: {
+    primaryBtn: {
+        flex: 1,
+        backgroundColor: '#000',
+        flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 32,
-        backgroundColor: '#f8fafc',
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-        borderStyle: 'dashed',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        borderRadius: 12,
+        gap: 8,
     },
-    emptyReviewsText: {
-        marginTop: 8,
-        fontSize: 14,
-        color: '#94a3b8',
-        fontWeight: '600',
+    primaryBtnText: {
+        color: '#FFF',
+        fontWeight: '700',
+        fontSize: 16,
     },
-    productModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
-    productModalContent: { width: width * 0.9, maxHeight: '85%', backgroundColor: 'white', borderRadius: 32, overflow: 'hidden', position: 'relative' },
-    closeModalBtn: { position: 'absolute', top: 20, right: 20, zIndex: 10, backgroundColor: 'white', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', elevation: 5 },
-    fullProductImage: { width: width * 0.9, aspectRatio: 1 },
-    productDetailInfo: { padding: 24 },
-    productDetailTitle: { fontSize: 24, fontWeight: '900', color: '#1e293b' },
-    priceContainer: { marginTop: 12, marginBottom: 20 },
-    productDetailPrice: { fontSize: 22, fontWeight: '800', color: '#10b981' },
-    contactBadge: { backgroundColor: '#f0fdf4', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, alignSelf: 'flex-start', borderWidth: 1, borderColor: '#bbf7d0' },
-    contactBadgeText: { color: '#166534', fontWeight: '800', fontSize: 14 },
-    productDetailDescLabel: { fontSize: 16, fontWeight: '800', color: '#1e293b', marginBottom: 8 },
-    productDetailDesc: { fontSize: 15, color: '#64748b', lineHeight: 22, marginBottom: 24 },
-    inquiryBtn: { backgroundColor: 'black', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 20, borderRadius: 20, gap: 10 },
-    inquiryBtnText: { color: 'white', fontWeight: '800', fontSize: 16 },
-    skillsContainer: {
+    secondaryBtn: {
+        flex: 1,
+        backgroundColor: '#F3F3F3',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        borderRadius: 12,
+        gap: 8,
+    },
+    secondaryBtnText: {
+        color: '#000',
+        fontWeight: '700',
+        fontSize: 16,
+    },
+    content: {
+        paddingHorizontal: 20,
+    },
+    section: {
+        marginBottom: 32,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#000',
+        marginBottom: 16,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+    },
+    infoText: {
+        fontSize: 15,
+        color: '#000',
+        flex: 1,
+        lineHeight: 22,
+    },
+    aboutText: {
+        fontSize: 15,
+        color: '#545454',
+        lineHeight: 24,
+    },
+    skillsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
     },
-    skillBadge: {
-        backgroundColor: '#eff6ff',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#dbeafe',
+    skillChip: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+        backgroundColor: '#F3F3F3',
     },
-    skillBadgeText: {
+    skillChipText: {
         fontSize: 13,
+        fontWeight: '600',
+        color: '#000',
+    },
+    galleryContainer: {
+        gap: 12,
+    },
+    galleryItem: {
+        width: 140,
+        borderRadius: 12,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#F3F3F3',
+    },
+    galleryImage: {
+        width: '100%',
+        height: 140,
+    },
+    galleryPrice: {
+        padding: 8,
+        backgroundColor: '#FFF',
+    },
+    galleryPriceText: {
+        fontSize: 12,
         fontWeight: '700',
-        color: '#1d4ed8',
+        color: '#000',
+    },
+    rateLink: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#000',
+        textDecorationLine: 'underline',
+    },
+    reviewItem: {
+        paddingVertical: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#F3F3F3',
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    reviewerName: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#000',
+    },
+    reviewRating: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F3F3F3',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+        gap: 4,
+    },
+    reviewRatingText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#000',
+    },
+    reviewComment: {
+        fontSize: 14,
+        color: '#545454',
+        marginTop: 8,
+        lineHeight: 20,
+    },
+    reviewDate: {
+        fontSize: 12,
+        color: '#AFAFAF',
+        marginTop: 8,
+    },
+    emptyReviews: {
+        paddingVertical: 20,
+    },
+    emptyReviewsText: {
+        color: '#AFAFAF',
+        fontSize: 14,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#FFF',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        paddingBottom: 40,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+    },
+    starRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12,
+        marginBottom: 24,
+    },
+    modalInput: {
+        backgroundColor: '#F3F3F3',
+        borderRadius: 12,
+        padding: 16,
+        height: 120,
+        textAlignVertical: 'top',
+        fontSize: 16,
+        marginBottom: 24,
+    },
+    modalSubmitBtn: {
+        backgroundColor: '#000',
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    modalSubmitBtnText: {
+        color: '#FFF',
+        fontWeight: '700',
+        fontSize: 16,
+    },
+    disabledBtn: {
+        opacity: 0.5,
+    },
+    productModalContent: {
+        width: '100%',
+        height: '90%',
+        backgroundColor: '#FFF',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        overflow: 'hidden',
+    },
+    fullProductImage: {
+        width: width,
+        height: width,
+    },
+    productDetailInfo: {
+        padding: 24,
+    },
+    productDetailTitle: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#000',
+    },
+    productDetailPrice: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#000',
+        marginTop: 8,
+    },
+    productDetailDesc: {
+        fontSize: 15,
+        color: '#545454',
+        lineHeight: 24,
+        marginVertical: 24,
+    },
+    closeBtn: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        zIndex: 10,
+        backgroundColor: '#FFF',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
     },
 });

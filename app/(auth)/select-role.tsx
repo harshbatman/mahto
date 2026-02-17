@@ -1,4 +1,3 @@
-import { Spacing } from '@/constants/theme';
 import { LANGUAGES, LanguageCode } from '@/constants/translations';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -29,31 +28,27 @@ export default function SelectRoleScreen() {
     const roles = [
         {
             id: 'homeowner',
-            title: t.profile === 'प्रोफ़ाइल' ? 'होमओनर' : 'Homeowner', // Fallback or add to translations
+            title: t.profile === 'प्रोफ़ाइल' ? 'होमओनर' : 'Homeowner',
             subtitle: t.home === 'होम' ? 'मैं अपना घर बनाना या मरम्मत करना चाहता हूं' : 'I want to build or renovate my home',
-            icon: 'home-account',
-            color: '#6366f1'
+            icon: 'home-variant-outline',
         },
         {
             id: 'worker',
             title: t.workers,
             subtitle: t.home === 'होम' ? 'मैं दिहाड़ी काम की तलाश में हूं' : 'I am looking for daily wage work',
-            icon: 'account-hard-hat',
-            color: '#a855f7'
+            icon: 'account-hard-hat-outline',
         },
         {
             id: 'contractor',
             title: t.contractors,
             subtitle: t.home === 'होम' ? 'कामगार खोजें और ठेका प्राप्त करें' : 'Find Workers and Win Contracts',
-            icon: 'briefcase-account',
-            color: '#ec4899'
+            icon: 'briefcase-outline',
         },
         {
             id: 'shop',
             title: t.materials === 'सामग्री' ? 'दुकानदार' : 'Shop Owner',
             subtitle: t.home === 'होम' ? 'मै निर्माण सामग्री बेचता हूं' : 'I sell construction materials',
-            icon: 'storefront',
-            color: '#f59e0b'
+            icon: 'storefront-outline',
         }
     ];
 
@@ -66,64 +61,60 @@ export default function SelectRoleScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.topActions}>
-                    <TouchableOpacity
-                        style={styles.backBtn}
-                        onPress={() => router.back()}
-                    >
-                        <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
-                    </TouchableOpacity>
+            <View style={styles.topActions}>
+                <TouchableOpacity
+                    style={styles.backBtn}
+                    onPress={() => router.back()}
+                >
+                    <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
+                </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.langBtn}
-                        onPress={() => setShowLangModal(true)}
-                    >
-                        <MaterialCommunityIcons name="translate" size={20} color="#666" />
-                        <Text style={styles.langBtnText}>{selectedLang.local}</Text>
-                        <MaterialCommunityIcons name="chevron-down" size={16} color="#666" />
-                    </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.langBtn}
+                    onPress={() => setShowLangModal(true)}
+                >
+                    <MaterialCommunityIcons name="translate" size={20} color="#000" />
+                    <Text style={styles.langBtnText}>{selectedLang.local}</Text>
+                    <MaterialCommunityIcons name="chevron-down" size={16} color="#000" />
+                </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Choose how you want to use MAHTO</Text>
                 </View>
 
-                <View style={styles.content}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>{t.welcome} to MAHTO</Text>
-                        <Text style={styles.subtitle}>{t.home === 'होम' ? 'आप ऐप का उपयोग कैसे करना चाहेंगे?' : 'How would you like to use the app?'}</Text>
-                    </View>
-
-                    <View style={styles.grid}>
-                        {roles.map((role) => (
-                            <TouchableOpacity
-                                key={role.id}
-                                style={styles.card}
-                                onPress={() => handleSelect(role.id)}
-                            >
-                                <View style={[styles.iconCircle, { backgroundColor: role.color + '15' }]}>
-                                    <MaterialCommunityIcons name={role.icon as any} size={32} color={role.color} />
-                                </View>
-                                <View style={styles.cardInfo}>
-                                    <Text style={styles.cardTitle}>{role.title}</Text>
-                                    <Text style={styles.cardSub}>{role.subtitle}</Text>
-                                </View>
-                                <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-
-                    <View style={styles.loginLink}>
-                        <Text style={styles.loginText}>
-                            {t.home === 'होम' ? 'पहले से ही एक खाता है?' : 'Already have an account?'}
-                        </Text>
-                    </View>
-
-                    <TouchableOpacity
-                        style={styles.mahtoIdButton}
-                        onPress={() => router.push('/(auth)/phone-login')}
-                    >
-                        <Text style={styles.mahtoIdButtonText}>Continue with MAHTO ID</Text>
-                    </TouchableOpacity>
+                <View style={styles.grid}>
+                    {roles.map((role) => (
+                        <TouchableOpacity
+                            key={role.id}
+                            style={styles.card}
+                            onPress={() => handleSelect(role.id)}
+                        >
+                            <View style={styles.cardInfo}>
+                                <Text style={styles.cardTitle}>{role.title}</Text>
+                                <Text style={styles.cardSub}>{role.subtitle}</Text>
+                            </View>
+                            <View style={styles.iconBox}>
+                                <MaterialCommunityIcons name={role.icon as any} size={40} color="#000" />
+                            </View>
+                        </TouchableOpacity>
+                    ))}
                 </View>
+
+                <View style={styles.loginLink}>
+                    <Text style={styles.loginText}>
+                        {t.home === 'होम' ? 'पहले से ही एक खाता है?' : 'Already have an account?'}
+                    </Text>
+                </View>
+
+                <TouchableOpacity
+                    style={styles.mahtoIdButton}
+                    onPress={() => router.push('/(auth)/phone-login')}
+                >
+                    <Text style={styles.mahtoIdButtonText}>Continue with Phone</Text>
+                    <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />
+                </TouchableOpacity>
             </ScrollView>
 
             <Modal
@@ -163,7 +154,7 @@ export default function SelectRoleScreen() {
                                         <Text style={styles.langLocal}>{item.local}</Text>
                                     </View>
                                     {selectedLang.id === item.id && (
-                                        <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
+                                        <MaterialCommunityIcons name="check-circle" size={24} color="#000" />
                                     )}
                                 </TouchableOpacity>
                             )}
@@ -180,118 +171,94 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
+    topActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 50,
+        paddingBottom: 20,
+    },
     content: {
-        padding: Spacing.lg,
+        paddingHorizontal: 20,
+        paddingBottom: 40,
     },
     header: {
-        marginBottom: 40,
+        marginBottom: 30,
     },
     title: {
         fontSize: 32,
-        fontWeight: '900',
+        fontWeight: '700',
         color: '#000',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#666',
-        marginTop: 8,
-        fontWeight: '500',
+        lineHeight: 40,
     },
     grid: {
-        gap: 16,
+        gap: 12,
     },
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 20,
-        borderRadius: 24,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-    },
-    iconCircle: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
+        padding: 24,
+        borderRadius: 12,
+        backgroundColor: '#F6F6F6',
     },
     cardInfo: {
         flex: 1,
     },
     cardTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '700',
         color: '#000',
     },
     cardSub: {
-        fontSize: 13,
-        color: '#777',
-        marginTop: 2,
+        fontSize: 14,
+        color: '#545454',
+        marginTop: 4,
+        paddingRight: 10,
+    },
+    iconBox: {
+        width: 60,
+        height: 60,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     loginLink: {
-        marginTop: 30,
-        alignItems: 'center',
-        marginBottom: 5, // Small positive gap
+        marginTop: 40,
+        alignItems: 'flex-start',
     },
     loginText: {
-        fontSize: 15,
-        color: '#666',
-    },
-    loginBold: {
-        color: '#000',
-        fontWeight: '800',
+        fontSize: 14,
+        color: '#545454',
     },
     mahtoIdButton: {
-        backgroundColor: '#000', // Black background
-        borderRadius: 12, // Rectangular with rounded corners
-        paddingVertical: 15,
+        backgroundColor: '#000',
+        borderRadius: 8,
+        paddingVertical: 16,
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 12,
-        marginBottom: 40,
-        borderWidth: 1,
-        borderColor: '#000',
+        gap: 8,
     },
     mahtoIdButtonText: {
-        color: '#fff', // White text
+        color: '#fff',
         fontSize: 16,
-        fontWeight: 'bold',
-    },
-    topActions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: Spacing.lg,
-        paddingTop: 50,
+        fontWeight: '700',
     },
     backBtn: {
         width: 40,
         height: 40,
-        borderRadius: 20,
-        backgroundColor: '#f5f5f5',
         justifyContent: 'center',
-        alignItems: 'center',
     },
     langBtn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 20,
         gap: 6,
     },
     langBtnText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#444',
+        color: '#000',
     },
     modalOverlay: {
         flex: 1,
@@ -300,9 +267,9 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         backgroundColor: 'white',
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        height: '70%',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        height: '60%',
         padding: 24,
     },
     modalHeader: {
@@ -312,34 +279,29 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     modalTitle: {
-        fontSize: 20,
-        fontWeight: '800',
+        fontSize: 22,
+        fontWeight: '700',
     },
     langItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 16,
-        paddingHorizontal: 12,
-        borderRadius: 16,
-        marginBottom: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEE',
     },
     selectedLangItem: {
-        backgroundColor: '#f0fdf4',
-        borderWidth: 1,
-        borderColor: '#10b981',
     },
     langName: {
         fontSize: 16,
-        fontWeight: '700',
-        color: '#1a1a1a',
+        fontWeight: '600',
+        color: '#000',
     },
     selectedLangText: {
-        color: '#10b981',
     },
     langLocal: {
-        fontSize: 13,
-        color: '#666',
+        fontSize: 14,
+        color: '#545454',
         marginTop: 2,
     },
 });

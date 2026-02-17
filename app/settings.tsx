@@ -1,4 +1,3 @@
-import { Spacing } from '@/constants/theme';
 import { LANGUAGES, LanguageCode } from '@/constants/translations';
 import { useLanguage } from '@/context/LanguageContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -15,6 +14,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+
 
 export default function SettingsScreen() {
     const router = useRouter();
@@ -41,47 +41,45 @@ export default function SettingsScreen() {
                 <View style={{ width: 40 }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t.preferences}</Text>
-                    <View style={styles.card}>
-                        <View style={styles.row}>
-                            <View style={styles.rowLeft}>
-                                <MaterialCommunityIcons name="bell-outline" size={22} color="black" />
-                                <Text style={styles.rowLabel}>{t.pushNotifications}</Text>
+                    <Text style={styles.sectionLabel}>{t.preferences}</Text>
+                    <View style={styles.menuBox}>
+                        <View style={styles.menuRow}>
+                            <View style={styles.rowInfo}>
+                                <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
+                                <Text style={styles.rowText}>{t.pushNotifications}</Text>
                             </View>
                             <Switch
                                 value={notifications}
                                 onValueChange={setNotifications}
-                                trackColor={{ false: '#ddd', true: '#10b981' }}
+                                trackColor={{ false: '#EEE', true: '#000' }}
+                                thumbColor={notifications ? '#FFF' : '#FFF'}
                             />
                         </View>
                         <TouchableOpacity
-                            style={[styles.row, { borderTopWidth: 1, borderTopColor: '#f0f0f0' }]}
+                            style={styles.menuRow}
                             onPress={() => setShowLangModal(true)}
                         >
-                            <View style={styles.rowLeft}>
-                                <MaterialCommunityIcons name="translate" size={22} color="black" />
-                                <Text style={styles.rowLabel}>{t.selectLanguage}</Text>
+                            <View style={styles.rowInfo}>
+                                <MaterialCommunityIcons name="translate" size={24} color="black" />
+                                <Text style={styles.rowText}>{t.selectLanguage}</Text>
                             </View>
-                            <View style={styles.rowRight}>
-                                <Text style={styles.rowValue}>{selectedLang.local}</Text>
-                                <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
+                            <View style={styles.rowValue}>
+                                <Text style={styles.valueText}>{selectedLang.local}</Text>
+                                <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
                             </View>
                         </TouchableOpacity>
                     </View>
                 </View>
 
-                <View style={[styles.section, { marginTop: 24 }]}>
-                    <Text style={styles.sectionTitle}>Support & Legal</Text>
-                    <View style={styles.card}>
+                <View style={styles.section}>
+                    <Text style={styles.sectionLabel}>Support & Legal</Text>
+                    <View style={styles.menuBox}>
                         {menuItems.map((item, index) => (
                             <TouchableOpacity
                                 key={item.id}
-                                style={[
-                                    styles.row,
-                                    index > 0 && { borderTopWidth: 1, borderTopColor: '#f0f0f0' }
-                                ]}
+                                style={styles.menuRow}
                                 onPress={() => {
                                     if (item.id === 'help') router.push('/help-support' as any);
                                     if (item.id === 'privacy') router.push('/privacy-policy' as any);
@@ -89,17 +87,20 @@ export default function SettingsScreen() {
                                     if (item.id === 'about') router.push('/about-us' as any);
                                 }}
                             >
-                                <View style={styles.rowLeft}>
-                                    <MaterialCommunityIcons name={item.icon as any} size={22} color="black" />
-                                    <Text style={styles.rowLabel}>{item.title}</Text>
+                                <View style={styles.rowInfo}>
+                                    <MaterialCommunityIcons name={item.icon as any} size={24} color="black" />
+                                    <Text style={styles.rowText}>{item.title}</Text>
                                 </View>
-                                <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
+                                <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
                             </TouchableOpacity>
                         ))}
                     </View>
                 </View>
 
-                <Text style={styles.versionText}>MAHTO App v1.0.0</Text>
+                <View style={styles.footer}>
+                    <Text style={styles.appTitle}>MAHTO</Text>
+                    <Text style={styles.versionText}>Version 1.1.20</Text>
+                </View>
             </ScrollView>
 
             <Modal
@@ -108,10 +109,10 @@ export default function SettingsScreen() {
                 animationType="fade"
                 onRequestClose={() => setShowLangModal(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
+                <View style={styles.modalBackdrop}>
+                    <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Choose Language</Text>
+                            <Text style={styles.modalTitle}>Select Language</Text>
                             <TouchableOpacity onPress={() => setShowLangModal(false)}>
                                 <MaterialCommunityIcons name="close" size={24} color="black" />
                             </TouchableOpacity>
@@ -120,11 +121,12 @@ export default function SettingsScreen() {
                         <FlatList
                             data={LANGUAGES}
                             keyExtractor={(item) => item.id}
+                            showsVerticalScrollIndicator={false}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
                                     style={[
                                         styles.langItem,
-                                        selectedLang.id === item.id && styles.selectedLangItem
+                                        selectedLang.id === item.id && styles.langItemActive
                                     ]}
                                     onPress={() => {
                                         setLanguage(item.id as LanguageCode);
@@ -134,12 +136,12 @@ export default function SettingsScreen() {
                                     <View>
                                         <Text style={[
                                             styles.langName,
-                                            selectedLang.id === item.id && styles.selectedLangText
+                                            selectedLang.id === item.id && styles.langNameActive
                                         ]}>{item.name}</Text>
                                         <Text style={styles.langLocal}>{item.local}</Text>
                                     </View>
                                     {selectedLang.id === item.id && (
-                                        <MaterialCommunityIcons name="check-circle" size={24} color="#10b981" />
+                                        <MaterialCommunityIcons name="check-circle" size={24} color="black" />
                                     )}
                                 </TouchableOpacity>
                             )}
@@ -154,17 +156,14 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: '#FFF',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: Spacing.lg,
-        paddingVertical: Spacing.md,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     backBtn: {
         padding: 4,
@@ -172,113 +171,115 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: '700',
+        color: '#000',
     },
     content: {
-        padding: Spacing.lg,
+        paddingHorizontal: 20,
     },
     section: {
-        marginBottom: 16,
+        marginTop: 24,
     },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#666',
-        textTransform: 'uppercase',
-        marginBottom: 12,
+    sectionLabel: {
+        fontSize: 12,
+        fontWeight: '800',
+        color: '#AFAFAF',
+        letterSpacing: 1,
+        marginBottom: 16,
         marginLeft: 4,
     },
-    card: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
+    menuBox: {
+        backgroundColor: '#FFF',
     },
-    row: {
+    menuRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 16,
+        paddingVertical: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
     },
-    rowLeft: {
+    rowInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
     },
-    rowLabel: {
+    rowText: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
+        color: '#000',
     },
-    rowRight: {
+    rowValue: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
     },
-    rowValue: {
+    valueText: {
         fontSize: 14,
-        color: '#666',
-    },
-    versionText: {
-        textAlign: 'center',
-        marginTop: 40,
-        color: '#999',
-        fontSize: 12,
+        color: '#545454',
         fontWeight: '600',
     },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
+    footer: {
         alignItems: 'center',
-        padding: 20,
+        marginTop: 60,
+        paddingBottom: 40,
     },
-    modalContainer: {
-        backgroundColor: 'white',
+    appTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+        letterSpacing: 2,
+        color: '#000',
+    },
+    versionText: {
+        fontSize: 12,
+        color: '#AFAFAF',
+        fontWeight: '700',
+        marginTop: 4,
+    },
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'center',
+        padding: 24,
+    },
+    modalContent: {
+        backgroundColor: '#FFF',
         borderRadius: 24,
-        width: '100%',
+        padding: 24,
         maxHeight: '80%',
-        padding: 20,
-        elevation: 10,
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-        paddingBottom: 15,
     },
     modalTitle: {
         fontSize: 20,
-        fontWeight: '900',
+        fontWeight: '800',
     },
     langItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 10,
+        paddingVertical: 16,
+        paddingHorizontal: 16,
         borderRadius: 12,
-        marginBottom: 4,
+        marginBottom: 8,
     },
-    selectedLangItem: {
-        backgroundColor: '#f0fdf4',
+    langItemActive: {
+        backgroundColor: '#F3F3F3',
     },
     langName: {
         fontSize: 16,
         fontWeight: '700',
+        color: '#545454',
     },
-    selectedLangText: {
-        color: '#10b981',
+    langNameActive: {
+        color: '#000',
     },
     langLocal: {
         fontSize: 14,
-        color: '#666',
+        color: '#AFAFAF',
         marginTop: 2,
     }
 });

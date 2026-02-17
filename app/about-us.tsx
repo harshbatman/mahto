@@ -1,16 +1,16 @@
-import { Spacing } from '@/constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 
 export default function AboutUsScreen() {
     const router = useRouter();
 
     const ecosystemItems = [
-        { id: 1, title: 'MAHTO', sub: 'Worker, Contractor & Shops Marketplace', icon: 'account-group-outline' },
-        { id: 2, title: 'Mine (by MAHTO)', sub: 'Full-stack Construction & Renovation Services', icon: 'home-edit-outline' },
-        { id: 3, title: 'MAHTO Home Loans', sub: 'Home Loans Marketplace', icon: 'bank-outline' },
-        { id: 4, title: 'MAHTO Land & Properties', sub: 'Land & Property Listings', icon: 'map-marker-radius-outline' },
+        { id: 1, title: 'MAHTO Marketplace', sub: 'Worker, Contractor & Shops Network', icon: 'account-group-outline' },
+        { id: 2, title: 'Mine (by MAHTO)', sub: 'Full-stack Construction Services', icon: 'home-edit-outline' },
+        { id: 3, title: 'Financing', sub: 'Home Loans & Credit Marketplace', icon: 'bank-outline' },
+        { id: 4, title: 'Properties', sub: 'Land & Property OS', icon: 'map-marker-radius-outline' },
     ];
 
     return (
@@ -19,7 +19,7 @@ export default function AboutUsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>About Us</Text>
+                <Text style={styles.headerTitle}>Mission</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -28,56 +28,54 @@ export default function AboutUsScreen() {
                     <View style={styles.logoBadge}>
                         <Text style={styles.logoText}>MAHTO</Text>
                     </View>
-                    <Text style={styles.heroTitle}>Home Building OS</Text>
-                    <Text style={styles.heroSubtitle}>MAHTO is the operating system for home building.</Text>
+                    <Text style={styles.heroTitle}>Building OS</Text>
+                    <Text style={styles.heroSubtitle}>The operating system for the entire home building journey.</Text>
                 </View>
+
+                <View style={styles.divider} />
 
                 <View style={styles.section}>
                     <Text style={styles.sectionText}>
-                        We are building one <Text style={styles.boldText}>unified system</Text> that brings together everything required to build a home — from land and labor to construction materials, financing, and delivery.
+                        We are building a <Text style={styles.boldText}>unified system</Text> that integrates everything required to build a home — land, labor, materials, and financing.
                     </Text>
                     <Text style={styles.sectionText}>
-                        Today, building a home means dealing with fragmented vendors, contractors, workers, and middlemen. MAHTO simplifies this entire journey into a single, integrated platform — end to end.
+                        MAHTO simplifies the fragmented journey of home building into a single, high-trust platform.
                     </Text>
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.label}>WHAT WE’RE BUILDING</Text>
-                    <Text style={styles.sectionHeading}>The MAHTO Ecosystem</Text>
+                    <Text style={styles.label}>CORE ECOSYSTEM</Text>
 
                     {ecosystemItems.map((item) => (
                         <View key={item.id} style={styles.ecoCard}>
-                            <View style={styles.ecoIconContainer}>
-                                <MaterialCommunityIcons name={item.icon as any} size={24} color="#6366f1" />
+                            <View style={styles.ecoIconCircle}>
+                                <MaterialCommunityIcons name={item.icon as any} size={22} color="black" />
                             </View>
                             <View style={styles.ecoTextContainer}>
-                                <Text style={styles.ecoTitle}>{item.id}. {item.title}</Text>
+                                <Text style={styles.ecoTitle}>{item.title}</Text>
                                 <Text style={styles.ecoSub}>{item.sub}</Text>
                             </View>
                         </View>
                     ))}
                 </View>
 
-                <View style={styles.highlightCard}>
-                    <MaterialCommunityIcons name="format-quote-open" size={32} color="white" />
-                    <Text style={styles.highlightText}>
-                        “Full-stack” at MAHTO means from land to lending — not just design to construction.
+                <View style={styles.quoteCard}>
+                    <Text style={styles.quoteText}>
+                        “Full-stack mean land to lending — not just design to construction.”
                     </Text>
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.label}>OUR MISSION</Text>
-                    <Text style={styles.missionTitle}>A roof over every head — not just a roof, but <Text style={styles.primaryText}>own roof</Text>.</Text>
+                    <Text style={styles.missionTitle}>A roof over every head — specifically, <Text style={styles.strikethrough}>a</Text> <Text style={styles.boldText}>their own</Text> roof.</Text>
                     <View style={styles.hindiBox}>
                         <Text style={styles.hindiText}>“Sabka sar apni chhaat.”</Text>
                     </View>
                 </View>
 
-                <View style={[styles.section, { marginBottom: 40 }]}>
-                    <Text style={styles.label}>OUR VISION</Text>
-                    <Text style={styles.sectionText}>
-                        To raise living standards by becoming the <Text style={styles.boldText}>global operating system</Text> for home building.
-                    </Text>
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>Version 1.1.20</Text>
+                    <Text style={styles.footerText}>Made in India 🇮🇳</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -87,97 +85,94 @@ export default function AboutUsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#FFF',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: Spacing.lg,
-        paddingVertical: Spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     backBtn: {
         padding: 4,
     },
     headerTitle: {
         fontSize: 18,
-        fontWeight: '900',
+        fontWeight: '700',
+        color: '#000',
     },
     content: {
-        padding: Spacing.lg,
+        paddingHorizontal: 20,
+        paddingBottom: 40,
     },
     heroSection: {
         alignItems: 'center',
-        marginVertical: 30,
+        marginTop: 32,
+        marginBottom: 32,
     },
     logoBadge: {
-        backgroundColor: 'black',
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 16,
+        backgroundColor: '#000',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 12,
         marginBottom: 20,
     },
     logoText: {
-        color: 'white',
-        fontSize: 32,
+        color: '#FFF',
+        fontSize: 24,
         fontWeight: '900',
         letterSpacing: 2,
     },
     heroTitle: {
-        fontSize: 28,
-        fontWeight: '900',
-        color: 'black',
+        fontSize: 32,
+        fontWeight: '800',
+        color: '#000',
+        letterSpacing: -1,
     },
     heroSubtitle: {
         fontSize: 16,
-        color: '#666',
+        color: '#545454',
         textAlign: 'center',
-        marginTop: 8,
-        paddingHorizontal: 20,
+        marginTop: 12,
+        lineHeight: 24,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#F3F3F3',
+        marginBottom: 32,
     },
     section: {
-        marginTop: 30,
+        marginBottom: 40,
     },
     label: {
         fontSize: 12,
-        fontWeight: '900',
-        color: '#6366f1',
-        letterSpacing: 1.5,
-        marginBottom: 10,
-    },
-    sectionHeading: {
-        fontSize: 22,
-        fontWeight: '900',
-        color: 'black',
+        fontWeight: '800',
+        color: '#AFAFAF',
+        letterSpacing: 1,
         marginBottom: 20,
     },
     sectionText: {
         fontSize: 16,
         lineHeight: 26,
-        color: '#444',
-        marginBottom: 15,
+        color: '#000',
+        marginBottom: 16,
     },
     boldText: {
         fontWeight: '800',
-        color: 'black',
     },
     ecoCard: {
         flexDirection: 'row',
-        backgroundColor: '#f8fafc',
-        padding: 16,
-        borderRadius: 16,
-        marginBottom: 12,
+        paddingVertical: 16,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
     },
-    ecoIconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 12,
-        backgroundColor: '#eeefff',
+    ecoIconCircle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#F3F3F3',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
@@ -187,50 +182,55 @@ const styles = StyleSheet.create({
     },
     ecoTitle: {
         fontSize: 16,
-        fontWeight: '800',
-        color: 'black',
+        fontWeight: '700',
+        color: '#000',
     },
     ecoSub: {
         fontSize: 14,
-        color: '#64748b',
+        color: '#545454',
         marginTop: 2,
     },
-    highlightCard: {
-        backgroundColor: 'black',
-        padding: 24,
+    quoteCard: {
+        backgroundColor: '#000',
+        padding: 32,
         borderRadius: 24,
-        marginTop: 30,
-        alignItems: 'center',
+        marginBottom: 40,
     },
-    highlightText: {
-        color: 'white',
+    quoteText: {
+        color: '#FFF',
         fontSize: 18,
         fontWeight: '700',
         textAlign: 'center',
         lineHeight: 28,
         fontStyle: 'italic',
-        marginTop: 10,
     },
     missionTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: 'black',
-        lineHeight: 30,
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#000',
+        lineHeight: 32,
     },
-    primaryText: {
-        color: '#6366f1',
+    strikethrough: {
+        textDecorationLine: 'line-through',
+        color: '#AFAFAF',
     },
     hindiBox: {
-        backgroundColor: '#f3f4f6',
-        padding: 16,
-        borderRadius: 12,
         marginTop: 16,
-        alignSelf: 'flex-start',
     },
     hindiText: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: '900',
-        color: 'black',
+        color: '#000',
         fontStyle: 'italic',
+    },
+    footer: {
+        alignItems: 'center',
+        marginTop: 20,
+        gap: 4,
+    },
+    footerText: {
+        fontSize: 12,
+        color: '#AFAFAF',
+        fontWeight: '600',
     },
 });

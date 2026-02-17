@@ -1,15 +1,14 @@
 import DashboardHeader from '@/components/DashboardHeader';
-import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getMyJobApplications, JobApplication } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Animated,
     BackHandler,
+    Dimensions,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -18,19 +17,20 @@ import {
     View
 } from 'react-native';
 
+const { width } = Dimensions.get('window');
+
+
 export default function WorkerDashboard() {
     const router = useRouter();
     const { profile } = useAuth();
     const [applications, setApplications] = useState<JobApplication[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const heartScale = useRef(new Animated.Value(1)).current;
-
     const fetchApplications = async () => {
         if (!profile?.uid) return;
         try {
             const data = await getMyJobApplications(profile.uid);
-            setApplications(data.slice(0, 3)); // Only show last 3 on home
+            setApplications(data.slice(0, 3));
         } catch (error) {
             console.error(error);
         } finally {
@@ -42,38 +42,15 @@ export default function WorkerDashboard() {
 
     useEffect(() => {
         if (!isFocused) return;
-
         const backAction = () => {
-            // When on the dashboard and focused, the back button should exit the app
-            // rather than going back to auth or index screens.
             BackHandler.exitApp();
             return true;
         };
-
-        const backHandler = BackHandler.addEventListener(
-            'hardwareBackPress',
-            backAction
-        );
-
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
         return () => backHandler.remove();
     }, [isFocused]);
 
     useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(heartScale, {
-                    toValue: 1.3,
-                    duration: 700,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(heartScale, {
-                    toValue: 1,
-                    duration: 700,
-                    useNativeDriver: true,
-                }),
-            ])
-        ).start();
-
         fetchApplications();
     }, [profile?.uid]);
 
@@ -81,121 +58,95 @@ export default function WorkerDashboard() {
         <SafeAreaView style={styles.container}>
             <DashboardHeader title={profile?.name || "Worker"} showSearch={false} />
 
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-            >
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 <View style={styles.heroSection}>
                     <Text style={styles.heroGreeting}>Welcome back,</Text>
-                    <Text style={styles.heroName}>{profile?.name || 'Worker'}! 👋</Text>
-                    <Text style={styles.heroSub}>Find your next big project or daily work here.</Text>
+                    <Text style={styles.heroName}>{profile?.name || 'Worker'}</Text>
                 </View>
 
-                <View style={styles.networkingSection}>
-                    <Text style={styles.sectionTitle}>Explore MAHTO</Text>
-                    <View style={styles.networkingGrid}>
-                        <TouchableOpacity
-                            style={[styles.networkCard, { backgroundColor: '#ecfdf5' }]}
-                            onPress={() => router.push('/browse-jobs')}
-                        >
-                            <View style={[styles.networkIcon, { backgroundColor: '#d1fae5' }]}>
-                                <MaterialCommunityIcons name="briefcase-search" size={24} color="#059669" />
-                            </View>
-                            <Text style={styles.networkLabel}>Find Jobs</Text>
-                        </TouchableOpacity>
+                {/* Main Actions */}
+                <View style={styles.actionGrid}>
+                    <TouchableOpacity
+                        style={styles.actionCard}
+                        onPress={() => router.push('/browse-jobs')}
+                    >
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name="briefcase-search-outline" size={28} color="black" />
+                        </View>
+                        <Text style={styles.actionLabel}>Find Jobs</Text>
+                    </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={[styles.networkCard, { backgroundColor: '#f5f3ff' }]}
-                            onPress={() => router.push({
-                                pathname: '/search-results',
-                                params: { role: 'worker', title: 'Workers' }
-                            })}
-                        >
-                            <View style={[styles.networkIcon, { backgroundColor: '#ddd6fe' }]}>
-                                <MaterialCommunityIcons name="account-group" size={24} color="#6d28d9" />
-                            </View>
-                            <Text style={styles.networkLabel}>Find Workers</Text>
-                        </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.actionCard}
+                        onPress={() => router.push({
+                            pathname: '/search-results',
+                            params: { role: 'worker', title: 'Workers' }
+                        })}
+                    >
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name="account-group-outline" size={28} color="black" />
+                        </View>
+                        <Text style={styles.actionLabel}>Find Workers</Text>
+                    </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={[styles.networkCard, { backgroundColor: '#fdf2f8' }]}
-                            onPress={() => router.push({
-                                pathname: '/search-results',
-                                params: { role: 'contractor', title: 'Contractors' }
-                            })}
-                        >
-                            <View style={[styles.networkIcon, { backgroundColor: '#fbcfe8' }]}>
-                                <MaterialCommunityIcons name="briefcase-check" size={24} color="#db2777" />
-                            </View>
-                            <Text style={styles.networkLabel}>Contractors</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.networkCard, { backgroundColor: '#fff7ed' }]}
-                            onPress={() => router.push('/applied-jobs')}
-                        >
-                            <View style={[styles.networkIcon, { backgroundColor: '#ffedd5' }]}>
-                                <MaterialCommunityIcons name="clipboard-text-clock" size={24} color="#ea580c" />
-                            </View>
-                            <Text style={styles.networkLabel}>Applied Jobs</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                        style={styles.actionCard}
+                        onPress={() => router.push({
+                            pathname: '/search-results',
+                            params: { role: 'contractor', title: 'Contractors' }
+                        })}
+                    >
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name="account-hard-hat-outline" size={28} color="black" />
+                        </View>
+                        <Text style={styles.actionLabel}>Contractors</Text>
+                    </TouchableOpacity>
                 </View>
 
-                <View style={styles.recentAppsSection}>
+                <View style={styles.divider} />
+
+                <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Recent Applications</Text>
                         {applications.length > 0 && (
                             <TouchableOpacity onPress={() => router.push('/applied-jobs')}>
-                                <Text style={styles.viewAllText}>View All</Text>
+                                <Text style={styles.viewAll}>See all</Text>
                             </TouchableOpacity>
                         )}
                     </View>
 
                     {loading ? (
-                        <ActivityIndicator color="black" style={{ marginTop: 20 }} />
+                        <ActivityIndicator color="black" />
                     ) : applications.length > 0 ? (
-                        <View style={styles.appsList}>
+                        <View style={styles.appList}>
                             {applications.map((app) => (
-                                <View key={app.id} style={styles.miniAppCard}>
+                                <TouchableOpacity key={app.id} style={styles.appItem} onPress={() => router.push('/applied-jobs')}>
                                     <View style={styles.appInfo}>
-                                        <Text style={styles.appTitle} numberOfLines={1}>{app.jobTitle}</Text>
-                                        <Text style={styles.appSubtitle}>{app.jobLocation}</Text>
+                                        <Text style={styles.appTitle}>{app.jobTitle}</Text>
+                                        <Text style={styles.appLocation}>{app.jobLocation}</Text>
                                     </View>
-                                    <View style={[
-                                        styles.miniStatus,
-                                        app.status === 'accepted' ? styles.acceptedMini :
-                                            app.status === 'rejected' ? styles.rejectedMini : styles.pendingMini
+                                    <Text style={[
+                                        styles.statusText,
+                                        { color: app.status === 'accepted' ? '#000' : app.status === 'rejected' ? '#AFAFAF' : '#545454' }
                                     ]}>
-                                        <Text style={[
-                                            styles.miniStatusText,
-                                            app.status === 'accepted' ? styles.acceptedText :
-                                                app.status === 'rejected' ? styles.rejectedText : styles.pendingText
-                                        ]}>
-                                            {app.status}
-                                        </Text>
-                                    </View>
-                                </View>
+                                        {app.status.toUpperCase()}
+                                    </Text>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     ) : (
-                        <View style={styles.emptyApps}>
-                            <MaterialCommunityIcons name="clipboard-text-outline" size={40} color="#cbd5e1" />
-                            <Text style={styles.emptyAppsText}>No recent applications</Text>
-                            <TouchableOpacity onPress={() => router.push('/browse-jobs')}>
-                                <Text style={styles.browseText}>Find jobs now</Text>
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyText}>No applications yet</Text>
+                            <TouchableOpacity style={styles.mainActionBtn} onPress={() => router.push('/browse-jobs')}>
+                                <Text style={styles.mainActionText}>Browse Jobs</Text>
                             </TouchableOpacity>
                         </View>
                     )}
                 </View>
+
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Made in India </Text>
-                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                        <Text style={styles.footerText}>🇮🇳</Text>
-                    </Animated.View>
-                    <Text style={styles.footerText}> with </Text>
-                    <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                        <MaterialCommunityIcons name="heart" size={18} color="#ff0000" />
-                    </Animated.View>
+                    <Text style={styles.footerText}>🇮🇳</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -205,79 +156,62 @@ export default function WorkerDashboard() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.light.background,
+        backgroundColor: '#FFF',
     },
     scrollContent: {
-        padding: Spacing.lg,
+        paddingHorizontal: 20,
+        paddingBottom: 40,
     },
     heroSection: {
+        marginTop: 24,
         marginBottom: 32,
-        marginTop: 8,
     },
     heroGreeting: {
         fontSize: 16,
-        color: Colors.light.muted,
-        fontWeight: '600',
+        color: '#545454',
+        fontWeight: '500',
     },
     heroName: {
         fontSize: 32,
-        fontWeight: '900',
-        color: 'black',
-        marginVertical: 4,
+        fontWeight: '700',
+        color: '#000',
+        marginTop: 4,
+        letterSpacing: -0.5,
     },
-    heroSub: {
-        fontSize: 15,
-        color: '#666',
-        lineHeight: 22,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: '800',
-    },
-    networkingSection: {
-        marginTop: 24,
-        paddingBottom: 40,
-    },
-    networkingGrid: {
+    actionGrid: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
         gap: 12,
-        marginTop: 12,
+        marginBottom: 32,
     },
-    networkCard: {
-        width: '48%',
+    actionCard: {
+        flex: 1,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 12,
         padding: 16,
-        borderRadius: 20,
         alignItems: 'center',
-        gap: 8,
     },
-    networkIcon: {
+    iconCircle: {
         width: 48,
         height: 48,
-        borderRadius: 14,
+        borderRadius: 24,
+        backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: 8,
     },
-    networkLabel: {
+    actionLabel: {
         fontSize: 13,
         fontWeight: '700',
-        color: '#1f2937',
+        color: '#000',
+        textAlign: 'center',
     },
-    footer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 32,
-        marginTop: 20,
+    divider: {
+        height: 1,
+        backgroundColor: '#F3F3F3',
+        marginBottom: 32,
     },
-    footerText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: Colors.light.text,
-    },
-    recentAppsSection: {
-        marginTop: 24,
-        paddingBottom: 20,
+    section: {
+        marginBottom: 32,
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -285,84 +219,77 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
     },
-    viewAllText: {
-        fontSize: 14,
-        color: '#6366f1',
+    sectionTitle: {
+        fontSize: 18,
         fontWeight: '700',
+        color: '#000',
     },
-    appsList: {
-        gap: 12,
+    viewAll: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#545454',
     },
-    miniAppCard: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 16,
+    appList: {
+        gap: 8,
+    },
+    appItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
     },
     appInfo: {
         flex: 1,
     },
     appTitle: {
-        fontSize: 15,
-        fontWeight: '800',
-        color: '#1e293b',
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000',
     },
-    appSubtitle: {
-        fontSize: 12,
-        color: '#64748b',
+    appLocation: {
+        fontSize: 14,
+        color: '#545454',
         marginTop: 2,
     },
-    miniStatus: {
-        paddingHorizontal: 10,
-        paddingVertical: 5,
+    statusText: {
+        fontSize: 11,
+        fontWeight: '800',
+        letterSpacing: 0.5,
+    },
+    emptyState: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 16,
+    },
+    emptyText: {
+        fontSize: 15,
+        color: '#545454',
+        marginBottom: 16,
+    },
+    mainActionBtn: {
+        backgroundColor: '#000',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
         borderRadius: 8,
     },
-    miniStatusText: {
-        fontSize: 10,
-        fontWeight: '800',
-        textTransform: 'uppercase',
-    },
-    pendingMini: {
-        backgroundColor: '#fffbeb',
-    },
-    acceptedMini: {
-        backgroundColor: '#f0fdf4',
-    },
-    rejectedMini: {
-        backgroundColor: '#fef2f2',
-    },
-    pendingText: {
-        color: '#b45309',
-    },
-    acceptedText: {
-        color: '#16a34a',
-    },
-    rejectedText: {
-        color: '#dc2626',
-    },
-    emptyApps: {
-        backgroundColor: '#f8fafc',
-        borderRadius: 20,
-        padding: 32,
-        alignItems: 'center',
-        borderStyle: 'dashed',
-        borderWidth: 2,
-        borderColor: '#e2e8f0',
-    },
-    emptyAppsText: {
-        marginTop: 12,
+    mainActionText: {
+        color: '#FFF',
+        fontWeight: '700',
         fontSize: 14,
-        color: '#64748b',
+    },
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 40,
+        paddingBottom: 20,
+    },
+    footerText: {
+        fontSize: 12,
+        color: '#AFAFAF',
         fontWeight: '600',
     },
-    browseText: {
-        marginTop: 8,
-        fontSize: 14,
-        color: '#6366f1',
-        fontWeight: '700',
-    }
 });

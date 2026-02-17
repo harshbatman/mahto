@@ -1,5 +1,4 @@
 
-import { Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { deleteUserAccount } from '@/services/auth/authService';
 import { sanitizeError } from '@/utils/errorHandler';
@@ -55,168 +54,137 @@ export default function ProfileMenuScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Profile</Text>
+                <Text style={styles.headerTitle}>Account</Text>
                 <View style={{ width: 40 }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.profileSummary}>
-                    {(profile?.role === 'shop' || profile?.role === 'contractor') ? (
-                        <>
-                            <View style={styles.avatarContainer}>
-                                {(profile?.shopLogo || profile?.companyLogo) ? (
-                                    <Image source={{ uri: profile.shopLogo || profile?.companyLogo }} style={styles.avatar} />
-                                ) : (
-                                    <MaterialCommunityIcons name={profile?.role === 'shop' ? "store" : "briefcase"} size={60} color="#9ca3af" />
-                                )}
-                            </View>
-                            <Text style={styles.userName}>{profile?.shopName || profile?.companyName || profile?.name || (profile?.role === 'shop' ? 'Shop' : 'Company')}</Text>
-                        </>
-                    ) : (
-                        <>
-                            <View style={styles.avatarContainer}>
-                                {profile?.photoURL ? (
-                                    <Image source={{ uri: profile.photoURL }} style={styles.avatar} />
-                                ) : (
-                                    <MaterialCommunityIcons name="account-circle" size={80} color="#9ca3af" />
-                                )}
-                            </View>
-                            <Text style={styles.userName}>{profile?.name || 'User'}</Text>
-                            <Text style={styles.userRole}>{profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : ''}</Text>
-                        </>
-                    )}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+                <View style={styles.profileHero}>
+                    <View style={styles.avatarBox}>
+                        {(profile?.photoURL || profile?.shopLogo || profile?.companyLogo) ? (
+                            <Image source={{ uri: profile.photoURL || profile.shopLogo || profile.companyLogo }} style={styles.avatarImg} />
+                        ) : (
+                            <MaterialCommunityIcons name="account-outline" size={48} color="black" />
+                        )}
+                    </View>
+                    <View style={styles.heroInfo}>
+                        <Text style={styles.userName}>{profile?.shopName || profile?.companyName || profile?.name || 'User'}</Text>
+                        <Text style={styles.userRole}>
+                            {profile?.role ? profile.role.toUpperCase() : 'MEMBER'}
+                        </Text>
+                    </View>
                 </View>
 
-                <View style={styles.menuList}>
-                    {/* Display Account Type */}
-                    <View style={styles.menuItem}>
-                        <View style={styles.menuItemLeft}>
-                            <MaterialCommunityIcons name="shield-account" size={24} color="#6366f1" />
-                            <Text style={styles.menuItemText}>
-                                {profile?.role === 'shop' ? 'Shop Owner' : (profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'User')}
-                            </Text>
-                        </View>
-                    </View>
-
+                <View style={styles.menuContainer}>
                     <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() => router.push(profile?.role === 'shop' ? '/edit-shop' : profile?.role === 'contractor' ? '/edit-contractor-profile' : '/edit-profile')}
                     >
-                        <View style={styles.menuItemLeft}>
-                            <MaterialCommunityIcons
-                                name={profile?.role === 'shop' ? "storefront-outline" : profile?.role === 'contractor' ? "briefcase-edit-outline" : "account-edit-outline"}
-                                size={24}
-                                color="black"
-                            />
-                            <Text style={styles.menuItemText}>
-                                {profile?.role === 'shop' ? 'Edit Shop' : profile?.role === 'contractor' ? 'Edit Company' : 'Edit Profile'}
-                            </Text>
-                        </View>
-                        <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.muted} />
+                        <MaterialCommunityIcons
+                            name={profile?.role === 'shop' ? "store-outline" : profile?.role === 'contractor' ? "briefcase-outline" : "account-outline"}
+                            size={24}
+                            color="black"
+                        />
+                        <Text style={styles.menuText}>
+                            {profile?.role === 'shop' ? 'Shop Profile' : profile?.role === 'contractor' ? 'Business Profile' : 'Personal Profile'}
+                        </Text>
+                        <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/settings')}>
-                        <View style={styles.menuItemLeft}>
-                            <MaterialCommunityIcons name="cog-outline" size={24} color="black" />
-                            <Text style={styles.menuItemText}>App Settings</Text>
-                        </View>
-                        <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.light.muted} />
+                        <MaterialCommunityIcons name="cog-outline" size={24} color="black" />
+                        <Text style={styles.menuText}>Settings</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
                     </TouchableOpacity>
 
-                    <View style={styles.dangerZone}>
-                        <Text style={styles.dangerTitle}>Account Actions</Text>
-                        <TouchableOpacity
-                            style={styles.logoutBtn}
-                            onPress={() => {
-                                Alert.alert(
-                                    'Logout Confirmation',
-                                    'Are you sure you want to log out of your MAHTO account? You will need to sign in again to access your data.',
-                                    [
-                                        { text: 'Cancel', style: 'cancel' },
-                                        {
-                                            text: 'Yes, Logout',
-                                            style: 'destructive',
-                                            onPress: async () => {
-                                                try {
-                                                    await logout();
-                                                    router.replace('/(auth)/select-role');
-                                                } catch (error) {
-                                                    Alert.alert('Error', 'Logout failed. Please try again.');
-                                                }
-                                            },
-                                        },
-                                    ]
-                                );
-                            }}
-                        >
-                            <View style={styles.menuItemLeft}>
-                                <MaterialCommunityIcons name="logout" size={24} color="#ef4444" />
-                                <Text style={styles.logoutText}>Logout from Account</Text>
-                            </View>
-                        </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/about-us')}>
+                        <MaterialCommunityIcons name="information-outline" size={24} color="black" />
+                        <Text style={styles.menuText}>About</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
+                    </TouchableOpacity>
+                </View>
 
-                        <TouchableOpacity style={styles.deleteInitBtn} onPress={() => setShowDeleteModal(true)}>
-                            <View style={styles.menuItemLeft}>
-                                <MaterialCommunityIcons name="delete-forever-outline" size={24} color="#999" />
-                                <Text style={styles.deleteInitText}>Permanently Delete Account</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
+                <View style={styles.authActions}>
+                    <TouchableOpacity
+                        style={styles.signOutBtn}
+                        onPress={() => {
+                            Alert.alert(
+                                'Sign out',
+                                'Are you sure you want to sign out?',
+                                [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Sign out',
+                                        style: 'destructive',
+                                        onPress: async () => {
+                                            try {
+                                                await logout();
+                                                router.replace('/(auth)/select-role');
+                                            } catch (error) {
+                                                Alert.alert('Error', 'Logout failed.');
+                                            }
+                                        },
+                                    },
+                                ]
+                            );
+                        }}
+                    >
+                        <Text style={styles.signOutText}>Sign out</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.deleteLink} onPress={() => setShowDeleteModal(true)}>
+                        <Text style={styles.deleteLinkText}>Delete account</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
 
-            {/* Delete Confirmation Modal */}
-            <Modal visible={showDeleteModal} transparent={true} animationType="slide">
-                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Confirm account deletion</Text>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
-                                <MaterialCommunityIcons name="close" size={24} color="black" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <Text style={styles.modalSubtitle}>
-                            This action is permanent and cannot be undone. Enter your credentials to proceed.
-                        </Text>
-
-                        <View style={styles.modalForm}>
-                            <View style={styles.modalInputGroup}>
-                                <Text style={styles.modalLabel}>Phone Number</Text>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Enter your phone number"
-                                    keyboardType="phone-pad"
-                                    value={confirmPhone}
-                                    onChangeText={setConfirmPhone}
-                                />
+            <Modal visible={showDeleteModal} transparent={true} animationType="fade">
+                <View style={styles.modalBackdrop}>
+                    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalView}>
+                        <View style={styles.modalInner}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Delete account</Text>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
+                                    <MaterialCommunityIcons name="close" size={24} color="black" />
+                                </TouchableOpacity>
                             </View>
 
-                            <View style={styles.modalInputGroup}>
-                                <Text style={styles.modalLabel}>Password</Text>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Enter your password"
-                                    secureTextEntry
-                                    value={confirmPassword}
-                                    onChangeText={setConfirmPassword}
-                                />
-                            </View>
+                            <Text style={styles.modalDesc}>
+                                This will permanently remove your account and all associated data from MAHTO.
+                            </Text>
+
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="Registered phone number"
+                                keyboardType="phone-pad"
+                                value={confirmPhone}
+                                onChangeText={setConfirmPhone}
+                                placeholderTextColor="#AFAFAF"
+                            />
+
+                            <TextInput
+                                style={styles.modalInput}
+                                placeholder="Your password"
+                                secureTextEntry
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                                placeholderTextColor="#AFAFAF"
+                            />
 
                             <TouchableOpacity
-                                style={[styles.deleteBtn, deleteLoading && styles.disabledBtn]}
+                                style={[styles.modalActionBtn, deleteLoading && styles.modalActionBtnDisabled]}
                                 onPress={handleDeleteAccount}
                                 disabled={deleteLoading}
                             >
                                 {deleteLoading ? (
                                     <ActivityIndicator color="white" />
                                 ) : (
-                                    <Text style={styles.deleteBtnText}>Confirm Deletion</Text>
+                                    <Text style={styles.modalActionText}>Confirm Deletion</Text>
                                 )}
                             </TouchableOpacity>
                         </View>
-                    </View>
-                </KeyboardAvoidingView>
+                    </KeyboardAvoidingView>
+                </View>
             </Modal>
         </SafeAreaView>
     );
@@ -225,16 +193,14 @@ export default function ProfileMenuScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#FFF',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: Spacing.lg,
-        paddingVertical: Spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
     backBtn: {
         padding: 4,
@@ -242,163 +208,142 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: '700',
+        color: '#000',
     },
     content: {
-        padding: Spacing.lg,
+        paddingHorizontal: 20,
     },
-    profileSummary: {
+    profileHero: {
+        paddingVertical: 32,
         alignItems: 'center',
-        marginBottom: 40,
-        marginTop: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
     },
-    avatarContainer: {
+    avatarBox: {
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#F3F3F3',
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#eee',
-        marginBottom: 16,
     },
-    avatar: {
+    avatarImg: {
         width: '100%',
         height: '100%',
     },
+    heroInfo: {
+        alignItems: 'center',
+        marginTop: 16,
+    },
     userName: {
-        fontSize: 24,
-        fontWeight: '800',
-        color: 'black',
+        fontSize: 26,
+        fontWeight: '700',
+        color: '#000',
+        letterSpacing: -0.5,
     },
     userRole: {
-        fontSize: 16,
-        color: Colors.light.muted,
+        fontSize: 12,
+        fontWeight: '800',
+        color: '#545454',
         marginTop: 4,
+        letterSpacing: 2,
     },
-    menuList: {
-        gap: 16,
+    menuContainer: {
+        marginTop: 12,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 16,
-        backgroundColor: '#f8f9fa',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#eee',
+        paddingVertical: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F3F3',
+        gap: 20,
     },
-    menuItemLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    menuItemText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: 'black',
-    },
-    modalOverlay: {
+    menuText: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'flex-end',
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000',
     },
-    modalContent: {
-        backgroundColor: 'white',
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        padding: Spacing.lg,
+    authActions: {
+        marginTop: 48,
         paddingBottom: 40,
+        gap: 24,
+    },
+    signOutBtn: {
+        height: 56,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    signOutText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000',
+    },
+    deleteLink: {
+        alignItems: 'center',
+    },
+    deleteLinkText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#ef4444',
+    },
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'center',
+        padding: 24,
+    },
+    modalView: {
+        width: '100%',
+    },
+    modalInner: {
+        backgroundColor: '#FFF',
+        borderRadius: 24,
+        padding: 24,
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: Spacing.md,
+        marginBottom: 20,
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: '800',
     },
-    modalSubtitle: {
-        fontSize: 14,
-        color: '#666',
-        lineHeight: 20,
+    modalDesc: {
+        fontSize: 15,
+        color: '#545454',
+        lineHeight: 22,
         marginBottom: 24,
     },
-    modalForm: {
-        gap: 16,
-    },
-    modalInputGroup: {
-        gap: 8,
-    },
-    modalLabel: {
-        fontSize: 14,
-        fontWeight: '700',
-    },
     modalInput: {
-        borderWidth: 1,
-        borderColor: '#ddd',
+        height: 56,
+        backgroundColor: '#F3F3F3',
         borderRadius: 12,
-        padding: 14,
+        paddingHorizontal: 16,
         fontSize: 16,
+        color: '#000',
+        marginBottom: 12,
     },
-    deleteBtn: {
-        backgroundColor: '#ef4444',
-        padding: 16,
-        borderRadius: 16,
+    modalActionBtn: {
+        height: 56,
+        backgroundColor: '#000',
+        borderRadius: 12,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 8,
+        marginTop: 12,
     },
-    disabledBtn: {
+    modalActionBtnDisabled: {
         opacity: 0.5,
     },
-    deleteBtnText: {
-        color: 'white',
+    modalActionText: {
+        color: '#FFF',
         fontSize: 16,
-        fontWeight: '700',
-    },
-    dangerZone: {
-        marginTop: 32,
-        gap: 16,
-    },
-    dangerTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#666',
-        textTransform: 'uppercase',
-        marginLeft: 4,
-        marginBottom: 8,
-    },
-    logoutBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        backgroundColor: '#fff1f2',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#fecaca',
-    },
-    logoutText: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#ef4444',
-    },
-    deleteInitBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        backgroundColor: '#f9fafb',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#eee',
-    },
-    deleteInitText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#999',
-        textDecorationLine: 'underline',
+        fontWeight: '800',
     },
 });

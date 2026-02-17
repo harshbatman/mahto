@@ -1,5 +1,6 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { useAuth } from '@/context/AuthContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
@@ -34,6 +35,20 @@ export default function ShopDashboard() {
                     <Text style={styles.heroGreeting}>Store</Text>
                     <Text style={styles.heroName}>{profile?.shopName || 'Partner'}</Text>
                 </View>
+
+                <TouchableOpacity style={styles.rewardBanner} onPress={() => router.push('/manage-product')}>
+                    <View style={styles.rewardInfo}>
+                        <View style={styles.freeBadge}>
+                            <Text style={styles.freeBadgeText}>FREE</Text>
+                        </View>
+                        <Text style={styles.rewardTitle}>Shop setup done!</Text>
+                        <Text style={styles.rewardSub}>Add products for ₹0 🥳</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontSize: 32 }}>🎁</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+                    </View>
+                </TouchableOpacity>
 
                 {/* Main Actions */}
                 <View style={[styles.actionGrid, { justifyContent: 'center' }]}>
@@ -206,5 +221,47 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#AFAFAF',
         fontWeight: '600',
+    },
+    rewardBanner: {
+        backgroundColor: '#1A1A1A',
+        borderRadius: 24,
+        padding: 24,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    rewardInfo: {
+        flex: 1,
+    },
+    freeBadge: {
+        backgroundColor: '#FF3B30',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 6,
+        marginBottom: 8,
+    },
+    freeBadgeText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 1,
+    },
+    rewardTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#FFF',
+    },
+    rewardSub: {
+        fontSize: 13,
+        color: '#AFAFAF',
+        marginTop: 4,
+        fontWeight: '500',
     },
 });

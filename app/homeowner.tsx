@@ -169,7 +169,7 @@ export default function HomeownerDashboard() {
                         <Text style={styles.rewardTitle}>Post now at zero cost</Text>
                         <Text style={styles.rewardSub}>Start your construction journey today</Text>
                     </View>
-                    <MaterialCommunityIcons name="ticket-percent-outline" size={32} color="#000" />
+                    <MaterialCommunityIcons name="ticket-percent-outline" size={32} color="#FFF" />
                 </View>
 
                 <View style={styles.section}>
@@ -482,15 +482,18 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     rewardBanner: {
-        backgroundColor: '#F3F3F3',
+        backgroundColor: '#1A1A1A',
         borderRadius: 24,
-        padding: 20,
+        padding: 24,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 32,
-        borderWidth: 1,
-        borderColor: '#EFEFEF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 10,
     },
     rewardInfo: {
         flex: 1,
@@ -512,12 +515,12 @@ const styles = StyleSheet.create({
     rewardTitle: {
         fontSize: 18,
         fontWeight: '800',
-        color: '#000',
+        color: '#FFF',
     },
     rewardSub: {
         fontSize: 13,
-        color: '#666',
-        marginTop: 2,
+        color: '#AFAFAF',
+        marginTop: 4,
         fontWeight: '500',
     },
 });

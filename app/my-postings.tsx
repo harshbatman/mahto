@@ -1,7 +1,7 @@
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { Contract, getMyContracts } from '@/services/db/contractService';
-import { getPostedJobs, Job } from '@/services/db/jobService';
+import { Job } from '@/services/db/jobService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -9,11 +9,9 @@ import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableO
 
 type Tab = 'jobs' | 'contracts';
 
-export default function MyPostingsScreen() {
+export default function MyContractsScreen() {
     const router = useRouter();
     const { profile } = useAuth();
-    const [activeTab, setActiveTab] = useState<Tab>('contracts');
-    const [jobs, setJobs] = useState<Job[]>([]);
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -25,11 +23,7 @@ export default function MyPostingsScreen() {
         setLoading(true);
         try {
             if (profile?.uid) {
-                const [jobsData, contractsData] = await Promise.all([
-                    getPostedJobs(profile.uid),
-                    getMyContracts(profile.uid)
-                ]);
-                setJobs(jobsData);
+                const contractsData = await getMyContracts(profile.uid);
                 setContracts(contractsData);
             }
         } catch (error) {
@@ -103,24 +97,10 @@ export default function MyPostingsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>My Postings</Text>
+                <Text style={styles.headerTitle}>My Contracts</Text>
                 <View style={{ width: 40 }} />
             </View>
 
-            <View style={styles.tabBar}>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === 'contracts' && styles.activeTab]}
-                    onPress={() => setActiveTab('contracts')}
-                >
-                    <Text style={[styles.tabText, activeTab === 'contracts' && styles.activeTabText]}>Contracts</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === 'jobs' && styles.activeTab]}
-                    onPress={() => setActiveTab('jobs')}
-                >
-                    <Text style={[styles.tabText, activeTab === 'jobs' && styles.activeTabText]}>Jobs</Text>
-                </TouchableOpacity>
-            </View>
 
             {loading ? (
                 <View style={styles.center}>
@@ -128,20 +108,18 @@ export default function MyPostingsScreen() {
                 </View>
             ) : (
                 <FlatList
-                    data={(activeTab === 'contracts' ? contracts : jobs) as any[]}
-                    renderItem={activeTab === 'contracts' ? (renderContract as any) : (renderJob as any)}
+                    data={contracts}
+                    renderItem={renderContract}
                     keyExtractor={item => item.id!}
                     contentContainerStyle={styles.list}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={
                         <View style={styles.center}>
                             <MaterialCommunityIcons
-                                name={activeTab === 'contracts' ? "file-document-outline" : "briefcase-outline"}
+                                name="file-document-outline"
                                 size={64} color="#ccc"
                             />
-                            <Text style={styles.emptyText}>
-                                {activeTab === 'contracts' ? "No contracts posted yet." : "No jobs posted yet."}
-                            </Text>
+                            <Text style={styles.emptyText}>No contracts posted yet.</Text>
                         </View>
                     }
                 />

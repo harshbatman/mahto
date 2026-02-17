@@ -7,10 +7,10 @@ export default function AboutUsScreen() {
     const router = useRouter();
 
     const ecosystemItems = [
-        { id: 1, title: 'MAHTO Marketplace', sub: 'Worker, Contractor & Shops Network', icon: 'account-group-outline' },
+        { id: 1, title: 'MAHTO', sub: 'Worker, Contractor & Shops Network', icon: 'account-group-outline' },
         { id: 2, title: 'Mine (by MAHTO)', sub: 'Full-stack Construction Services', icon: 'home-edit-outline' },
-        { id: 3, title: 'Financing', sub: 'Home Loans & Credit Marketplace', icon: 'bank-outline' },
-        { id: 4, title: 'Properties', sub: 'Land & Property OS', icon: 'map-marker-radius-outline' },
+        { id: 3, title: 'MAHTO Home Loans', sub: 'Home Loans & Credit Marketplace', icon: 'bank-outline' },
+        { id: 4, title: 'MAHTO Lands & Properties', sub: 'Lands & Properties Marketplace', icon: 'map-marker-radius-outline' },
     ];
 
     return (

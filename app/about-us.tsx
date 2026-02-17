@@ -73,6 +73,11 @@ export default function AboutUsScreen() {
                     </View>
                 </View>
 
+                <View style={styles.section}>
+                    <Text style={styles.label}>OUR VISION</Text>
+                    <Text style={styles.missionTitle}>To raise living standards by becoming the global operating system for home building.</Text>
+                </View>
+
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Version 1.1.20</Text>
                     <Text style={styles.footerText}>Made in India 🇮🇳</Text>

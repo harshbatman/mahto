@@ -91,7 +91,12 @@ export default function SelectRoleScreen() {
                                 <Image source={role.image} style={styles.roleImage} />
                             </View>
                             <View style={styles.cardInfo}>
-                                <Text style={styles.cardTitle}>{role.title}</Text>
+                                <View style={styles.titleRow}>
+                                    <Text style={styles.cardTitle}>{role.title}</Text>
+                                    <View style={styles.miniCircle}>
+                                        <MaterialCommunityIcons name="chevron-right" size={14} color="#000" />
+                                    </View>
+                                </View>
                                 <Text style={styles.cardSub}>{role.subtitle}</Text>
                             </View>
                         </TouchableOpacity>
@@ -214,13 +219,27 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: '800',
-        color: '#000',
-        textAlign: 'center',
+        color: '#1e293b',
+    },
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    miniCircle: {
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        backgroundColor: '#F1F5F9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
     },
     cardSub: {
         fontSize: 12,
-        color: '#717171',
-        marginTop: 6,
+        color: '#64748b',
+        marginTop: 4,
         textAlign: 'center',
         lineHeight: 16,
     },

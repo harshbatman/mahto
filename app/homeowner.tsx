@@ -327,7 +327,16 @@ const styles = StyleSheet.create({
     actionItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 12,
+        padding: 16,
+        backgroundColor: '#FFF',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#F3F3F3',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 2,
     },
     actionIcon: {
         width: 48,

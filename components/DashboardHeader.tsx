@@ -46,12 +46,20 @@ export default function DashboardHeader({ title, subtitle, showSearch = true, on
                     <Text style={styles.title}>{title}</Text>
                     {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
                 </View>
-                <TouchableOpacity
-                    style={styles.messageBtn}
-                    onPress={() => router.push('/messages')}
-                >
-                    <MaterialCommunityIcons name="message-outline" size={28} color="black" />
-                </TouchableOpacity>
+                <View style={styles.actionBlock}>
+                    <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={() => router.push('/notifications')}
+                    >
+                        <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.actionBtn}
+                        onPress={() => router.push('/messages')}
+                    >
+                        <MaterialCommunityIcons name="message-outline" size={24} color="black" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {
@@ -130,10 +138,17 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         padding: 0,
     },
-    messageBtn: {
-        width: 44,
-        height: 44,
+    actionBlock: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    actionBtn: {
+        width: 40,
+        height: 40,
         justifyContent: 'center',
-        alignItems: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: '#F3F3F3',
+        borderRadius: 20,
     },
 });

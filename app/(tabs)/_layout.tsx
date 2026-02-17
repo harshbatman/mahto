@@ -2,9 +2,12 @@ import { useAuth } from '@/context/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Image, Platform, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
     const { profile } = useAuth();
+
+    const insets = useSafeAreaInsets();
 
     // Get the display name based on role, fallback to 'Profile'
     const displayName = profile?.shopName || profile?.companyName || profile?.name?.split(' ')[0] || 'Profile';
@@ -13,7 +16,19 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: styles.tabBar,
+                tabBarStyle: {
+                    height: 60 + (Platform.OS === 'ios' ? insets.bottom : (insets.bottom > 0 ? insets.bottom : 12)),
+                    paddingBottom: Platform.OS === 'ios' ? insets.bottom : (insets.bottom > 0 ? insets.bottom : 12),
+                    paddingTop: 12,
+                    backgroundColor: '#FFFFFF',
+                    borderTopWidth: 1,
+                    borderTopColor: '#f1f5f9',
+                    elevation: 8,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: -4 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 12,
+                },
                 tabBarActiveTintColor: '#000',
                 tabBarInactiveTintColor: '#94a3b8',
                 tabBarShowLabel: true,

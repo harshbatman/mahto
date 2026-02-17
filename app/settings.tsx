@@ -46,6 +46,18 @@ export default function SettingsScreen() {
                     <Text style={styles.sectionLabel}>{t.preferences}</Text>
                     <View style={styles.menuBox}>
                         <View style={styles.menuRow}>
+                            <TouchableOpacity
+                                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}
+                                onPress={() => router.push('/notifications' as any)}
+                            >
+                                <View style={styles.rowInfo}>
+                                    <MaterialCommunityIcons name="inbox-outline" size={24} color="black" />
+                                    <Text style={styles.rowText}>Notification Inbox</Text>
+                                </View>
+                                <MaterialCommunityIcons name="chevron-right" size={20} color="#AFAFAF" />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.menuRow}>
                             <View style={styles.rowInfo}>
                                 <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
                                 <Text style={styles.rowText}>{t.pushNotifications}</Text>

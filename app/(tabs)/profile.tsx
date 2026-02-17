@@ -22,6 +22,7 @@ export default function ProfileTab() {
             icon: profile?.role === 'shop' ? 'store-outline' : profile?.role === 'contractor' ? 'briefcase-outline' : 'account-outline',
             route: profile?.role === 'shop' ? '/edit-shop' : profile?.role === 'contractor' ? '/edit-contractor-profile' : '/edit-profile'
         },
+        { title: 'Messages', icon: 'message-outline', route: '/messages' },
         { title: 'Settings', icon: 'cog-outline', route: '/settings' },
     ];
 

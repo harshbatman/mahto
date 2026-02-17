@@ -2,7 +2,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 import ContractorDashboard from '../contractor';
 import HomeownerDashboard from '../homeowner';
-import MyShopScreen from '../my-shop';
+import ShopDashboard from '../shop';
 import WorkerDashboard from '../worker';
 
 export default function HomeTab() {
@@ -27,7 +27,7 @@ export default function HomeTab() {
         case 'contractor':
             return <ContractorDashboard />;
         case 'shop':
-            return <MyShopScreen />;
+            return <ShopDashboard />;
         default:
             return <HomeownerDashboard />;
     }

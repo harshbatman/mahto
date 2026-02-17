@@ -183,6 +183,31 @@ export default function HomeownerDashboard() {
                     </View>
                 )}
 
+
+                <TouchableOpacity style={styles.exploreCard} onPress={() => router.push('/explore')}>
+                    <View style={styles.exploreCardContent}>
+                        <View style={styles.exploreCardTag}>
+                            <Text style={styles.exploreCardTagText}>New Experience</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.exploreCardTitle}>Explore MAHTO</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" style={{ marginBottom: 4 }} />
+                        </View>
+                        <Text style={styles.exploreCardSub}>
+                            Discover verified professionals and major material shops in your neighborhood.
+                        </Text>
+                    </View>
+                    <View style={styles.exploreCardImageContainer}>
+                        <Image
+                            source={require('@/assets/images/3d_explore.png')}
+                            style={styles.exploreCardImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+                </TouchableOpacity>
+
+
+
                 <Text style={styles.mainTitle}>What can we help you find?</Text>
 
                 <View style={styles.categoryGrid}>
@@ -200,14 +225,14 @@ export default function HomeownerDashboard() {
                     ))}
                 </View>
 
-                <View style={styles.divider} />
+
 
                 <TouchableOpacity style={styles.rewardBanner} onPress={() => router.push('/(tabs)/post')}>
                     <View style={styles.rewardInfo}>
                         <View style={styles.freeBadge}>
                             <Text style={styles.freeBadgeText}>FREE</Text>
                         </View>
-                        <Text style={styles.rewardTitle}>Post Contracts & Jobs now at 0 cost</Text>
+                        <Text style={styles.rewardTitle}>Post Contracts & Jobs now at ₹0 cost</Text>
                         <Text style={styles.rewardSub}>Start your construction journey today</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -217,7 +242,7 @@ export default function HomeownerDashboard() {
                 </TouchableOpacity>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Manage My Postings</Text>
+                    <Text style={styles.sectionTitle}>My Postings</Text>
                     <View style={styles.actionGridRow}>
                         <TouchableOpacity style={styles.miniActionCard} onPress={() => router.push('/my-posted-jobs')}>
                             <View style={styles.miniIconCircle}>
@@ -312,27 +337,7 @@ export default function HomeownerDashboard() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.exploreCard} onPress={() => router.push('/explore')}>
-                    <View style={styles.exploreCardContent}>
-                        <View style={styles.exploreCardTag}>
-                            <Text style={styles.exploreCardTagText}>New Experience</Text>
-                        </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Text style={styles.exploreCardTitle}>Explore MAHTO</Text>
-                            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" style={{ marginBottom: 4 }} />
-                        </View>
-                        <Text style={styles.exploreCardSub}>
-                            Discover verified professionals and major material shops in your neighborhood.
-                        </Text>
-                    </View>
-                    <View style={styles.exploreCardImageContainer}>
-                        <Image
-                            source={require('@/assets/images/3d_explore.png')}
-                            style={styles.exploreCardImage}
-                            resizeMode="contain"
-                        />
-                    </View>
-                </TouchableOpacity>
+
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Made in 🇮🇳 with ❤️</Text>
@@ -496,6 +501,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 20,
         elevation: 10,
+        marginBottom: 16,
     },
     exploreCardContent: {
         flex: 1.8,

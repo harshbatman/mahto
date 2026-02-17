@@ -10,7 +10,7 @@ export default function PostTab() {
         {
             title: 'Post Contract',
             subtitle: 'For major construction or renovation works',
-            image: require('@/assets/images/3d_contract.png'),
+            image: require('@/assets/images/3d_contract_v1.png'),
             route: '/post-contract',
             color: '#6366f1'
         },
@@ -40,7 +40,7 @@ export default function PostTab() {
                             onPress={() => router.push(option.route as any)}
                         >
                             <View style={styles.iconContainer}>
-                                <Image source={option.image} style={{ width: 50, height: 50 }} resizeMode="contain" />
+                                <Image source={option.image} style={{ width: 50, height: 50 }} resizeMode="contain" tintColor={undefined} />
                             </View>
                             <View style={styles.cardText}>
                                 <Text style={styles.cardTitle}>{option.title}</Text>

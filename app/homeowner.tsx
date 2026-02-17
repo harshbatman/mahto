@@ -186,7 +186,7 @@ export default function HomeownerDashboard() {
                     <View style={styles.actionGrid}>
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-contract')}>
                             <View style={styles.actionIcon}>
-                                <Image source={require('@/assets/images/3d_contract.png')} style={styles.realisticActionIcon} />
+                                <Image source={require('@/assets/images/3d_contract_v1.png')} style={styles.realisticActionIcon} tintColor={undefined} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>
@@ -202,7 +202,7 @@ export default function HomeownerDashboard() {
 
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-job')}>
                             <View style={styles.actionIcon}>
-                                <Image source={require('@/assets/images/3d_job_new_v1.png')} style={styles.realisticActionIcon} />
+                                <Image source={require('@/assets/images/3d_job_new_v1.png')} style={styles.realisticActionIcon} tintColor={undefined} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>

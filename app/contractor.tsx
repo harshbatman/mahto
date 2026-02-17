@@ -130,6 +130,20 @@ export default function ContractorDashboard() {
                     </TouchableOpacity>
                 </View>
 
+                <TouchableOpacity style={[styles.rewardBanner, { marginTop: 24 }]} onPress={() => router.push('/browse-contracts')}>
+                    <View style={styles.rewardInfo}>
+                        <View style={styles.freeBadge}>
+                            <Text style={styles.freeBadgeText}>FREE</Text>
+                        </View>
+                        <Text style={styles.rewardTitle}>Start making bids now completely free ₹0</Text>
+                        <Text style={styles.rewardSub}>Access premium contracts today</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <Text style={{ fontSize: 36 }}>🎉</Text>
+                        <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+                    </View>
+                </TouchableOpacity>
+
                 <View style={[styles.actionGrid, { marginTop: 12 }]}>
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/browse-contracts')}>
                         <View style={styles.iconCircle}>

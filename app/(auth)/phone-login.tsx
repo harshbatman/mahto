@@ -1,17 +1,19 @@
 import { COUNTRIES, Country } from '@/constants/countries';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { loginUser } from '@/services/auth/authService';
 import { getUserProfile } from '@/services/db/userProfile';
-import { sanitizeError } from '@/utils/errorHandler';
+import { mapErrorToProfessionalMessage } from '@/utils/error-mapper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function PhoneLoginScreen() {
     const router = useRouter();
     const { user, profile, loading: authLoading } = useAuth();
+    const { showToast } = useToast();
 
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
@@ -35,12 +37,12 @@ export default function PhoneLoginScreen() {
 
     const handleLogin = async () => {
         if (!phone || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            showToast({ message: 'Please enter both your phone number and password.', type: 'warning' });
             return;
         }
 
         if (phone.length !== 10) {
-            Alert.alert('Error', 'Please enter a valid 10-digit phone number');
+            showToast({ message: 'A valid phone number has 10 digits. Please check and try again.', type: 'warning' });
             return;
         }
 
@@ -57,7 +59,10 @@ export default function PhoneLoginScreen() {
                 router.replace('/(auth)/login');
             }
         } catch (error: any) {
-            Alert.alert('Login Failed', sanitizeError(error));
+            showToast({
+                message: mapErrorToProfessionalMessage(error),
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }

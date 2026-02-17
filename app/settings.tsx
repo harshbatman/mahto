@@ -1,6 +1,7 @@
 import { LANGUAGES, LanguageCode } from '@/constants/translations';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -23,6 +24,7 @@ export default function SettingsScreen() {
     const router = useRouter();
     const { language, setLanguage, t } = useLanguage();
     const { logout, profile } = useAuth();
+    const { showToast } = useToast();
     const [notifications, setNotifications] = useState(true);
     const [showLangModal, setShowLangModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -42,12 +44,12 @@ export default function SettingsScreen() {
 
     const handleDeleteAccount = async () => {
         if (!confirmPhone || !confirmPassword) {
-            Alert.alert('Error', 'Please enter your phone number and password to confirm.');
+            showToast({ message: "To keep your account secure, please enter your phone number and password to confirm.", type: 'info' });
             return;
         }
 
         if (profile?.phoneNumber && !profile.phoneNumber.endsWith(confirmPhone)) {
-            Alert.alert('Error', 'Phone number does not match your account.');
+            showToast({ message: "The phone number you entered doesn't match our records for this account. Please double-check.", type: 'warning' });
             return;
         }
 
@@ -63,12 +65,17 @@ export default function SettingsScreen() {
                         setIsDeleting(true);
                         try {
                             setTimeout(async () => {
+                                showToast({
+                                    message: "Your account has been deleted. We're sorry to see you go.",
+                                    type: 'logout',
+                                    duration: 3000
+                                });
                                 await logout();
                                 router.replace('/(auth)/welcome');
                                 setIsDeleting(false);
                             }, 2000);
                         } catch (error) {
-                            Alert.alert('Error', 'Failed to delete account.');
+                            showToast({ message: "We couldn't delete your account at this time. Please try again later.", type: 'error' });
                             setIsDeleting(false);
                         }
                     }
@@ -314,3 +321,5 @@ const styles = StyleSheet.create({
     deleteConfirmText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
     deleteWarning: { fontSize: 12, color: '#AFAFAF', textAlign: 'center', marginTop: 8 },
 });
+
+

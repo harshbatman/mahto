@@ -1,15 +1,17 @@
 import { COUNTRIES, Country } from '@/constants/countries';
 import { BorderRadius, Colors, Spacing } from '@/constants/theme';
+import { useToast } from '@/context/ToastContext';
 import { registerUser } from '@/services/auth/authService';
-import { sanitizeError } from '@/utils/errorHandler';
+import { mapErrorToProfessionalMessage } from '@/utils/error-mapper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RegisterScreen() {
     const router = useRouter();
     const { role } = useLocalSearchParams<{ role: string }>();
+    const { showToast } = useToast();
 
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
@@ -27,12 +29,12 @@ export default function RegisterScreen() {
 
     const handleRegister = async () => {
         if (!name || !phone || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+            showToast({ message: "Welcome! To get started, please fill in your name, phone, and password.", type: 'info' });
             return;
         }
 
         if (phone.length !== 10) {
-            Alert.alert('Error', 'Please enter a valid 10-digit phone number');
+            showToast({ message: 'A valid phone number has 10 digits. Please check and try again.', type: 'warning' });
             return;
         }
 
@@ -54,7 +56,10 @@ export default function RegisterScreen() {
                 router.replace(`/${role}` as any);
             }
         } catch (error: any) {
-            Alert.alert('Registration Failed', sanitizeError(error));
+            showToast({
+                message: mapErrorToProfessionalMessage(error),
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }

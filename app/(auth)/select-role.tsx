@@ -4,11 +4,13 @@ import { useLanguage } from '@/context/LanguageContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const roles = [
     // ... (roles array remains the same)
 ];
+
+const { width } = Dimensions.get('window');
 
 export default function SelectRoleScreen() {
     const router = useRouter();
@@ -30,25 +32,25 @@ export default function SelectRoleScreen() {
             id: 'homeowner',
             title: t.profile === 'प्रोफ़ाइल' ? 'होमओनर' : 'Homeowner',
             subtitle: t.home === 'होम' ? 'मैं अपना घर बनाना या मरम्मत करना चाहता हूं' : 'I want to build or renovate my home',
-            icon: 'home-variant-outline',
+            image: require('@/assets/images/role_homeowner.png'),
         },
         {
             id: 'worker',
             title: t.workers,
             subtitle: t.home === 'होम' ? 'मैं दिहाड़ी काम की तलाश में हूं' : 'I am looking for daily wage work',
-            icon: 'account-hard-hat-outline',
+            image: require('@/assets/images/role_worker.png'),
         },
         {
             id: 'contractor',
             title: t.contractors,
             subtitle: t.home === 'होम' ? 'कामगार खोजें और ठेका प्राप्त करें' : 'Find Workers and Win Contracts',
-            icon: 'briefcase-outline',
+            image: require('@/assets/images/role_contractor.png'),
         },
         {
             id: 'shop',
             title: t.materials === 'सामग्री' ? 'दुकानदार' : 'Shop Owner',
             subtitle: t.home === 'होम' ? 'मै निर्माण सामग्री बेचता हूं' : 'I sell construction materials',
-            icon: 'storefront-outline',
+            image: require('@/assets/images/3d_materials.png'),
         }
     ];
 
@@ -61,13 +63,7 @@ export default function SelectRoleScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.topActions}>
-                <TouchableOpacity
-                    style={styles.backBtn}
-                    onPress={() => router.back()}
-                >
-                    <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
-                </TouchableOpacity>
+            <View style={[styles.topActions, { justifyContent: 'flex-end' }]}>
 
                 <TouchableOpacity
                     style={styles.langBtn}
@@ -91,12 +87,12 @@ export default function SelectRoleScreen() {
                             style={styles.card}
                             onPress={() => handleSelect(role.id)}
                         >
+                            <View style={styles.iconBox}>
+                                <Image source={role.image} style={styles.roleImage} />
+                            </View>
                             <View style={styles.cardInfo}>
                                 <Text style={styles.cardTitle}>{role.title}</Text>
                                 <Text style={styles.cardSub}>{role.subtitle}</Text>
-                            </View>
-                            <View style={styles.iconBox}>
-                                <MaterialCommunityIcons name={role.icon as any} size={40} color="#000" />
                             </View>
                         </TouchableOpacity>
                     ))}
@@ -112,8 +108,7 @@ export default function SelectRoleScreen() {
                     style={styles.mahtoIdButton}
                     onPress={() => router.push('/(auth)/phone-login')}
                 >
-                    <Text style={styles.mahtoIdButtonText}>Continue with Phone</Text>
-                    <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />
+                    <Text style={styles.mahtoIdButtonText}>Continue with MAHTO ID</Text>
                 </TouchableOpacity>
             </ScrollView>
 
@@ -193,42 +188,62 @@ const styles = StyleSheet.create({
         lineHeight: 40,
     },
     grid: {
-        gap: 12,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 16,
+        justifyContent: 'space-between',
     },
     card: {
-        flexDirection: 'row',
+        width: (width - 56) / 2, // 20 padding each side + 16 gap
         alignItems: 'center',
-        padding: 24,
-        borderRadius: 12,
-        backgroundColor: '#F6F6F6',
+        padding: 20,
+        borderRadius: 24,
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#F0F0F0',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
     },
     cardInfo: {
-        flex: 1,
+        alignItems: 'center',
+        marginTop: 12,
     },
     cardTitle: {
-        fontSize: 20,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '800',
         color: '#000',
+        textAlign: 'center',
     },
     cardSub: {
-        fontSize: 14,
-        color: '#545454',
-        marginTop: 4,
-        paddingRight: 10,
+        fontSize: 12,
+        color: '#717171',
+        marginTop: 6,
+        textAlign: 'center',
+        lineHeight: 16,
     },
     iconBox: {
-        width: 60,
-        height: 60,
+        width: 120,
+        height: 120,
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: -10, // Pull character closer to text
+    },
+    roleImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
     },
     loginLink: {
         marginTop: 40,
-        alignItems: 'flex-start',
+        alignItems: 'center',
     },
     loginText: {
         fontSize: 14,
         color: '#545454',
+        fontWeight: '500',
     },
     mahtoIdButton: {
         backgroundColor: '#000',

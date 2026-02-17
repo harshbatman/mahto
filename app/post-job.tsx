@@ -1,15 +1,15 @@
 import { SKILLS_DATA } from '@/constants/skills';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { postJob } from '@/services/db/jobService';
-import { sanitizeError } from '@/utils/errorHandler';
+import { mapErrorToProfessionalMessage } from '@/utils/error-mapper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
@@ -32,6 +32,7 @@ interface SelectedWorker {
 export default function PostJobScreen() {
     const { profile } = useAuth();
     const router = useRouter();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [locationLoading, setLocationLoading] = useState(false);
 
@@ -40,7 +41,7 @@ export default function PostJobScreen() {
             setLocationLoading(true);
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Permission Denied', 'Please allow location access to use this feature.');
+                showToast({ message: 'We need your permission to access your location so we can help you set the job address.', type: 'info' });
                 return;
             }
 
@@ -60,7 +61,7 @@ export default function PostJobScreen() {
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Could not get your current location.');
+            showToast({ message: "We're having trouble retrieving your current location. Please try entering it manually.", type: 'warning' });
         } finally {
             setLocationLoading(false);
         }
@@ -100,7 +101,7 @@ export default function PostJobScreen() {
 
     const handlePost = async () => {
         if (!form.title || !form.wage || !form.description || selectedWorkers.length === 0) {
-            Alert.alert('Missing Fields', 'Please fill in all details and select at least one worker type.');
+            showToast({ message: "Almost there! Please make sure to fill in all the job details and select at least one worker type.", type: 'info' });
             return;
         }
 
@@ -120,10 +121,10 @@ export default function PostJobScreen() {
                 description: form.description,
                 location: form.location,
             });
-            Alert.alert('Success', 'Job posted successfully! Workers can now apply.');
+            showToast({ message: 'Great news! Your job has been posted successfully. Workers can now start applying.', type: 'success' });
             router.back();
         } catch (error: any) {
-            Alert.alert('Error', sanitizeError(error));
+            showToast({ message: mapErrorToProfessionalMessage(error), type: 'error' });
         } finally {
             setLoading(false);
         }

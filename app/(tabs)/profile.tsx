@@ -1,8 +1,10 @@
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React from 'react';
 import {
-    Alert,
     Image,
     ScrollView,
     StyleSheet,
@@ -15,6 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function ProfileTab() {
     const { profile, logout } = useAuth();
     const router = useRouter();
+    const { showToast } = useToast();
+    const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
     const menuItems = [
         {
@@ -27,21 +31,26 @@ export default function ProfileTab() {
     ];
 
     const handleSignOut = () => {
-        Alert.alert('Sign out', 'Are you sure you want to sign out?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Sign out',
-                style: 'destructive',
-                onPress: async () => {
-                    try {
-                        await logout();
-                        router.replace('/(auth)/select-role');
-                    } catch (error) {
-                        Alert.alert('Error', 'Logout failed.');
-                    }
-                }
-            }
-        ]);
+        setShowLogoutModal(true);
+    };
+
+    const confirmSignOut = async () => {
+        setShowLogoutModal(false);
+        try {
+            showToast({
+                message: "Signing you out... We hope to see you back soon!",
+                type: 'logout',
+                duration: 2000
+            });
+
+            // Slight delay to allow the toast to be seen before redirect
+            setTimeout(async () => {
+                await logout();
+                router.replace('/(auth)/select-role');
+            }, 1000);
+        } catch (error) {
+            showToast({ message: "We encountered a temporary issue while signing you out. please try again.", type: 'error' });
+        }
     };
 
     return (
@@ -87,6 +96,17 @@ export default function ProfileTab() {
                     <Text style={styles.madeInIndia}>Made in India 🇮🇳</Text>
                 </View>
             </ScrollView>
+
+            <ConfirmationModal
+                visible={showLogoutModal}
+                title="Sign Out"
+                message="Are you sure you want to sign out from your MAHTO account?"
+                confirmText="Sign Out"
+                cancelText="Keep me signed in"
+                onConfirm={confirmSignOut}
+                onCancel={() => setShowLogoutModal(false)}
+                type="danger"
+            />
         </SafeAreaView>
     );
 }

@@ -10,7 +10,7 @@ export default function PostTab() {
         {
             title: 'Post Contract',
             subtitle: 'For major construction or renovation works',
-            image: require('@/assets/images/3d_contract_v1.png'),
+            image: require('@/assets/images/3d_contract_final_v1.png'),
             route: '/post-contract',
             color: '#6366f1'
         },

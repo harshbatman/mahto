@@ -249,15 +249,15 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     iconCircle: {
-        width: 64,
-        height: 64,
+        width: 80,
+        height: 80,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: 8,
     },
     categoryImage: {
-        width: 60,
-        height: 60,
+        width: 76,
+        height: 76,
     },
     categoryLabel: {
         fontSize: 13,

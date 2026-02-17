@@ -175,7 +175,7 @@ export default function HomeownerDashboard() {
                         <Text style={styles.rewardTitle}>Post now at ₹0 cost 🥳</Text>
                         <Text style={styles.rewardSub}>Start your construction journey today</Text>
                     </View>
-                    <MaterialCommunityIcons name="party-popper" size={32} color="#FFF" />
+                    <Text style={{ fontSize: 36 }}>🎉</Text>
                 </View>
 
                 <View style={styles.section}>

@@ -235,9 +235,7 @@ const styles = StyleSheet.create({
     },
     categoryCard: {
         flex: 1,
-        backgroundColor: '#F3F3F3',
-        borderRadius: 12,
-        padding: 16,
+        padding: 12,
         alignItems: 'center',
     },
     iconCircle: {

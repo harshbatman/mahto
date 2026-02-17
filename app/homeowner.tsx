@@ -234,11 +234,13 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     categoryCard: {
-        flex: 1,
+        width: (width - 64) / 3, // Roughly calculate width for 3 columns with gaps and padding
+        aspectRatio: 1,
         backgroundColor: '#FFF',
-        borderRadius: 16,
+        borderRadius: 20,
         padding: 8,
         alignItems: 'center',
+        justifyContent: 'center',
         borderWidth: 1,
         borderColor: '#F3F3F3',
         // Elevation/Shadow
@@ -249,20 +251,21 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     iconCircle: {
-        width: 104,
-        height: 104,
+        width: 70,
+        height: 70,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     categoryImage: {
-        width: 100,
-        height: 100,
+        width: 68,
+        height: 68,
     },
     categoryLabel: {
-        fontSize: 13,
+        fontSize: 11,
         fontWeight: '700',
         color: '#000',
+        textAlign: 'center',
     },
     divider: {
         height: 1,

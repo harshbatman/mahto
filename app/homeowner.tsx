@@ -1,12 +1,14 @@
 import DashboardHeader from '@/components/DashboardHeader';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { Contract, getMyContracts } from '@/services/db/contractService';
+import { getPostedJobs, Job } from '@/services/db/jobService';
 import { searchUsers } from '@/services/db/searchService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, BackHandler, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Dimensions, Image, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +31,36 @@ export default function HomeownerDashboard() {
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [resultsTitle, setResultsTitle] = useState('');
+    const [myJobs, setMyJobs] = useState<Job[]>([]);
+    const [myContracts, setMyContracts] = useState<Contract[]>([]);
+    const [loadingActivity, setLoadingActivity] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchActivity = async () => {
+        if (!profile?.uid) return;
+        try {
+            const [jobs, contracts] = await Promise.all([
+                getPostedJobs(profile.uid),
+                getMyContracts(profile.uid)
+            ]);
+            setMyJobs(jobs.slice(0, 2)); // Show latest 2
+            setMyContracts(contracts.slice(0, 2)); // Show latest 2
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoadingActivity(false);
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchActivity();
+    }, [profile?.uid]);
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchActivity();
+    };
 
     const categories = [
         { id: 'contractor', title: t.contractors, image: require('@/assets/images/3d_contractor.png') },
@@ -99,7 +131,11 @@ export default function HomeownerDashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
                 <View style={styles.headerWrapper}>
                     <DashboardHeader
                         title={`Hi, ${profile?.name || "Homeowner"}`}
@@ -181,11 +217,70 @@ export default function HomeownerDashboard() {
                 </TouchableOpacity>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Quick Actions</Text>
+                    <Text style={styles.sectionTitle}>Manage My Postings</Text>
+                    <View style={styles.actionGridRow}>
+                        <TouchableOpacity style={styles.miniActionCard} onPress={() => router.push('/my-posted-jobs')}>
+                            <View style={styles.miniIconCircle}>
+                                <Image source={require('@/assets/images/3d_my_jobs_contractor.png')} style={styles.miniActionIcon} />
+                            </View>
+                            <Text style={styles.miniActionLabel}>My Jobs</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.miniActionCard} onPress={() => router.push('/my-postings')}>
+                            <View style={styles.miniIconCircle}>
+                                <Image source={require('@/assets/images/3d_contracts.png')} style={styles.miniActionIcon} />
+                            </View>
+                            <Text style={styles.miniActionLabel}>Contracts</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {(myJobs.length > 0 || myContracts.length > 0) && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Recent Activity</Text>
+
+                        {myJobs.map(job => (
+                            <TouchableOpacity key={job.id} style={styles.activityCard} onPress={() => router.push('/my-posted-jobs')}>
+                                <View style={styles.activityCardBody}>
+                                    <View style={styles.activityIconBox}>
+                                        <MaterialCommunityIcons name="briefcase-outline" size={24} color="#3b82f6" />
+                                    </View>
+                                    <View style={styles.activityInfo}>
+                                        <Text style={styles.activityTitle} numberOfLines={1}>{job.title}</Text>
+                                        <Text style={styles.activityMeta}>{job.applicantCount} Applicants • {job.location}</Text>
+                                    </View>
+                                    <View style={[styles.statusTag, { backgroundColor: '#eff6ff' }]}>
+                                        <Text style={[styles.statusTagText, { color: '#3b82f6' }]}>JOB</Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+
+                        {myContracts.map(contract => (
+                            <TouchableOpacity key={contract.id} style={styles.activityCard} onPress={() => router.push('/my-postings')}>
+                                <View style={styles.activityCardBody}>
+                                    <View style={styles.activityIconBox}>
+                                        <MaterialCommunityIcons name="file-document-outline" size={24} color="#10b981" />
+                                    </View>
+                                    <View style={styles.activityInfo}>
+                                        <Text style={styles.activityTitle} numberOfLines={1}>{contract.title}</Text>
+                                        <Text style={styles.activityMeta}>{contract.applicantCount} Bids • {contract.location}</Text>
+                                    </View>
+                                    <View style={[styles.statusTag, { backgroundColor: '#ecfdf5' }]}>
+                                        <Text style={[styles.statusTagText, { color: '#10b981' }]}>CONTRACT</Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Create New Postings</Text>
                     <View style={styles.actionGrid}>
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-contract')}>
                             <View style={styles.actionIcon}>
-                                <Image source={require('@/assets/images/3d_contract_final_v1.png')} style={styles.realisticActionIcon} tintColor={undefined} />
+                                <Image source={require('@/assets/images/3d_contract_final_v1.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>
@@ -201,7 +296,7 @@ export default function HomeownerDashboard() {
 
                         <TouchableOpacity style={styles.actionItem} onPress={() => router.push('/post-job')}>
                             <View style={styles.actionIcon}>
-                                <Image source={require('@/assets/images/3d_job_new_v1.png')} style={styles.realisticActionIcon} tintColor={undefined} />
+                                <Image source={require('@/assets/images/3d_job_new_v1.png')} style={styles.realisticActionIcon} />
                             </View>
                             <View style={styles.actionInfo}>
                                 <View style={styles.actionTitleRow}>
@@ -441,6 +536,91 @@ const styles = StyleSheet.create({
         width: 140,
         height: 140,
         marginRight: -25,
+    },
+    actionGridRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 4,
+    },
+    miniActionCard: {
+        flex: 1,
+        backgroundColor: '#F8FAFC',
+        borderRadius: 20,
+        padding: 16,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#F1F5F9',
+    },
+    miniIconCircle: {
+        width: 54,
+        height: 54,
+        borderRadius: 18,
+        backgroundColor: '#FFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    miniActionIcon: {
+        width: 40,
+        height: 40,
+    },
+    miniActionLabel: {
+        fontSize: 12,
+        fontWeight: '800',
+        color: '#0F172A',
+    },
+    activityCard: {
+        backgroundColor: '#FFF',
+        borderRadius: 20,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#F1F5F9',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 8,
+        elevation: 1,
+    },
+    activityCardBody: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    activityIconBox: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: '#F8FAFC',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    activityInfo: {
+        flex: 1,
+        marginLeft: 12,
+    },
+    activityTitle: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#0F172A',
+    },
+    activityMeta: {
+        fontSize: 12,
+        color: '#64748B',
+        marginTop: 2,
+    },
+    statusTag: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    statusTagText: {
+        fontSize: 10,
+        fontWeight: '800',
     },
     resultsContainer: {
         marginTop: 24,

@@ -72,44 +72,68 @@ export default function ContractorDashboard() {
                 <View style={styles.actionGrid}>
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/post-job')}>
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="briefcase-plus-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_job_new_v1.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>Post Job</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/my-posted-jobs')}>
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="clipboard-list-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_my_jobs_contractor.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>My Jobs</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'worker', title: 'Find Workers' } })}>
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="account-hard-hat-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_find_workers_contractor.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>Find Workers</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={[styles.actionGrid, { marginTop: 12 }]}>
-                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'contractor', title: 'Find Contractors' } })}>
+                    <TouchableOpacity style={styles.actionCard} onPress={() => router.push({ pathname: '/search-results', params: { role: 'contractor', title: 'Other Contractors' } })}>
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="briefcase-search-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_other_contractors.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
-                        <Text style={styles.actionLabel}>Network</Text>
+                        <Text style={styles.actionLabel}>Other Contractor</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/browse-contracts')}>
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="file-search-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_contracts.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>Contracts</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/my-bids')}>
                         <View style={styles.iconCircle}>
-                            <MaterialCommunityIcons name="file-document-edit-outline" size={28} color="black" />
+                            <Image
+                                source={require('@/assets/images/3d_my_bids.png')}
+                                style={styles.actionIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.actionLabel}>My Bids</Text>
                     </TouchableOpacity>
@@ -217,19 +241,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     iconCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 64,
+        height: 64,
+        borderRadius: 20,
         backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
+        // Elevation for the icon itself
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    actionIcon: {
+        width: 50,
+        height: 50,
     },
     actionLabel: {
-        fontSize: 13,
-        fontWeight: '700',
+        fontSize: 12,
+        fontWeight: '800',
         color: '#000',
         textAlign: 'center',
+        marginTop: 4,
     },
     divider: {
         height: 1,

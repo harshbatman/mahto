@@ -46,8 +46,19 @@ export default function TabLayout() {
             />
             <Tabs.Screen
                 name="post"
+                listeners={({ navigation }) => ({
+                    tabPress: (e) => {
+                        if (profile?.role === 'shop') {
+                            e.preventDefault();
+                            // Navigate directly to manage-product
+                            // Using a listener to override the default tab navigation
+                            // router.push is not available here directly in the same way, but we can use navigation
+                            navigation.navigate('manage-product' as any);
+                        }
+                    },
+                })}
                 options={{
-                    title: 'Post',
+                    title: profile?.role === 'shop' ? 'Add Product' : 'Post',
                     tabBarIcon: () => (
                         <View style={styles.postIconContainer}>
                             <MaterialCommunityIcons name="plus" size={32} color="#FFF" />
